@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Dealerships Near You - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">🗺️ Find Dealerships Near You</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Map -->
+        <div class="col-lg-8 col-md-12">
+            <div class="card" style="height: 600px;">
+                <div id="map" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Dealerships List -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🏢 All Dealerships</h5>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    <div id="dealershipsContainer">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps Script -->
+{% if google_maps_api_key %}
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
+{% else %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+            mapContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><strong class="text-danger">Google Maps API key is missing. Set GOOGLE_MAPS_API_KEY in settings.py.</strong></div>';
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+let map;
+let markers = [];
+let dealerships = [];
+
+function initMap() {
+    // Center map on Kenya
+    const kenyaCenter = { lat: -1.2921, lng: 36.8219 };
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 6,
+        center: kenyaCenter,
+        mapTypeId: 'roadmap',
+    });
+
+    // Fetch dealerships data
+    fetch('/api/dealerships/')
+        .then(response => response.json())
+        .then(data => {
+            dealerships = data;
+            displayDealerships();
+            addMarkers();
+        });
+}
+
+function addMarkers() {
+    dealerships.forEach(dealership => {
+        if (dealership.lat && dealership.lng) {
+            const marker = new google.maps.Marker({
+                position: { lat: dealership.lat, lng: dealership.lng },
+                map: map,
+                title: dealership.name,
+            });
+
+            // Dealership info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding: 10px; max-width: 200px;">
+                        <h6>${dealership.name}</h6>
+                        <p style="margin: 5px 0; font-size: 0.9rem;">${dealership.location}</p>
+                        <div style="margin: 5px 0;">
+                            ${'★'.repeat(Math.round(dealership.rating))}${'☆'.repeat(5 - Math.round(dealership.rating))}
+                        </div>
+                        <a href="${dealership.url}" class="btn btn-primary btn-sm" style="margin-top: 10px; display: inline-block;">View Profile</a>
+                    </div>
+                `,
+            });
+
+            marker.addListener('click', () => {
+                // Close all other info windows
+                markers.forEach(m => {
+                    if (m.infoWindow) {
+                        m.infoWindow.close();
+                    }
+                });
+                infoWindow.open(map, marker);
+                marker.infoWindow = infoWindow;
+            });
+
+            markers.push(marker);
+        }
+    });
+}
+
+function displayDealerships() {
+    const container = document.getElementById('dealershipsContainer');
+    container.innerHTML = '';
+
+    if (dealerships.length === 0) {
+        container.innerHTML = '<p class="text-muted">No dealerships with location data available yet.</p>';
+        return;
+    }
+
+    dealerships.forEach(dealership => {
+        const dealershipHTML = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-title">${dealership.name}</h6>
+                    <p class="text-muted small mb-2">📍 ${dealership.location}</p>
+                    <div class="stars mb-2">
+                        ${'★'.repeat(Math.round(dealership.rating))}${'☆'.repeat(5 - Math.round(dealership.rating))}
+                        <small class="text-muted">${dealership.rating.toFixed(1)}</small>
+                    </div>
+                    <a href="${dealership.url}" class="btn btn-primary btn-sm w-100">View Profile</a>
+                </div>
+            </div>
+        `;
+        container.innerHTML += dealershipHTML;
+    });
+}
+
+// Map initialization is triggered by the Google Maps callback
+</script>
+{% endblock %}

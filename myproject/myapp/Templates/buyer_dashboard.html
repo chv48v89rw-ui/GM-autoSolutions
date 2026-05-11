@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Buyer Dashboard - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">👤 My Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="{{ user.username }}"
+                             class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light-accent rounded-circle mx-auto mb-3" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+                            <span class="text-accent" style="font-size: 3rem;">👤</span>
+                        </div>
+                    {% endif %}
+
+                    <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                    <p class="text-muted">@{{ user.username }}</p>
+
+                    <hr>
+
+                    <p>
+                        <strong>Email:</strong><br>
+                        {{ user.email }}
+                    </p>
+                    <p>
+                        <strong>Phone:</strong><br>
+                        {% if profile.phone_number %}
+                            {{ profile.phone_number }}
+                        {% else %}
+                            <span class="text-muted">Not provided</span>
+                        {% endif %}
+                    </p>
+
+                    <a href="/edit-profile/" class="btn btn-primary w-100">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-12">
+            <!-- Welcome Card -->
+            <div class="card mb-4 bg-light-accent border-accent">
+                <div class="card-body">
+                    <h5 class="text-accent">Welcome back, {{ user.first_name }}! 👋</h5>
+                    <p class="mb-0">Browse our collection of cars, save your favorites, and manage your enquiries all in one place.</p>
+                </div>
+            </div>
+
+            <!-- Enquiries Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        💬 My Enquiries
+                        <span class="badge bg-primary float-end">{{ enquiries|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if enquiries %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Car</th>
+                                        <th>Dealership</th>
+                                        <th>Date Sent</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enquiry in enquiries %}
+                                        <tr>
+                                            <td>
+                                                <a href="/car/{{ enquiry.car.id }}/">
+                                                    {{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="/dealership/{{ enquiry.car.dealership.id }}/">
+                                                    {{ enquiry.car.dealership.company_name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ enquiry.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <span class="badge bg-info">Pending Response</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <p class="mb-0">You haven't sent any enquiries yet.</p>
+                            <a href="/cars/" class="btn btn-primary btn-sm mt-3">Browse Cars</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Favorites Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        ❤️ My Favorite Cars
+                        <span class="badge bg-danger float-end">{{ favorites|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if favorites %}
+                        <div class="row g-3">
+                            {% for favorite in favorites %}
+                                <div class="col-lg-6 col-md-12">
+                                    <div class="card h-100">
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                            {% if favorite.car.main_image %}
+                                                <img src="{{ favorite.car.main_image.url }}" class="img-fluid rounded-start h-100" 
+                                                     alt="{{ favorite.car.title }}" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center rounded-start h-100">
+                                                    <span class="text-muted">No Image</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                            <div class="col-md-8">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{ favorite.car.year }} {{ favorite.car.make }} {{ favorite.car.model }}</h6>
+                                                    <p class="card-text text-accent fw-bold mb-1">KES {{ favorite.car.price|floatformat:0 }}</p>
+                                                    <p class="card-text small text-muted mb-2">
+                                                        {{ favorite.car.mileage }} km • {{ favorite.car.fuel_type }} • {{ favorite.car.condition }}
+                                                    </p>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="/car/{{ favorite.car.id }}/" class="btn btn-primary btn-sm">View Details</a>
+                                                        <a href="/car/{{ favorite.car.id }}/unfavorite/" class="btn btn-outline-danger btn-sm">
+                                                            <i class="fas fa-heart-broken"></i> Remove
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <p class="mb-0">You haven't added any cars to your favorites yet.</p>
+                            <a href="/cars/" class="btn btn-primary btn-sm mt-3">Browse Cars</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="row g-3 mt-4">
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+                            <h6>Browse Cars</h6>
+                            <p class="text-muted small mb-3">Explore our entire inventory</p>
+                            <a href="/cars/" class="btn btn-primary btn-sm">Start Browsing</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div style="font-size: 2rem; margin-bottom: 1rem;">🏢</div>
+                            <h6>Find Dealerships</h6>
+                            <p class="text-muted small mb-3">Locate dealerships near you</p>
+                            <a href="/dealerships/" class="btn btn-primary btn-sm">View Map</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

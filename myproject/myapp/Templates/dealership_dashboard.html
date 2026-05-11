@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Dealership Dashboard - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">🏢 Dealership Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-accent">
+                <div class="card-body text-center">
+                    <h3 class="text-accent">{{ total_cars }}</h3>
+                    <p class="mb-0">Active Listings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-accent">
+                <div class="card-body text-center">
+                    <h3 class="text-accent">{{ total_enquiries }}</h3>
+                    <p class="mb-0">Enquiries Received</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-accent">
+                <div class="card-body text-center">
+                    <h3 class="text-accent">{{ avg_rating|floatformat:1 }}</h3>
+                    <p class="mb-0">Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dealership Info -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if dealership.logo %}
+                        <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}"
+                             style="max-width: 100px; max-height: 100px; object-fit: contain; margin-bottom: 1rem;">
+                    {% else %}
+                        <div class="bg-light-accent rounded mb-3" style="width: 100px; height: 100px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                            <span class="text-accent" style="font-size: 2.5rem;">🏢</span>
+                        </div>
+                    {% endif %}
+
+                    <h5>{{ dealership.company_name }}</h5>
+                    
+                    {% if dealership.is_approved %}
+                        <span class="badge bg-success mb-2">✅ Approved Dealership</span>
+                    {% else %}
+                        <span class="badge bg-warning mb-2">⏳ Pending Approval</span>
+                        <p class="text-muted small mb-2">Your dealership is being reviewed. You'll be notified once approved.</p>
+                    {% endif %}
+
+                    <div class="stars mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <p class="text-muted small">{{ dealership.location }}</p>
+
+                    <a href="/edit-dealership/" class="btn btn-primary btn-sm w-100">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Company Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Email:</strong><br>
+                                {{ dealership.email }}
+                            </p>
+                            <p>
+                                <strong>Phone:</strong><br>
+                                {{ dealership.phone_number }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Location:</strong><br>
+                                {{ dealership.location }}
+                            </p>
+                            {% if dealership.website %}
+                                <p>
+                                    <strong>Website:</strong><br>
+                                    <a href="{{ dealership.website }}" target="_blank">{{ dealership.website }}</a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p>
+                        <strong>Address:</strong><br>
+                        {{ dealership.address }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cars Management Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">🚗 My Listings ({{ cars|length }})</h5>
+            <a href="/car/add/" class="btn btn-primary btn-sm">+ Add New Car</a>
+        </div>
+        <div class="card-body">
+            {% if cars %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Car</th>
+                                <th>Price</th>
+                                <th>Mileage</th>
+                                <th>Listed Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for car in cars %}
+                                <tr>
+                                    <td>
+                                        <a href="/car/{{ car.id }}/">
+                                            <strong>{{ car.year }} {{ car.make }} {{ car.model }}</strong>
+                                        </a>
+                                    </td>
+                                    <td>KES {{ car.price|floatformat:0|add:"0" }}</td>
+                                    <td>{{ car.mileage }} km</td>
+                                    <td>{{ car.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if not car.is_sold %}
+                                            <form method="post" action="/car/{{ car.id }}/mark-sold/" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success" 
+                                                        onclick="return confirm('Mark this car as sold?')">Mark Sold</button>
+                                            </form>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sold</span>
+                                        {% endif %}
+                                        <a href="/car/{{ car.id }}/edit/" class="btn btn-sm btn-outline-primary ms-1">Edit</a>
+                                        <a href="/car/{{ car.id }}/delete/" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <p class="mb-0">You haven't listed any cars yet.</p>
+                    <a href="/car/add/" class="btn btn-primary btn-sm mt-3">Add Your First Car</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Enquiries Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">💬 Recent Enquiries ({{ enquiries|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if enquiries %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Buyer Name</th>
+                                <th>Car</th>
+                                <th>Contact</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enquiry in enquiries|slice:":10" %}
+                                <tr>
+                                    <td>{{ enquiry.buyer_name }}</td>
+                                    <td>
+                                        <a href="/car/{{ enquiry.car.id }}/">
+                                            {{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <small>
+                                            📧 {{ enquiry.buyer_email }}<br>
+                                            📞 {{ enquiry.buyer_phone }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small>{{ enquiry.message|truncatewords:10 }}</small>
+                                    </td>
+                                    <td>{{ enquiry.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <p class="mb-0">No enquiries yet. Your listings will appear here when buyers inquire.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    {% if reviews %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">⭐ Customer Reviews</h5>
+            </div>
+            <div class="card-body">
+                {% for review in reviews|slice:":5" %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>{{ review.buyer.first_name }} {{ review.buyer.last_name }}</strong>
+                            <span class="stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <p class="mb-2">{{ review.comment }}</p>
+                        <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

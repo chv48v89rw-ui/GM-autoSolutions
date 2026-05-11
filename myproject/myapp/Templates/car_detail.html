@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ car.year }} {{ car.make }} {{ car.model }} - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 col-md-12">
+            <!-- Image Gallery -->
+            <div class="card mb-4">
+                <div style="height: 400px; overflow: hidden; position: relative;">
+                    {% if gallery_images %}
+                        <img src="{{ gallery_images.0.url }}" class="img-fluid" alt="{{ car.title }}"
+                             style="width: 100%; height: 100%; object-fit: cover;" id="mainImage">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; background-color: #f8f9fa;">
+                            <span class="text-muted">No Image Available</span>
+                        </div>
+                    {% endif %}
+                    <span class="badge bg-primary position-absolute top-0 end-0 m-3" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        {{ car.get_condition_display }}
+                    </span>
+                </div>
+
+                <!-- Thumbnail Images -->
+                <div class="card-body">
+                    <div class="row g-2">
+                        {% for image in gallery_images %}
+                            <div class="col-3">
+                                <img src="{{ image.url }}" class="img-thumbnail cursor-pointer" alt="Photo {{ forloop.counter }}"
+                                     onclick="changeMainImage(this.src)">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Car Details -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="mb-3">{{ car.year }} {{ car.make }} {{ car.model }}</h2>
+                    <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|add:"0" }}</h3>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <p><strong>⛽ Fuel Type:</strong> {{ car.get_fuel_type_display }}</p>
+                            <p><strong>⚙️ Transmission:</strong> {{ car.get_transmission_display }}</p>
+                            <p><strong>🎨 Color:</strong> {{ car.color }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>🎯 Mileage:</strong> {{ car.mileage }} km</p>
+                            <p><strong>👥 Seats:</strong> {{ car.seats }}</p>
+                            <p><strong>📅 Year:</strong> {{ car.year }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h5>Description</h5>
+                    <p>{{ car.description }}</p>
+
+                    {% if car_features %}
+                        <hr>
+                        <h5>Features</h5>
+                        <div class="row g-2">
+                            {% for feature in car_features %}
+                                {% if feature %}
+                                    <div class="col-auto">
+                                        <span class="badge bg-light text-accent border border-2 border-accent">
+                                            ✓ {{ feature }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary w-100 btn-lg">
+                                💬 Send Enquiry
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/dealership/{{ car.dealership.id }}/contact/" class="btn btn-outline-primary w-100 btn-lg">
+                                📞 Contact Dealership
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            {% if user.is_authenticated %}
+                                {% if is_favorited %}
+                                    <a href="/car/{{ car.id }}/unfavorite/" class="btn btn-outline-danger w-100 btn-lg">
+                                        ❤️ Favorited
+                                    </a>
+                                {% else %}
+                                    <a href="/car/{{ car.id }}/favorite/" class="btn btn-danger w-100 btn-lg">
+                                        🤍 Add to Favorites
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="/login/" class="btn btn-outline-secondary w-100 btn-lg">
+                                    🔒 Login to Favorite
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/dealership/{{ car.dealership.id }}/" class="btn btn-outline-secondary w-100 btn-lg">
+                                🏢 View Dealership
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Reviews & Ratings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div>
+                            <h3 class="text-accent mb-0">{{ avg_rating|floatformat:1 }}</h3>
+                            <div class="stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= avg_rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">Based on {{ reviews|length }} reviews</small>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        <hr>
+                        <h6>Leave a Review</h6>
+                        <form method="post" class="mb-4">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <div>
+                                    {% for value, label in form.rating.field.choices %}
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="rating" id="rating{{ value }}" value="{{ value }}">
+                                            <label class="form-check-label" for="rating{{ value }}">
+                                                {{ value }} {% for i in "12345" %}{% if forloop.counter <= value %}★{% endif %}{% endfor %}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Your Review</label>
+                                {{ form.comment }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Post Review</button>
+                        </form>
+                        <hr>
+                    {% endif %}
+
+                    <!-- Existing Reviews -->
+                    {% if reviews %}
+                        <h6>Recent Reviews</h6>
+                        {% for review in reviews|slice:":5" %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>{{ review.buyer.first_name }} {{ review.buyer.last_name }}</strong>
+                                    <span class="stars">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                ★
+                                            {% else %}
+                                                ☆
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                <p class="mb-2">{{ review.comment }}</p>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No reviews yet. Be the first to review this car!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Dealership Info -->
+        <div class="col-lg-4 col-md-12">
+            <!-- Dealership Card -->
+            <div class="card mb-4 sticky-top" style="top: 20px;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Dealership</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if dealership.logo %}
+                        <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}"
+                             style="max-width: 80px; max-height: 80px; object-fit: contain; margin-bottom: 1rem;">
+                    {% else %}
+                        <div class="bg-light-accent p-3 rounded mb-3" style="width: 80px; height: 80px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                            <span class="text-accent" style="font-size: 2.5rem;">🏢</span>
+                        </div>
+                    {% endif %}
+
+                    <h6>{{ dealership.company_name }}</h6>
+
+                    <div class="stars mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= dealership_rating %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                        <br>
+                        <small class="text-muted">({{ dealership_rating|floatformat:1 }})</small>
+                    </div>
+
+                    <p class="text-muted small mb-3">{{ dealership.description|truncatewords:15 }}</p>
+
+                    <hr>
+
+                    <p>
+                        <strong>📞</strong><br>
+                        <a href="tel:{{ dealership.phone_number }}">{{ dealership.phone_number }}</a>
+                    </p>
+                    <p>
+                        <strong>📧</strong><br>
+                        <a href="mailto:{{ dealership.email }}">{{ dealership.email }}</a>
+                    </p>
+                    <p>
+                        <strong>📍</strong><br>
+                        {{ dealership.location }}
+                    </p>
+
+                    {% if dealership.website %}
+                        <p>
+                            <strong>🌐</strong><br>
+                            <a href="{{ dealership.website }}" target="_blank">Visit Website</a>
+                        </p>
+                    {% endif %}
+
+                    <a href="/dealership/{{ dealership.id }}/" class="btn btn-outline-primary w-100 mb-2">
+                        View All Cars
+                    </a>
+                    <a href="/dealership/{{ dealership.id }}/" class="btn btn-secondary w-100">
+                        View Dealership Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Contact Card -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quick Contact</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Interested in this car? Contact the dealership directly:</p>
+                    <div class="d-grid gap-2">
+                        <a href="tel:{{ dealership.phone_number }}" class="btn btn-outline-primary">
+                            📞 Call Now
+                        </a>
+                        <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary">
+                            ✉️ Email
+                        </a>
+                        <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary">
+                            💬 Send Message
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeMainImage(src) {
+        document.getElementById('mainImage').src = src;
+    }
+</script>
+{% endblock %}

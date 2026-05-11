@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Dealership - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Register Your Dealership</h3>
+                    <p class="text-muted mb-0 mt-2">Reach thousands of car buyers across Kenya</p>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <h5 class="mb-4 text-accent">Account Information</h5>
+
+                        <!-- User Form Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username</label>
+                                {{ user_form.username }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                {{ user_form.email }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password</label>
+                                {{ user_form.password }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                {{ user_form.password_confirm }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-4 text-accent">Dealership Information</h5>
+
+                        <!-- Dealership Form Fields -->
+                        <div class="mb-3">
+                            <label class="form-label">Company Name</label>
+                            {{ dealership_form.company_name }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ dealership_form.description }}
+                            <small class="form-text text-muted">Tell buyers about your dealership</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number</label>
+                                {{ dealership_form.phone_number }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                {{ dealership_form.email }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location (City/Area)</label>
+                                {{ dealership_form.location }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Website (Optional)</label>
+                                {{ dealership_form.website }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Full Address</label>
+                            {{ dealership_form.address }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Company Logo (Optional)</label>
+                                {{ dealership_form.logo }}
+                                <small class="form-text text-muted">Upload a logo to build trust with buyers</small>
+                            </div>
+                        </div>
+
+                        <!-- Error Messages -->
+                        {% if user_form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in user_form.non_field_errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Register Dealership</button>
+                    </form>
+
+                    <hr>
+
+                    <p class="text-center mb-0">
+                        Already have an account? <a href="/login/" class="text-accent fw-bold">Login here</a>
+                    </p>
+
+                    <p class="text-center mt-3 mb-0">
+                        Are you a buyer? <a href="/register/" class="text-accent fw-bold">Register as buyer</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

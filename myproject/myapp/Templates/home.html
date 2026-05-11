@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - GM autoSolutions{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="fade-in-up">Find Your Perfect Car in <span class="accent-text">Kenya</span></h1>
+        <p class="fade-in-up">Browse thousands of vehicles from trusted dealerships across the country</p>
+        
+        <!-- Search Section -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-10">
+                <form method="get" action="/cars/" class="card p-4" style="background-color: rgba(255,255,255,0.95);">
+                    <h5 class="text-dark mb-4">Search for Your Perfect Car</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            {{ form.make }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.model }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.year_from }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.year_to }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                🔍 Search
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Filters -->
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-3">
+                            {{ form.price_from }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.price_to }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.fuel_type }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.transmission }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.condition }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Browse Cars CTA -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="section-title">Browse the Latest Cars</h2>
+                <p>Search the full marketplace and explore every available listing with the filters you selected from the homepage.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="/cars/" class="btn btn-primary btn-lg">Browse All Cars →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="py-5" style="background-color: #f5f6fa;">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Why Choose GM autoSolutions?</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h5>Secure Transactions</h5>
+                    <p>Protected buyer-seller communication and verified dealerships</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h5>Verified Ratings</h5>
+                    <p>Real reviews from actual buyers help you make informed decisions</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h5>Find Nearby</h5>
+                    <p>Locate dealerships near you with our interactive map</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h5>Easy Listing</h5>
+                    <p>Dealerships can list vehicles in minutes with detailed photos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Top Dealerships Section -->
+{% if dealerships %}
+    <section class="py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h2 class="section-title">🏪 Top Dealerships Near You</h2>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for dealership in dealerships|slice:":4" %}
+                    <div class="col-lg-6 col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title">{{ dealership.company_name }}</h5>
+                                        <p class="card-text">{{ dealership.description|truncatewords:20 }}</p>
+                                        <p class="text-muted small">
+                                            📍 {{ dealership.location }}<br>
+                                            📞 {{ dealership.phone_number }}
+                                        </p>
+                                        <div class="stars mb-2">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= dealership.rating %}
+                                                    ★
+                                                {% else %}
+                                                    ☆
+                                                {% endif %}
+                                            {% endfor %}
+                                            <small class="text-muted">({{ dealership.rating|floatformat:1 }})</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        {% if dealership.logo %}
+                                            <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}" 
+                                                 style="max-width: 80px; max-height: 80px; object-fit: contain;">
+                                        {% else %}
+                                            <div class="bg-light-accent p-3 rounded" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                                <span class="text-accent" style="font-size: 2rem;">🏢</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <hr>
+                                <a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm">
+                                    View Dealership
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/dealerships/" class="btn btn-secondary">
+                        View All Dealerships →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%); color: white;">
+    <div class="container text-center">
+        <h2 class="mb-4">Are You a Car Dealership?</h2>
+        <p class="fs-5 mb-4">Join GM autoSolutions and reach thousands of potential buyers. List your inventory in minutes!</p>
+        <a href="/dealership-register/" class="btn btn-primary btn-lg">
+            Register Your Dealership Today
+        </a>
+    </div>
+</section>
+{% endblock %}
