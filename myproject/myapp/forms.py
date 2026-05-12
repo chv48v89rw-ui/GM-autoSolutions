@@ -65,7 +65,7 @@ class DealershipRegistrationForm(forms.ModelForm):
     class Meta:
         model = Dealership
         fields = ('company_name', 'description', 'logo', 'website', 'email', 
-                 'phone_number', 'location', 'address')
+                 'phone_number', 'location', 'latitude', 'longitude', 'address')
         widgets = {
             'company_name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -93,6 +93,14 @@ class DealershipRegistrationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Location (City/Area)'
             }),
+            'latitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Latitude (e.g. -1.2921)'
+            }),
+            'longitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Longitude (e.g. 36.8219)'
+            }),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Full address',
@@ -106,6 +114,7 @@ class CarForm(forms.ModelForm):
         model = Car
         fields = ('title', 'make', 'model', 'year', 'price', 'mileage', 
                  'fuel_type', 'transmission', 'condition', 'color', 'seats',
+                 'engine_size', 'doors', 'body_type', 'previous_owners',
                  'description', 'main_image', 'features')
         widgets = {
             'title': forms.TextInput(attrs={
@@ -143,6 +152,10 @@ class CarForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Number of seats'
             }),
+            'engine_size': forms.Select(attrs={'class': 'form-select'}),
+            'doors': forms.Select(attrs={'class': 'form-select'}),
+            'body_type': forms.Select(attrs={'class': 'form-select'}),
+            'previous_owners': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Detailed description',
@@ -213,6 +226,28 @@ class EnquiryForm(forms.ModelForm):
         }
 
 
+class EnquiryReplyForm(forms.Form):
+    response = forms.CharField(
+        label='Response to buyer',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 6,
+            'placeholder': 'Write your reply to the buyer'
+        })
+    )
+
+
+class ConversationMessageForm(forms.Form):
+    message = forms.CharField(
+        label='Message',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'placeholder': 'Type your message here...'
+        })
+    )
+
+
 class CarSearchForm(forms.Form):
     make = forms.CharField(required=False, widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -244,3 +279,19 @@ class CarSearchForm(forms.Form):
                                     widget=forms.Select(attrs={'class': 'form-select'}))
     condition = forms.ChoiceField(required=False, choices=[('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES),
                                  widget=forms.Select(attrs={'class': 'form-select'}))
+    engine_size = forms.ChoiceField(required=False, choices=[('', '-- All Engine Sizes --')] + list(Car.ENGINE_SIZE_CHOICES),
+                                   widget=forms.Select(attrs={'class': 'form-select'}))
+    doors = forms.ChoiceField(required=False, choices=[('', '-- All Doors --')] + list(Car.DOORS_CHOICES),
+                             widget=forms.Select(attrs={'class': 'form-select'}))
+    body_type = forms.ChoiceField(required=False, choices=[('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES),
+                                 widget=forms.Select(attrs={'class': 'form-select'}))
+    previous_owners = forms.ChoiceField(required=False, choices=[('', '-- All Owners --')] + list(Car.OWNERS_CHOICES),
+                                       widget=forms.Select(attrs={'class': 'form-select'}))
+    seats = forms.ChoiceField(required=False, choices=[
+        ('', '-- All Seats --'),
+        ('2', '2 Seats'),
+        ('4', '4 Seats'),
+        ('5', '5 Seats'),
+        ('7', '7 Seats'),
+        ('8', '8+ Seats'),
+    ], widget=forms.Select(attrs={'class': 'form-select'}))

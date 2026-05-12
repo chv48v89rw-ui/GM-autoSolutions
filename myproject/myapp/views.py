@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,12 +8,14 @@ from django.contrib import messages
 from django.db.models import Q, Avg, Exists, OuterRef
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-from .models import UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, Favorite
+from django.utils import timezone
+from .models import UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, Favorite
 from .forms import (UserRegistrationForm, UserProfileForm, DealershipRegistrationForm,
-                    CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, CarSearchForm)
+                    CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm)
 from django.conf import settings
 
 
+@login_required(login_url='login')
 def home(request):
     """Home page with search filters and featured cars"""
     form = CarSearchForm(request.GET or None)
@@ -38,6 +42,16 @@ def home(request):
             cars = cars.filter(transmission=form.cleaned_data['transmission'])
         if form.cleaned_data.get('condition'):
             cars = cars.filter(condition=form.cleaned_data['condition'])
+        if form.cleaned_data.get('engine_size'):
+            cars = cars.filter(engine_size=form.cleaned_data['engine_size'])
+        if form.cleaned_data.get('doors'):
+            cars = cars.filter(doors=form.cleaned_data['doors'])
+        if form.cleaned_data.get('body_type'):
+            cars = cars.filter(body_type=form.cleaned_data['body_type'])
+        if form.cleaned_data.get('previous_owners'):
+            cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
+        if form.cleaned_data.get('seats'):
+            cars = cars.filter(seats__gte=form.cleaned_data['seats'])
     
     # Get featured/recent cars
     featured_cars = cars[:12]
@@ -188,8 +202,10 @@ def dealership_dashboard(request):
     reviews = dealership.reviews.all()
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
     
-    # Count enquiries for dealership's cars
-    enquiries = Enquiry.objects.filter(car__dealership=dealership).order_by('-created_at')
+    enquiries = Enquiry.objects.filter(
+        Q(dealership=dealership) | Q(car__dealership=dealership)
+    ).order_by('-created_at')
+    unread_enquiries = enquiries.filter(is_read=False).count()
     
     context = {
         'dealership': dealership,
@@ -199,6 +215,7 @@ def dealership_dashboard(request):
         'enquiries': enquiries,
         'total_cars': cars.count(),
         'total_enquiries': enquiries.count(),
+        'unread_enquiries': unread_enquiries,
     }
     return render(request, 'dealership_dashboard.html', context)
 
@@ -221,6 +238,7 @@ def add_car(request):
             else:
                 car = form.save(commit=False)
                 car.dealership = dealership
+                car.is_approved = True
                 car.save()
 
                 for image in images:
@@ -252,9 +270,11 @@ def edit_car(request, car_id):
             if len(images) > 15:
                 form.add_error('images', 'You can upload up to 15 images only.')
             else:
-                form.save()
+                updated_car = form.save(commit=False)
+                updated_car.is_approved = True
+                updated_car.save()
                 for image in images:
-                    CarImage.objects.create(car=car, image=image)
+                    CarImage.objects.create(car=updated_car, image=image)
                 messages.success(request, 'Car updated successfully!')
                 return redirect('dealership_dashboard')
     else:
@@ -282,6 +302,7 @@ def delete_car(request, car_id):
     return render(request, 'confirm_delete.html', context)
 
 
+@login_required(login_url='login')
 def car_list(request):
     """List all cars with filters"""
     form = CarSearchForm(request.GET or None)
@@ -309,12 +330,33 @@ def car_list(request):
             cars = cars.filter(transmission=form.cleaned_data['transmission'])
         if form.cleaned_data.get('condition'):
             cars = cars.filter(condition=form.cleaned_data['condition'])
+        if form.cleaned_data.get('engine_size'):
+            cars = cars.filter(engine_size=form.cleaned_data['engine_size'])
+        if form.cleaned_data.get('doors'):
+            cars = cars.filter(doors=form.cleaned_data['doors'])
+        if form.cleaned_data.get('body_type'):
+            cars = cars.filter(body_type=form.cleaned_data['body_type'])
+        if form.cleaned_data.get('previous_owners'):
+            cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
+        if form.cleaned_data.get('seats'):
+            cars = cars.filter(seats__gte=form.cleaned_data['seats'])
     
     context = {
         'form': form,
         'cars': cars,
     }
     return render(request, 'car_list.html', context)
+
+@login_required(login_url='login')
+
+def terms(request):
+    return render(request, 'terms.html')
+@login_required(login_url='login')
+
+
+@login_required(login_url='login')
+def privacy(request):
+    return render(request, 'privacy.html')
 
 
 def get_dealerships_json(request):
@@ -337,8 +379,9 @@ def get_dealerships_json(request):
             'rating': dealership['rating'] or 0,
             'url': f"/dealership/{dealership['id']}/",
         })
+@login_required(login_url='login')
+def your_view_name(request):
     return JsonResponse(data, safe=False)
-
 
 def car_detail(request, car_id):
     """Car detail page"""
@@ -391,6 +434,8 @@ def car_detail(request, car_id):
         'is_favorited': is_favorited,
         'car_features': car_features,
     }
+@login_required(login_url='login')
+def car_detail(request):
     return render(request, 'car_detail.html', context)
 
 
@@ -427,6 +472,11 @@ def dealership_detail(request, dealership_id):
         'form': form,
         'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     }
+@login_required(login_url='login')
+def dealership_detail(request):
+    context = {
+    }
+
     return render(request, 'dealership_detail.html', context)
 
 
@@ -439,7 +489,14 @@ def enquire_car(request, car_id):
         if form.is_valid():
             enquiry = form.save(commit=False)
             enquiry.car = car
+            enquiry.dealership = car.dealership
             enquiry.save()
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='buyer',
+                sender_name=enquiry.buyer_name,
+                message=enquiry.message,
+            )
             messages.success(request, 'Your enquiry has been sent successfully!')
             return redirect('car_detail', car_id=car.id)
     else:
@@ -449,6 +506,65 @@ def enquire_car(request, car_id):
     return render(request, 'enquire_car.html', context)
 
 
+@login_required(login_url='login')
+def enquiry_conversation(request, enquiry_id):
+    enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+    user = request.user
+    is_dealership = hasattr(user, 'dealership') and (
+        (enquiry.dealership and enquiry.dealership.user == user) or
+        (enquiry.car and enquiry.car.dealership.user == user)
+    )
+    is_buyer = hasattr(user, 'profile') and user.profile.user_type == 'buyer' and enquiry.buyer_email == user.email
+
+    if not (is_dealership or is_buyer):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ConversationMessageForm(request.POST)
+        if form.is_valid():
+            message_text = form.cleaned_data['message']
+            sender_name = enquiry.dealership.company_name if is_dealership else enquiry.buyer_name
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='dealership' if is_dealership else 'buyer',
+                sender_name=sender_name,
+                message=message_text,
+            )
+
+            if is_dealership:
+                enquiry.dealership_response = message_text
+                enquiry.responded_at = timezone.now()
+                enquiry.is_read = True
+            else:
+                enquiry.is_read = False
+
+            enquiry.save()
+            messages.success(request, 'Message sent successfully.')
+            return redirect('view_enquiry', enquiry_id=enquiry.id)
+    else:
+        form = ConversationMessageForm()
+
+    messages_list = enquiry.messages.order_by('created_at')
+    last_message = messages_list.last()
+    is_waiting_reply = last_message and last_message.sender_type == 'buyer'
+
+    context = {
+        'enquiry': enquiry,
+        'messages': messages_list,
+        'form': form,
+        'is_dealership': is_dealership,
+        'is_buyer': is_buyer,
+        'is_waiting_reply': is_waiting_reply,
+    }
+    return render(request, 'view_enquiry.html', context)
+
+
+@login_required(login_url='login')
+@login_required(login_url='login')
+def view_enquiry(request, enquiry_id):
+    return enquiry_conversation(request, enquiry_id)
+
+
 def dealerships_map(request):
     """Map view of all dealerships"""
     dealerships = Dealership.objects.filter(is_approved=True)  # Only approved dealerships
@@ -456,6 +572,11 @@ def dealerships_map(request):
         'dealerships': dealerships,
         'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     }
+@login_required(login_url='login')
+def dealerships_map(request):
+    context = {
+    }
+
     return render(request, 'dealerships_map.html', context)
 
 
@@ -471,10 +592,17 @@ def contact_dealership(request, dealership_id):
             # Create a general enquiry (not tied to a specific car)
             enquiry = Enquiry.objects.create(
                 car=None,  # No specific car for general contact
+                dealership=dealership,
                 buyer_name=form.cleaned_data['buyer_name'],
                 buyer_email=form.cleaned_data['buyer_email'],
                 buyer_phone=form.cleaned_data['buyer_phone'],
                 message=f"Subject: {request.POST.get('subject', 'General Inquiry')}\n\n{form.cleaned_data['message']}"
+            )
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='buyer',
+                sender_name=enquiry.buyer_name,
+                message=enquiry.message,
             )
             messages.success(request, f'Your message has been sent to {dealership.company_name}! They will get back to you soon.')
             return redirect('contact_dealership', dealership_id=dealership.id)

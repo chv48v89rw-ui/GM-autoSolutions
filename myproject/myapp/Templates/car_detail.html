@@ -46,11 +46,15 @@
                             <p><strong>⛽ Fuel Type:</strong> {{ car.get_fuel_type_display }}</p>
                             <p><strong>⚙️ Transmission:</strong> {{ car.get_transmission_display }}</p>
                             <p><strong>🎨 Color:</strong> {{ car.color }}</p>
+                            {% if car.engine_size %}<p><strong>🔧 Engine Size:</strong> {{ car.get_engine_size_display }}</p>{% endif %}
+                            {% if car.doors %}<p><strong>🚪 Doors:</strong> {{ car.get_doors_display }}</p>{% endif %}
                         </div>
                         <div class="col-md-6">
                             <p><strong>🎯 Mileage:</strong> {{ car.mileage }} km</p>
                             <p><strong>👥 Seats:</strong> {{ car.seats }}</p>
                             <p><strong>📅 Year:</strong> {{ car.year }}</p>
+                            {% if car.body_type %}<p><strong>🚗 Body Type:</strong> {{ car.get_body_type_display }}</p>{% endif %}
+                            {% if car.previous_owners %}<p><strong>👤 Previous Owners:</strong> {{ car.get_previous_owners_display }}</p>{% endif %}
                         </div>
                     </div>
 

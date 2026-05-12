@@ -52,16 +52,20 @@
 let map;
 let markers = [];
 let dealerships = [];
+let globalInfoWindow;
 
 function initMap() {
     // Center map on Kenya
     const kenyaCenter = { lat: -1.2921, lng: 36.8219 };
-    
+    const bounds = new google.maps.LatLngBounds();
+
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 6,
         center: kenyaCenter,
         mapTypeId: 'roadmap',
     });
+
+    globalInfoWindow = new google.maps.InfoWindow();
 
     // Fetch dealerships data
     fetch('/api/dealerships/')
@@ -69,45 +73,48 @@ function initMap() {
         .then(data => {
             dealerships = data;
             displayDealerships();
-            addMarkers();
+            addMarkers(bounds);
+
+            if (markers.length > 0) {
+                map.fitBounds(bounds);
+            } else {
+                map.setCenter(kenyaCenter);
+                map.setZoom(6);
+            }
+        })
+        .catch(() => {
+            map.setCenter(kenyaCenter);
         });
 }
 
-function addMarkers() {
+function addMarkers(bounds) {
     dealerships.forEach(dealership => {
-        if (dealership.lat && dealership.lng) {
+        if (dealership.lat != null && dealership.lng != null) {
+            const position = { lat: dealership.lat, lng: dealership.lng };
             const marker = new google.maps.Marker({
-                position: { lat: dealership.lat, lng: dealership.lng },
+                position,
                 map: map,
                 title: dealership.name,
             });
 
-            // Dealership info window
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="padding: 10px; max-width: 200px;">
-                        <h6>${dealership.name}</h6>
-                        <p style="margin: 5px 0; font-size: 0.9rem;">${dealership.location}</p>
-                        <div style="margin: 5px 0;">
-                            ${'★'.repeat(Math.round(dealership.rating))}${'☆'.repeat(5 - Math.round(dealership.rating))}
-                        </div>
-                        <a href="${dealership.url}" class="btn btn-primary btn-sm" style="margin-top: 10px; display: inline-block;">View Profile</a>
+            const content = `
+                <div style="padding: 10px; max-width: 240px;">
+                    <h6>${dealership.name}</h6>
+                    <p style="margin: 5px 0; font-size: 0.9rem;">${dealership.location || 'Location not available'}</p>
+                    <div style="margin: 5px 0; font-size: 0.9rem;">
+                        ${'★'.repeat(Math.round(dealership.rating || 0))}${'☆'.repeat(5 - Math.round(dealership.rating || 0))}
                     </div>
-                `,
-            });
+                    <a href="${dealership.url}" class="btn btn-primary btn-sm" style="margin-top: 10px; display: inline-block;">View Profile</a>
+                </div>
+            `;
 
             marker.addListener('click', () => {
-                // Close all other info windows
-                markers.forEach(m => {
-                    if (m.infoWindow) {
-                        m.infoWindow.close();
-                    }
-                });
-                infoWindow.open(map, marker);
-                marker.infoWindow = infoWindow;
+                globalInfoWindow.setContent(content);
+                globalInfoWindow.open(map, marker);
             });
 
             markers.push(marker);
+            bounds.extend(position);
         }
     });
 }
@@ -122,14 +129,15 @@ function displayDealerships() {
     }
 
     dealerships.forEach(dealership => {
+        const rating = dealership.rating != null ? dealership.rating : 0;
         const dealershipHTML = `
             <div class="card mb-3">
                 <div class="card-body">
                     <h6 class="card-title">${dealership.name}</h6>
-                    <p class="text-muted small mb-2">📍 ${dealership.location}</p>
+                    <p class="text-muted small mb-2">📍 ${dealership.location || 'Location not available'}</p>
                     <div class="stars mb-2">
-                        ${'★'.repeat(Math.round(dealership.rating))}${'☆'.repeat(5 - Math.round(dealership.rating))}
-                        <small class="text-muted">${dealership.rating.toFixed(1)}</small>
+                        ${'★'.repeat(Math.round(rating))}${'☆'.repeat(5 - Math.round(rating))}
+                        <small class="text-muted">${rating.toFixed(1)}</small>
                     </div>
                     <a href="${dealership.url}" class="btn btn-primary btn-sm w-100">View Profile</a>
                 </div>

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 from datetime import datetime
 
 class UserProfile(models.Model):
@@ -59,6 +60,45 @@ class Car(models.Model):
         ('used', 'Used'),
     ]
     
+    ENGINE_SIZE_CHOICES = [
+        ('1.0', '1.0L'),
+        ('1.2', '1.2L'),
+        ('1.4', '1.4L'),
+        ('1.5', '1.5L'),
+        ('1.6', '1.6L'),
+        ('1.8', '1.8L'),
+        ('2.0', '2.0L'),
+        ('2.5', '2.5L'),
+        ('3.0', '3.0L'),
+        ('other', 'Other'),
+    ]
+    
+    DOORS_CHOICES = [
+        (2, '2 Doors'),
+        (3, '3 Doors'),
+        (4, '4 Doors'),
+        (5, '5 Doors'),
+    ]
+    
+    BODY_TYPE_CHOICES = [
+        ('sedan', 'Sedan'),
+        ('suv', 'SUV'),
+        ('hatchback', 'Hatchback'),
+        ('coupe', 'Coupe'),
+        ('convertible', 'Convertible'),
+        ('wagon', 'Wagon'),
+        ('pickup', 'Pickup'),
+        ('van', 'Van'),
+        ('other', 'Other'),
+    ]
+    
+    OWNERS_CHOICES = [
+        (0, '0 Owners'),
+        (1, '1 Owner'),
+        (2, '2 Owners'),
+        (3, '3+ Owners'),
+    ]
+    
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, related_name='cars')
     title = models.CharField(max_length=255)
     make = models.CharField(max_length=100)  # Toyota, BMW, etc.
@@ -71,6 +111,10 @@ class Car(models.Model):
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
     color = models.CharField(max_length=50)
     seats = models.IntegerField(default=5)
+    engine_size = models.CharField(max_length=10, choices=ENGINE_SIZE_CHOICES, blank=True)
+    doors = models.IntegerField(choices=DOORS_CHOICES, blank=True, null=True)
+    body_type = models.CharField(max_length=20, choices=BODY_TYPE_CHOICES, blank=True)
+    previous_owners = models.IntegerField(choices=OWNERS_CHOICES, blank=True, null=True)
     description = models.TextField()
     
     # Images
@@ -127,15 +171,40 @@ class DealershipReview(models.Model):
 
 class Enquiry(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='enquiries', null=True, blank=True)
+    dealership = models.ForeignKey('Dealership', on_delete=models.CASCADE, related_name='enquiries', null=True, blank=True)
     buyer_name = models.CharField(max_length=255)
     buyer_email = models.EmailField()
     buyer_phone = models.CharField(max_length=15)
     message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    dealership_response = models.TextField(null=True, blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         car_label = f" for {self.car}" if self.car else ""
         return f"Enquiry from {self.buyer_name}{car_label}"
+
+    @property
+    def last_message_sender(self):
+        last_message = self.messages.order_by('-created_at').first()
+        return last_message.sender_type if last_message else None
+
+
+class EnquiryMessage(models.Model):
+    SENDER_CHOICES = [
+        ('buyer', 'Buyer'),
+        ('dealership', 'Dealership'),
+    ]
+
+    enquiry = models.ForeignKey(Enquiry, on_delete=models.CASCADE, related_name='messages')
+    sender_type = models.CharField(max_length=20, choices=SENDER_CHOICES)
+    sender_name = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_sender_type_display()} message for {self.enquiry}"
 
 
 class Favorite(models.Model):

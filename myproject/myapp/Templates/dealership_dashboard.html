@@ -177,7 +177,14 @@
     <!-- Enquiries Section -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="mb-0">💬 Recent Enquiries ({{ enquiries|length }})</h5>
+            <h5 class="mb-0">
+                💬 Recent Enquiries
+                {% if unread_enquiries > 0 %}
+                    <span class="badge bg-danger ms-2">{{ unread_enquiries }} New</span>
+                {% else %}
+                    <span class="badge bg-secondary ms-2">{{ enquiries|length }} Total</span>
+                {% endif %}
+            </h5>
         </div>
         <div class="card-body">
             {% if enquiries %}
@@ -189,7 +196,9 @@
                                 <th>Car</th>
                                 <th>Contact</th>
                                 <th>Message</th>
+                                <th>Status</th>
                                 <th>Date</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -197,9 +206,13 @@
                                 <tr>
                                     <td>{{ enquiry.buyer_name }}</td>
                                     <td>
-                                        <a href="/car/{{ enquiry.car.id }}/">
-                                            {{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}
-                                        </a>
+                                        {% if enquiry.car %}
+                                            <a href="/car/{{ enquiry.car.id }}/">
+                                                {{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">General enquiry</span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <small>
@@ -210,7 +223,19 @@
                                     <td>
                                         <small>{{ enquiry.message|truncatewords:10 }}</small>
                                     </td>
+                                    <td>
+                                        {% if enquiry.dealership_response %}
+                                            <span class="badge bg-success">Replied</span>
+                                        {% elif not enquiry.is_read %}
+                                            <span class="badge bg-danger">New</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Awaiting Reply</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ enquiry.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'reply_enquiry' enquiry.id %}" class="btn btn-sm btn-primary">Reply</a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

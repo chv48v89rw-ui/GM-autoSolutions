@@ -32,6 +32,10 @@ urlpatterns = [
     
     # Enquiry and reviews
     path('car/<int:car_id>/enquire/', views.enquire_car, name='enquire_car'),
+    path('enquiry/<int:enquiry_id>/reply/', views.enquiry_conversation, name='reply_enquiry'),
+    path('enquiry/<int:enquiry_id>/view/', views.view_enquiry, name='view_enquiry'),
+    path('terms/', views.terms, name='terms'),
+    path('privacy/', views.privacy, name='privacy'),
     
     # API endpoints
     path('api/dealerships/', views.get_dealerships_json, name='api_dealerships'),
