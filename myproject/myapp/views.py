@@ -381,7 +381,12 @@ def get_dealerships_json(request):
         })
 @login_required(login_url='login')
 def your_view_name(request):
-    return JsonResponse(data, safe=False)
+    data = {
+        "message": "Hello from Django",
+        "status": "success"
+    }
+
+    return JsonResponse(data)
 
 def car_detail(request, car_id):
     """Car detail page"""
