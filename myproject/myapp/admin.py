@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, Dealership, Car, Review, DealershipReview, Enquiry, Favorite
-
+from .models import UserProfile, Dealership, Car, Review, DealershipReview, Enquiry, Favorite, EmailVerification, Report, Subscription, SubscriptionRequest 
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -87,3 +86,87 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'car', 'created_at')
     list_filter = ('created_at', 'car__dealership')
     search_fields = ('user__username', 'car__title', 'car__make', 'car__model')
+
+
+@admin.register(EmailVerification)
+class EmailVerificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'verification_code', 'created_at', 'expires_at')
+    list_filter = ('created_at', 'expires_at')
+    search_fields = ('user__username', 'user__email')
+
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ('reporter', 'report_type', 'status', 'created_at')
+    list_filter = ('report_type', 'status', 'created_at')
+    search_fields = ('reporter__username', 'description')
+    actions = ('mark_under_review', 'mark_resolved', 'mark_dismissed')
+    fieldsets = (
+        ('Report Info', {'fields': ('reporter', 'report_type', 'description')}),
+        ('Related Item', {'fields': ('car', 'dealership', 'reported_user')}),
+        ('Status & Resolution', {'fields': ('status',)}),
+        ('Metadata', {'fields': ('created_at', 'updated_at')}),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+    @admin.action(description='Mark selected reports as under review')
+    def mark_under_review(self, request, queryset):
+        updated = queryset.update(status='under_review')
+        self.message_user(request, f"{updated} report(s) marked as under review.")
+
+    @admin.action(description='Mark selected reports as resolved')
+    def mark_resolved(self, request, queryset):
+        from django.utils import timezone
+        updated = queryset.update(status='resolved')
+        self.message_user(request, f"{updated} report(s) marked as resolved.")
+
+    @admin.action(description='Mark selected reports as dismissed')
+    def mark_dismissed(self, request, queryset):
+        updated = queryset.update(status='dismissed')
+        self.message_user(request, f"{updated} report(s) dismissed.")
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('dealership', 'subscription_type', 'status', 'amount_paid', 'start_date', 'end_date')
+    list_filter = ('subscription_type', 'status', 'start_date', 'end_date')
+    search_fields = ('dealership__company_name', 'payment_reference')
+    fieldsets = (
+        ('Subscription Info', {'fields': ('dealership', 'subscription_type', 'status', 'is_premium')}),
+        ('Payment Details', {'fields': ('amount_paid', 'payment_reference', 'start_date', 'end_date')}),
+        ('Metadata', {'fields': ('created_at', 'updated_at')}),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(SubscriptionRequest)
+class SubscriptionRequestAdmin(admin.ModelAdmin):
+    list_display = ('company_name', 'contact_person', 'email', 'subscription_type', 'status', 'created_at')
+    list_filter = ('subscription_type', 'status', 'created_at')
+    search_fields = ('company_name', 'email', 'contact_person')
+    fieldsets = (
+        ('Request Info', {'fields': ('company_name', 'contact_person', 'email', 'phone', 'subscription_type')}),
+        ('Additional Info', {'fields': ('message', 'status')}),
+        ('Admin Notes', {'fields': ('admin_notes',)}),
+        ('Metadata', {'fields': ('created_at', 'updated_at')}),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    actions = ['mark_approved', 'mark_rejected', 'mark_completed']
+    
+    @admin.action(description='Mark selected requests as Approved')
+    def mark_approved(self, request, queryset):
+        updated = queryset.update(status='approved')
+        self.message_user(request, f"{updated} subscription request(s) approved.")
+        return updated
+    
+    @admin.action(description='Mark selected requests as Rejected')
+    def mark_rejected(self, request, queryset):
+        updated = queryset.update(status='rejected')
+        self.message_user(request, f"{updated} subscription request(s) rejected.")
+        return updated
+    
+    @admin.action(description='Mark selected requests as Completed')
+    def mark_completed(self, request, queryset):
+        updated = queryset.update(status='completed')
+        self.message_user(request, f"{updated} subscription request(s) completed.")
+        return updated

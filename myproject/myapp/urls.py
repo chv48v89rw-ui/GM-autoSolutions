@@ -13,6 +13,7 @@ urlpatterns = [
     # Authentication
     path('register/', views.register, name='register'),
     path('dealership-register/', views.dealership_register, name='dealership_register'),
+    path('verify-email/', views.verify_email, name='verify_email'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     
@@ -37,6 +38,24 @@ urlpatterns = [
     path('terms/', views.terms, name='terms'),
     path('privacy/', views.privacy, name='privacy'),
     
+    # Reporting
+    path('report/', views.general_report, name='general_report'),
+    path('car/<int:car_id>/report/', views.report_car, name='report_car'),
+    path('dealership/<int:dealership_id>/report/', views.report_dealership, name='report_dealership'),
+    path('user/<int:user_id>/report/', views.report_user, name='report_user'),
+    path('my-reports/', views.my_reports, name='my_reports'),
+    
+    # Pricing
+    path('pricing/', views.pricing_page, name='pricing'),
+    
     # API endpoints
+    path('api/subscription-request/', views.subscription_request, name='subscription_request'),
+    path('api/models-for-make/', views.get_models_for_make, name='api_models_for_make'),
     path('api/dealerships/', views.get_dealerships_json, name='api_dealerships'),
+    
+    # Admin
+    path('admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/approve-dealership/<int:dealership_id>/', views.approve_dealership, name='approve_dealership'),
+    path('admin/reject-dealership/<int:dealership_id>/', views.reject_dealership, name='reject_dealership'),
+    path('admin/update-report/<int:report_id>/', views.update_report_status, name='update_report_status'),
 ]

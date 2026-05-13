@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.utils import timezone
 from .models import UserProfile, Dealership, Car, Review, DealershipReview, Enquiry
-
+from .models import Report
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -50,9 +51,8 @@ class UserRegistrationForm(forms.ModelForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('user_type', 'phone_number', 'profile_picture')
+        fields = ('phone_number', 'profile_picture')
         widgets = {
-            'user_type': forms.Select(attrs={'class': 'form-select'}),
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Phone number'
@@ -65,7 +65,7 @@ class DealershipRegistrationForm(forms.ModelForm):
     class Meta:
         model = Dealership
         fields = ('company_name', 'description', 'logo', 'website', 'email', 
-                 'phone_number', 'location', 'latitude', 'longitude', 'address')
+                 'phone_number', 'location', 'area_code', 'address')
         widgets = {
             'company_name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -93,18 +93,14 @@ class DealershipRegistrationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Location (City/Area)'
             }),
-            'latitude': forms.NumberInput(attrs={
+            'area_code': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Latitude (e.g. -1.2921)'
-            }),
-            'longitude': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Longitude (e.g. 36.8219)'
+                'placeholder': 'Area code (e.g., 00100 for Nairobi CBD)'
             }),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Full address',
-                'rows': 3
+                'placeholder': 'Full street address for precise map location',
+                'rows': 4
             }),
         }
 
@@ -249,29 +245,194 @@ class ConversationMessageForm(forms.Form):
 
 
 class CarSearchForm(forms.Form):
-    make = forms.CharField(required=False, widget=forms.TextInput(attrs={
+    # Get unique makes from database
+    from .models import Car
+    
+    def get_make_choices():
+        makes = Car.objects.values_list('make', flat=True).distinct().order_by('make')
+        return [('', '-- All Makes --')] + [(make, make) for make in makes]
+    
+    make = forms.ChoiceField(required=False, choices=get_make_choices(), widget=forms.Select(attrs={
         'class': 'form-control',
-        'placeholder': 'Make'
     }))
     model = forms.CharField(required=False, widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'Model'
     }))
-    year_from = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={
+    
+        
+    # Generate year choices from 1990 to current year with blank option
+    current_year = timezone.now().year
+    YEAR_CHOICES = [('', '--- Year from ---')] + [(year, str(year)) for year in range(current_year, 1989, -1)]
+    
+    year_from = forms.ChoiceField(required=False, choices=YEAR_CHOICES, widget=forms.Select(attrs={
         'class': 'form-control',
-        'placeholder': 'Year from'
     }))
-    year_to = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={
+    
+    # Generate year choices for year_to with blank option
+    YEAR_TO_CHOICES = [('', '--- Year to ---')] + [(year, str(year)) for year in range(current_year, 1989, -1)]
+    
+    year_to = forms.ChoiceField(required=False, choices=YEAR_TO_CHOICES, widget=forms.Select(attrs={
         'class': 'form-control',
-        'placeholder': 'Year to'
     }))
-    price_from = forms.DecimalField(required=False, widget=forms.NumberInput(attrs={
+    # Price range choices from 100,000 to 50,000,000 KSH with 500K increments
+    PRICE_CHOICES = [
+        ('', '--- Price from ---'),
+        ('100000', '100,000'),
+        ('150000', '150,000'),
+        ('200000', '200,000'),
+        ('250000', '250,000'),
+        ('300000', '300,000'),
+        ('350000', '350,000'),
+        ('400000', '400,000'),
+        ('450000', '450,000'),
+        ('500000', '500,000'),
+        ('550000', '550,000'),
+        ('600000', '600,000'),
+        ('650000', '650,000'),
+        ('700000', '700,000'),
+        ('750000', '750,000'),
+        ('800000', '800,000'),
+        ('850000', '850,000'),
+        ('900000', '900,000'),
+        ('950000', '950,000'),
+        ('1000000', '1,000,000'),
+        ('1500000', '1,500,000'),
+        ('2000000', '2,000,000'),
+        ('2500000', '2,500,000'),
+        ('3000000', '3,000,000'),
+        ('3500000', '3,500,000'),
+        ('4000000', '4,000,000'),
+        ('4500000', '4,500,000'),
+        ('5000000', '5,000,000'),
+        ('5500000', '5,500,000'),
+        ('6000000', '6,000,000'),
+        ('6500000', '6,500,000'),
+        ('7000000', '7,000,000'),
+        ('7500000', '7,500,000'),
+        ('8000000', '8,000,000'),
+        ('8500000', '8,500,000'),
+        ('9000000', '9,000,000'),
+        ('9500000', '9,500,000'),
+        ('10000000', '10,000,000'),
+        ('15000000', '15,000,000'),
+        ('20000000', '20,000,000'),
+        ('25000000', '25,000,000'),
+        ('30000000', '30,000,000'),
+        ('35000000', '35,000,000'),
+        ('40000000', '40,000,000'),
+        ('45000000', '45,000,000'),
+        ('50000000', '50,000,000'),
+    ]
+    
+    # Price to choices with higher range - 500K increments up to 500M
+    PRICE_TO_CHOICES = [
+        ('', '--- Price to ---'),
+        ('150000', '150,000'),
+        ('200000', '200,000'),
+        ('250000', '250,000'),
+        ('300000', '300,000'),
+        ('350000', '350,000'),
+        ('400000', '400,000'),
+        ('450000', '450,000'),
+        ('500000', '500,000'),
+        ('550000', '550,000'),
+        ('600000', '600,000'),
+        ('650000', '650,000'),
+        ('700000', '700,000'),
+        ('750000', '750,000'),
+        ('800000', '800,000'),
+        ('850000', '850,000'),
+        ('900000', '900,000'),
+        ('950000', '950,000'),
+        ('1000000', '1,000,000'),
+        ('1500000', '1,500,000'),
+        ('2000000', '2,000,000'),
+        ('2500000', '2,500,000'),
+        ('3000000', '3,000,000'),
+        ('3500000', '3,500,000'),
+        ('4000000', '4,000,000'),
+        ('4500000', '4,500,000'),
+        ('5000000', '5,000,000'),
+        ('5500000', '5,500,000'),
+        ('6000000', '6,000,000'),
+        ('6500000', '6,500,000'),
+        ('7000000', '7,000,000'),
+        ('7500000', '7,500,000'),
+        ('8000000', '8,000,000'),
+        ('8500000', '8,500,000'),
+        ('9000000', '9,000,000'),
+        ('9500000', '9,500,000'),
+        ('10000000', '10,000,000'),
+        ('15000000', '15,000,000'),
+        ('20000000', '20,000,000'),
+        ('25000000', '25,000,000'),
+        ('30000000', '30,000,000'),
+        ('35000000', '35,000,000'),
+        ('40000000', '40,000,000'),
+        ('45000000', '45,000,000'),
+        ('50000000', '50,000,000'),
+    ]
+    
+    price_from = forms.ChoiceField(required=False, choices=PRICE_CHOICES, widget=forms.Select(attrs={
         'class': 'form-control',
-        'placeholder': 'Price from'
     }))
-    price_to = forms.DecimalField(required=False, widget=forms.NumberInput(attrs={
+    
+    # Price to choices with higher range - 500K increments up to 500M
+    PRICE_TO_CHOICES = [
+        ('', '--- Price to ---'),
+        ('150000', '150,000'),
+        ('200000', '200,000'),
+        ('250000', '250,000'),
+        ('300000', '300,000'),
+        ('350000', '350,000'),
+        ('400000', '400,000'),
+        ('450000', '450,000'),
+        ('500000', '500,000'),
+        ('550000', '550,000'),
+        ('600000', '600,000'),
+        ('650000', '650,000'),
+        ('700000', '700,000'),
+        ('750000', '750,000'),
+        ('800000', '800,000'),
+        ('850000', '850,000'),
+        ('900000', '900,000'),
+        ('950000', '950,000'),
+        ('1000000', '1,000,000'),
+        ('1500000', '1,500,000'),
+        ('2000000', '2,000,000'),
+        ('2500000', '2,500,000'),
+        ('3000000', '3,000,000'),
+        ('3500000', '3,500,000'),
+        ('4000000', '4,000,000'),
+        ('4500000', '4,500,000'),
+        ('5000000', '5,000,000'),
+        ('5500000', '5,500,000'),
+        ('6000000', '6,000,000'),
+        ('6500000', '6,500,000'),
+        ('7000000', '7,000,000'),
+        ('7500000', '7,500,000'),
+        ('8000000', '8,000,000'),
+        ('8500000', '8,500,000'),
+        ('9000000', '9,000,000'),
+        ('9500000', '9,500,000'),
+        ('10000000', '10,000,000'),
+        ('15000000', '15,000,000'),
+        ('20000000', '20,000,000'),
+        ('25000000', '25,000,000'),
+        ('30000000', '30,000,000'),
+        ('35000000', '35,000,000'),
+        ('40000000', '40,000,000'),
+        ('45000000', '45,000,000'),
+        ('50000000', '50,000,000'),
+        ('55000000', '55,000,000'),
+        ('60000000', '60,000,000'),
+        ('65000000', '65,000,000'),
+        
+    ]
+    
+    price_to = forms.ChoiceField(required=False, choices=PRICE_TO_CHOICES, widget=forms.Select(attrs={
         'class': 'form-control',
-        'placeholder': 'Price to'
     }))
     fuel_type = forms.ChoiceField(required=False, choices=[('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES), 
                                   widget=forms.Select(attrs={'class': 'form-select'}))
@@ -295,3 +456,15 @@ class CarSearchForm(forms.Form):
         ('7', '7 Seats'),
         ('8', '8+ Seats'),
     ], widget=forms.Select(attrs={'class': 'form-select'}))
+
+
+class ReportForm(forms.ModelForm):
+    class Meta:
+        model = Report
+        fields = ('report_type', 'description')
+        widgets = {
+            'report_type': forms.Select(choices=Report.REPORT_TYPES),
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+
+

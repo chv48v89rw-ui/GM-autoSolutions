@@ -139,3 +139,12 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'YOUR_GOOGLE_MAPS_AP
 # Login URL for @login_required decorator
 LOGIN_URL = 'login'
 
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # For production
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'autosolutionsgm@gmail.com'
+EMAIL_HOST_PASSWORD = 'pgwdxoszawrgqgpp'
+DEFAULT_FROM_EMAIL = 'autosolutionsgm@gmail.com'

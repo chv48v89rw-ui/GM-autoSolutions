@@ -91,27 +91,38 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Latitude</label>
-                                {{ dealership_form.latitude }}
-                                <small class="form-text text-muted">Enter latitude for the map marker.</small>
+                                <label class="form-label">Area Code</label>
+                                {{ dealership_form.area_code }}
+                                <small class="form-text text-muted">e.g., 00100 for Nairobi CBD</small>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Longitude</label>
-                                {{ dealership_form.longitude }}
-                                <small class="form-text text-muted">Enter longitude for the map marker.</small>
+                                <label class="form-label">Company Logo</label>
+                                {{ dealership_form.logo }}
+                                <small class="form-text text-muted">Upload your dealership logo</small>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Full Address</label>
+                            <label class="form-label">Full Street Address</label>
                             {{ dealership_form.address }}
+                            <small class="form-text text-muted">Complete street address for accurate map positioning (e.g., Moi Avenue, Nairobi)</small>
+                        </div>
+
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Location Tips:</strong> Providing a complete street address with area code ensures precise map positioning for customers.
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Company Logo (Optional)</label>
-                                {{ dealership_form.logo }}
-                                <small class="form-text text-muted">Upload a logo to build trust with buyers</small>
+                                <label class="form-label">Latitude (Optional)</label>
+                                {{ dealership_form.latitude }}
+                                <small class="form-text text-muted">Will be auto-generated from address if left blank</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Longitude (Optional)</label>
+                                {{ dealership_form.longitude }}
+                                <small class="form-text text-muted">Will be auto-generated from address if left blank</small>
                             </div>
                         </div>
 

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Report an Issue - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-flag"></i> Report an Issue
+                    </h3>
+                    <p class="text-muted mb-0 mt-2">Help us keep the platform safe and fair</p>
+                </div>
+                <div class="card-body p-5">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="report-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Report Type *</label>
+                            <select name="report_type" class="form-select" required>
+                                <option value="">Select report type...</option>
+                                <option value="inappropriate_content">Inappropriate Content</option>
+                                <option value="fraud">Fraud or Scam</option>
+                                <option value="fake_listing">Fake Listing</option>
+                                <option value="harassment">Harassment</option>
+                                <option value="spam">Spam</option>
+                                <option value="duplicate">Duplicate Listing</option>
+                                <option value="other">Other Issue</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Type of Item to Report *</label>
+                            <select name="item_type" class="form-select" id="item-type" required>
+                                <option value="">Select item type...</option>
+                                <option value="car">Car Listing</option>
+                                <option value="dealership">Dealership</option>
+                                <option value="user">User</option>
+                            </select>
+                        </div>
+
+                        <!-- Car Selection -->
+                        <div class="mb-4" id="car-selection" style="display: none;">
+                            <label class="form-label">Select Car *</label>
+                            <select name="car_id" class="form-select">
+                                <option value="">Choose a car...</option>
+                                {% for car in cars %}
+                                    <option value="{{ car.id }}">{{ car.year }} {{ car.make }} {{ car.model }} - {{ car.price|floatformat:"0,intcomma" }} KES</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Dealership Selection -->
+                        <div class="mb-4" id="dealership-selection" style="display: none;">
+                            <label class="form-label">Select Dealership *</label>
+                            <select name="dealership_id" class="form-select">
+                                <option value="">Choose a dealership...</option>
+                                {% for dealership in dealerships %}
+                                    <option value="{{ dealership.id }}">{{ dealership.company_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- User Selection -->
+                        <div class="mb-4" id="user-selection" style="display: none;">
+                            <label class="form-label">Username to Report *</label>
+                            <input type="text" name="reported_user_username" class="form-control" placeholder="Enter username...">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Description of Issue *</label>
+                            <textarea name="description" class="form-control" rows="5" required 
+                                      placeholder="Please provide detailed information about the issue you're reporting..."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Contact Information</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="text" name="reporter_name" class="form-control" 
+                                           placeholder="Your name (optional)" value="{{ user.get_full_name|default:user.username }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <input type="email" name="reporter_email" class="form-control" 
+                                           placeholder="Your email (optional)" value="{{ user.email }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Important:</strong> All reports are reviewed by our admin team and will be visible to administrators for action. False reports may result in account restrictions.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Report
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide selection fields based on item type
+document.getElementById('item-type').addEventListener('change', function() {
+    var itemType = this.value;
+    
+    // Hide all selection fields
+    document.getElementById('car-selection').style.display = 'none';
+    document.getElementById('dealership-selection').style.display = 'none';
+    document.getElementById('user-selection').style.display = 'none';
+    
+    // Show relevant selection field
+    if (itemType === 'car') {
+        document.getElementById('car-selection').style.display = 'block';
+    } else if (itemType === 'dealership') {
+        document.getElementById('dealership-selection').style.display = 'block';
+    } else if (itemType === 'user') {
+        document.getElementById('user-selection').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

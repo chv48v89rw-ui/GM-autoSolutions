@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import datetime
+import secrets
+
 
 class UserProfile(models.Model):
     USER_TYPE_CHOICES = [
@@ -14,6 +16,7 @@ class UserProfile(models.Model):
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     phone_number = models.CharField(max_length=15, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    is_verified = models.BooleanField(default=False)  # For buyer email verification
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -30,6 +33,7 @@ class Dealership(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
     location = models.CharField(max_length=255)  # City/Area in Kenya
+    area_code = models.CharField(max_length=20, blank=True, help_text="Area code (e.g., 00100 for Nairobi CBD)")
     latitude = models.FloatField(null=True, blank=True)  # For Google Maps
     longitude = models.FloatField(null=True, blank=True)  # For Google Maps
     address = models.TextField()
@@ -217,3 +221,125 @@ class Favorite(models.Model):
     
     def __str__(self):
         return f"{self.user.username} favorited {self.car}"
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification')
+    verification_code = models.CharField(max_length=6, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    def __str__(self):
+        return f"Verification for {self.user.email}"
+
+
+class Report(models.Model):
+    REPORT_TYPES = [
+        ('inappropriate_content', 'Inappropriate Content'),
+        ('fraud', 'Fraud or Scam'),
+        ('fake_listing', 'Fake Listing'),
+        ('harassment', 'Harassment'),
+        ('spam', 'Spam'),
+        ('duplicate', 'Duplicate Listing'),
+        ('other', 'Other Issue'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('under_review', 'Under Review'),
+        ('resolved', 'Resolved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_made')
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True, blank=True, related_name='car_reports')
+    dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, null=True, blank=True, related_name='dealership_reports')
+    reported_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='user_reports')
+    report_type = models.CharField(max_length=25, choices=REPORT_TYPES)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.reporter.username} - {self.get_report_type_display()}"
+        report_of = self.car or self.dealership or self.reported_user
+        return f"Report by {self.reporter.username} - {self.get_report_type_display()} ({self.get_status_display()})"
+
+
+class Subscription(models.Model):
+    SUBSCRIPTION_TYPES = [
+        ('monthly', 'Monthly Subscription'),
+        ('yearly', 'Yearly Subscription'),
+        ('per_car', 'Per Car Listing'),
+        ('premium', 'Premium Dealership'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('expired', 'Expired'),
+        ('cancelled', 'Cancelled'),
+        ('pending', 'Pending Payment'),
+    ]
+    
+    dealership = models.OneToOneField(Dealership, on_delete=models.CASCADE, related_name='subscription')
+    subscription_type = models.CharField(max_length=20, choices=SUBSCRIPTION_TYPES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_reference = models.CharField(max_length=100, blank=True)
+    is_premium = models.BooleanField(default=False)  # For premium checkmark
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.dealership.company_name} - {self.get_subscription_type_display()}"
+    
+    def is_active(self):
+        return self.status == 'active' and (self.end_date is None or self.end_date > timezone.now())
+
+
+class SubscriptionRequest(models.Model):
+    SUBSCRIPTION_TYPES = [
+        ('monthly', 'Monthly Subscription'),
+        ('yearly', 'Yearly Subscription'),
+        ('premium_monthly', 'Premium Monthly'),
+        ('premium_yearly', 'Premium Yearly'),
+        ('per_car', 'Per Car Listing'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('reviewing', 'Under Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('completed', 'Completed'),
+    ]
+    
+    company_name = models.CharField(max_length=255)
+    contact_person = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    subscription_type = models.CharField(max_length=20, choices=SUBSCRIPTION_TYPES)
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.company_name} - {self.get_subscription_type_display()}"
+

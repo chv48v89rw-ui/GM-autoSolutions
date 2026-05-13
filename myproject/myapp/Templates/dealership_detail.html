@@ -87,6 +87,49 @@
         </div>
     </div>
 
+    <!-- Map Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marked-alt"></i> Exact Location
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="dealership-map" style="height: 400px; width: 100%;"></div>
+                    <div class="p-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>📍 Address</h6>
+                                <p class="text-muted">{{ dealership.address }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>🌍 Coordinates</h6>
+                                <p class="text-muted">
+                                    Latitude: {{ dealership.latitude|default:"Not set" }}<br>
+                                    Longitude: {{ dealership.longitude|default:"Not set" }}
+                                </p>
+                            </div>
+                        </div>
+                        {% if dealership.latitude and dealership.longitude %}
+                            <div class="mt-3">
+                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ dealership.latitude }},{{ dealership.longitude }}" 
+                                   target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-directions"></i> Get Directions
+                                </a>
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ dealership.latitude }},{{ dealership.longitude }}" 
+                                   target="_blank" class="btn btn-outline-primary ms-2">
+                                    <i class="fas fa-external-link-alt"></i> Open in Google Maps
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Cars Section -->
     <div class="row mb-5">
         <div class="col-12">
@@ -204,4 +247,66 @@
         </div>
     </div>
 </div>
+
+<!-- Map JavaScript -->
+{% if dealership.latitude and dealership.longitude %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Pass Django variables to JavaScript
+    var dealershipData = {
+        latitude: {{ dealership.latitude|default:"null" }},
+        longitude: {{ dealership.longitude|default:"null" }},
+        name: "{{ dealership.company_name|escapejs }}",
+        address: "{{ dealership.address|escapejs }}",
+        phone: "{{ dealership.phone_number|escapejs }}",
+        email: "{{ dealership.email|escapejs }}"
+    };
+
+    // Initialize the map
+    var map = L.map('dealership-map').setView([dealershipData.latitude, dealershipData.longitude], 16);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Custom dealership icon
+    var dealershipIcon = L.divIcon({
+        html: '<div style="background-color: #007bff; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-car"></i></div>',
+        iconSize: [30, 30],
+        className: 'custom-div-icon'
+    });
+
+    // Add dealership marker with detailed popup
+    var marker = L.marker([dealershipData.latitude, dealershipData.longitude], {icon: dealershipIcon})
+        .addTo(map)
+        .bindPopup(
+            '<div style="min-width: 200px;">' +
+                '<h6>' + dealershipData.name + '</h6>' +
+                '<p style="margin: 5px 0;"><strong>📍 Address:</strong><br>' + dealershipData.address + '</p>' +
+                '<p style="margin: 5px 0;"><strong>📞 Phone:</strong> ' + dealershipData.phone + '</p>' +
+                '<p style="margin: 5px 0;"><strong>📧 Email:</strong> ' + dealershipData.email + '</p>' +
+                '<div style="margin-top: 10px;">' +
+                    '<a href="https://www.google.com/maps/dir/?api=1&destination=' + dealershipData.latitude + ',' + dealershipData.longitude + '" ' +
+                       'target="_blank" style="color: #007bff; text-decoration: none;">' +
+                        '<i class="fas fa-directions"></i> Get Directions' +
+                    '</a>' +
+                '</div>' +
+            '</div>'
+        );
+
+    // Add accuracy circle for precise location
+    L.circle([dealershipData.latitude, dealershipData.longitude], {
+        color: '#007bff',
+        fillColor: '#007bff',
+        fillOpacity: 0.1,
+        radius: 50 // 50 meter radius for precise location
+    }).addTo(map);
+
+    // Open popup by default
+    marker.openPopup();
+</script>
+{% endif %}
+
 {% endblock %}
