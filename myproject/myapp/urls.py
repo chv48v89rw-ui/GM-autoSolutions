@@ -9,6 +9,7 @@ urlpatterns = [
     path('dealerships/', views.dealerships_map, name='dealerships_map'),
     path('dealership/<int:dealership_id>/', views.dealership_detail, name='dealership_detail'),
     path('dealership/<int:dealership_id>/contact/', views.contact_dealership, name='contact_dealership'),
+    path('dealership/<int:dealership_id>/track-click/', views.track_dealership_click, name='track_dealership_click'),
     
     # Authentication
     path('register/', views.register, name='register'),
@@ -20,6 +21,8 @@ urlpatterns = [
     # Dashboards
     path('dashboard/buyer/', views.buyer_dashboard, name='buyer_dashboard'),
     path('dashboard/dealership/', views.dealership_dashboard, name='dealership_dashboard'),
+    path('dashboard/dealership/analytics/', views.dealership_analytics, name='dealership_analytics'),
+    path('dashboard/dealership/submit-cars/', views.submit_cars_for_review, name='submit_cars_for_review'),
     
     # Car management
     path('car/add/', views.add_car, name='add_car'),
@@ -47,6 +50,7 @@ urlpatterns = [
     
     # Pricing
     path('pricing/', views.pricing_page, name='pricing'),
+    path('pricing/subscribe/<str:plan>/', views.pricing_subscribe, name='pricing_subscribe'),
     
     # API endpoints
     path('api/subscription-request/', views.subscription_request, name='subscription_request'),

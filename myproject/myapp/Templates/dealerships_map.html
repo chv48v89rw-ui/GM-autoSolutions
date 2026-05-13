@@ -1,70 +1,97 @@
 {% extends 'base.html' %}
 
-{% block title %}Dealerships Near You - GM autoSolutions{% endblock %}
+{% block title %}Dealerships - GM autoSolutions{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row">
         <div class="col-12">
             <h2 class="mb-4">
-                <i class="fas fa-map-marked-alt"></i> Dealerships Near You
+                <i class="fas fa-store"></i> Our Dealerships
             </h2>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body p-0">
-                    <div id="map" style="height: 600px; width: 100%;"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-list"></i> Dealership List
                     </h5>
                 </div>
-                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <input type="text" id="area-search" class="form-control" placeholder="Search by area code or location...">
-                            <button class="btn btn-outline-secondary" type="button" onclick="searchByArea()">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <button onclick="getUserLocation()" class="btn btn-primary btn-sm w-100">
-                            <i class="fas fa-location-arrow"></i> Find My Location
-                        </button>
-                    </div>
-                    <div id="dealership-list">
-                        {% for dealership in dealerships %}
-                            <div class="border-bottom pb-3 mb-3 dealership-item" 
-                                 data-lat="{{ dealership.latitude }}" 
-                                 data-lng="{{ dealership.longitude }}"
-                                 data-name="{{ dealership.company_name }}"
-                                 data-area="{{ dealership.area_code|default:'' }}">
-                                <h6 class="mb-1">{{ dealership.company_name }}</h6>
-                                <p class="text-muted small mb-1">
-                                    <i class="fas fa-map-marker-alt"></i> {{ dealership.location }}
-                                    {% if dealership.area_code %}
-                                        <span class="badge bg-info ms-2">{{ dealership.area_code }}</span>
-                                    {% endif %}
-                                </p>
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-phone"></i> {{ dealership.phone_number }}
-                                </p>
-                                <button onclick="focusOnDealership({{ dealership.latitude }}, {{ dealership.longitude }}, '{{ dealership.company_name|escapejs }}')" 
-                                        class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-search"></i> View on Map
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="input-group">
+                                <input type="text" id="area-search" class="form-control" placeholder="Search by area code, name, or location...">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchByArea()">
+                                    <i class="fas fa-search"></i>
                                 </button>
                             </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="premium-filter" onchange="filterDealerships()">
+                                <label class="form-check-label" for="premium-filter">
+                                    <i class="fas fa-star text-warning"></i> Show only premium dealerships
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="dealership-list" class="row g-4">
+                        {% for dealership in dealerships %}
+                            <div class="col-md-6 col-lg-4 dealership-item" 
+                                 data-name="{{ dealership.company_name }}"
+                                 data-area="{{ dealership.area_code|default:'' }}">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0 flex-grow-1">{{ dealership.company_name }}</h6>
+                                            {% if dealership.is_premium %}
+                                                <span class="badge bg-warning text-dark ms-2"><i class="fas fa-star"></i></span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-map-marker-alt"></i> {{ dealership.location }}
+                                            {% if dealership.area_code %}
+                                                <br><span class="badge bg-info">{{ dealership.area_code }}</span>
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-phone"></i> <a href="tel:{{ dealership.phone_number }}" class="text-decoration-none">{{ dealership.phone_number }}</a>
+                                        </p>
+                                        
+                                        {% if dealership.email %}
+                                            <p class="text-muted small mb-3">
+                                                <i class="fas fa-envelope"></i> <a href="mailto:{{ dealership.email }}" class="text-decoration-none">{{ dealership.email }}</a>
+                                            </p>
+                                        {% endif %}
+                                        
+                                        <div class="d-flex gap-2">
+                                            <a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm flex-grow-1">
+                                                <i class="fas fa-info-circle"></i> View Details
+                                            </a>
+                                            {% if dealership.latitude and dealership.longitude %}
+                                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ dealership.latitude }},{{ dealership.longitude }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-directions"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         {% empty %}
-                            <p class="text-muted">No dealerships found.</p>
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No dealerships found.</p>
+                                    <p class="text-muted small">Try adjusting your search or check back later.</p>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -73,121 +100,40 @@
     </div>
 </div>
 
-<!-- Map JavaScript -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    // Initialize map
-    var map = L.map('map').setView([-1.286389, 36.817223], 11);
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    window.searchByArea = function() {
+        const searchTerm = document.getElementById('area-search').value.toLowerCase().trim();
+        filterDealerships(searchTerm);
+    };
 
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
-
-    // Custom icons
-    var userIcon = L.divIcon({
-        html: '<div style="background-color: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-user" style="font-size: 10px;"></i></div>',
-        iconSize: [20, 20],
-        className: 'custom-div-icon'
-    });
-
-    var dealershipIcon = L.divIcon({
-        html: '<div style="background-color: #007bff; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-car"></i></div>',
-        iconSize: [30, 30],
-        className: 'custom-div-icon'
-    });
-
-    // User location functionality
-    function getUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    var userLat = position.coords.latitude;
-                    var userLng = position.coords.longitude;
-                    
-                    map.setView([userLat, userLng], 15);
-                    
-                    L.marker([userLat, userLng], {icon: userIcon})
-                        .addTo(map)
-                        .bindPopup('<strong>You are here</strong><br>Lat: ' + userLat.toFixed(6) + '<br>Lng: ' + userLng.toFixed(6))
-                        .openPopup();
-                },
-                function(error) {
-                    alert('Unable to get your location. Please enable location services.');
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by your browser.');
+    // Filter dealerships by search term and premium status
+    window.filterDealerships = function(searchTerm = null) {
+        if (searchTerm === null) {
+            searchTerm = document.getElementById('area-search').value.toLowerCase().trim();
         }
-    }
-
-    // Focus on specific dealership
-    function focusOnDealership(lat, lng, name) {
-        map.setView([lat, lng], 16);
-        // Find and open the popup for this dealership
-        map.eachLayer(function(layer) {
-            if (layer instanceof L.Marker && layer.getPopup()) {
-                var popupContent = layer.getPopup().getContent();
-                if (popupContent.includes(name)) {
-                    layer.openPopup();
-                }
-            }
-        });
-    }
-
-    // Add dealership markers with detailed popups
-    {% for dealership in dealerships %}
-        {% if dealership.latitude and dealership.longitude %}
-            var marker{{ dealership.id }} = L.marker([{{ dealership.latitude }}, {{ dealership.longitude }}], {icon: dealershipIcon})
-                .addTo(map)
-                .bindPopup(
-                    '<div style="min-width: 250px;">' +
-                        '<h6>{{ dealership.company_name|escapejs }}</h6>' +
-                        '<p style="margin: 5px 0;"><strong>📍 Address:</strong><br>{{ dealership.address|default:dealership.location|escapejs }}</p>' +
-                        '<p style="margin: 5px 0;"><strong>📞 Phone:</strong> {{ dealership.phone_number|escapejs }}</p>' +
-                        '<p style="margin: 5px 0;"><strong>📧 Email:</strong> {{ dealership.email|escapejs }}</p>' +
-                        '<p style="margin: 5px 0;"><strong>⭐ Rating:</strong> {{ dealership.rating|default:"0"|floatformat:1 }}/5</p>' +
-                        '<div style="margin-top: 10px;">' +
-                            '<a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm me-2">View Details</a>' +
-                            '<a href="https://www.google.com/maps/dir/?api=1&destination={{ dealership.latitude }},{{ dealership.longitude }}" target="_blank" class="btn btn-outline-primary btn-sm">Directions</a>' +
-                        '</div>' +
-                    '</div>'
-                );
-        {% endif %}
-    {% endfor %}
-
-    // Search dealerships by area code or location
-    function searchByArea() {
-        var searchTerm = document.getElementById('area-search').value.toLowerCase();
-        var dealershipItems = document.querySelectorAll('.dealership-item');
         
+        const premiumOnly = document.getElementById('premium-filter').checked;
+        const dealershipItems = document.querySelectorAll('.dealership-item');
+
         dealershipItems.forEach(function(item) {
-            var areaCode = (item.dataset.area || '').toLowerCase();
-            var name = (item.dataset.name || '').toLowerCase();
-            var location = (item.querySelector('.fa-map-marker-alt').parentElement.textContent || '').toLowerCase();
+            const areaCode = (item.dataset.area || '').toLowerCase();
+            const name = (item.dataset.name || '').toLowerCase();
+            const isPremium = item.querySelector('.badge.bg-warning') !== null;
+
+            const matchesSearch = !searchTerm || 
+                                areaCode.includes(searchTerm) ||
+                                name.includes(searchTerm);
             
-            if (areaCode.includes(searchTerm) || 
-                name.includes(searchTerm) || 
-                location.includes(searchTerm)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
+            const matchesPremium = !premiumOnly || isPremium;
+
+            const shouldShow = matchesSearch && matchesPremium;
+            item.style.display = shouldShow ? 'block' : 'none';
         });
-    }
-
-    // Add enter key support for search
-    document.getElementById('area-search').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchByArea();
-        }
-    });
-
-    // Try to get user location on load
-    setTimeout(function() {
-        getUserLocation();
-    }, 1000);
+    };
+});
 </script>
+
 {% endblock %}
 

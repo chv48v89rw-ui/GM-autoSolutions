@@ -10,16 +10,16 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Dealership)
 class DealershipAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'location', 'is_approved', 'rating', 'created_at')
-    list_filter = ('location', 'is_approved', 'rating', 'created_at')
+    list_display = ('company_name', 'location', 'is_approved', 'is_premium', 'rating', 'created_at')
+    list_filter = ('location', 'is_approved', 'is_premium', 'rating', 'created_at')
     search_fields = ('company_name', 'email')
-    actions = ('approve_dealerships', 'reject_dealerships')
+    actions = ('approve_dealerships', 'reject_dealerships', 'mark_premium', 'unmark_premium')
     fieldsets = (
         ('User', {'fields': ('user',)}),
         ('Company Information', {'fields': ('company_name', 'description', 'logo', 'website')}),
         ('Contact', {'fields': ('email', 'phone_number')}),
         ('Location', {'fields': ('location', 'address', 'latitude', 'longitude')}),
-        ('Status & Rating', {'fields': ('is_approved', 'rating')}),
+        ('Status & Rating', {'fields': ('is_approved', 'is_premium', 'rating')}),
     )
 
     @admin.action(description='Approve selected dealerships')
@@ -32,17 +32,28 @@ class DealershipAdmin(admin.ModelAdmin):
         updated = queryset.update(is_approved=False)
         self.message_user(request, f"{updated} dealership(s) set to not approved.")
 
+    @admin.action(description='Mark selected dealerships as Premium')
+    def mark_premium(self, request, queryset):
+        updated = queryset.update(is_premium=True)
+        self.message_user(request, f"{updated} dealership(s) marked as premium.")
+
+    @admin.action(description='Remove Premium status from selected dealerships')
+    def unmark_premium(self, request, queryset):
+        updated = queryset.update(is_premium=False)
+        self.message_user(request, f"{updated} dealership(s) removed from premium status.")
+
 
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
-    list_display = ('title', 'dealership', 'price', 'year', 'mileage', 'condition', 'is_approved', 'is_sold', 'created_at')
-    list_filter = ('dealership', 'year', 'fuel_type', 'condition', 'transmission', 'is_approved', 'is_sold', 'created_at')
+    list_display = ('title', 'dealership', 'price', 'year', 'mileage', 'condition', 'is_approved', 'is_premium', 'submitted_for_review', 'is_sold', 'created_at')
+    list_filter = ('dealership', 'year', 'fuel_type', 'condition', 'transmission', 'is_approved', 'is_premium', 'submitted_for_review', 'is_sold', 'created_at')
     search_fields = ('title', 'make', 'model')
-    actions = ('approve_cars', 'reject_cars')
+    actions = ('approve_cars', 'reject_cars', 'mark_premium', 'unmark_premium', 'mark_submission_reviewed')
     fieldsets = (
         ('Dealership', {'fields': ('dealership',)}),
         ('Basic Info', {'fields': ('title', 'make', 'model', 'year')}),
-        ('Pricing & Condition', {'fields': ('price', 'mileage', 'condition', 'is_sold', 'is_approved')}),
+        ('Pricing & Condition', {'fields': ('price', 'mileage', 'condition', 'is_sold', 'is_approved', 'is_premium')}),
+        ('Review Status', {'fields': ('submitted_for_review', 'submitted_at')}),
         ('Vehicle Details', {'fields': ('fuel_type', 'transmission', 'color', 'seats')}),
         ('Description', {'fields': ('description', 'features')}),
         ('Images', {'fields': ('main_image', 'image2', 'image3', 'image4')}),
@@ -58,19 +69,58 @@ class CarAdmin(admin.ModelAdmin):
         updated = queryset.update(is_approved=False)
         self.message_user(request, f"{updated} car(s) set to not approved.")
 
+    @admin.action(description='Mark selected cars as Premium')
+    def mark_premium(self, request, queryset):
+        updated = queryset.update(is_premium=True)
+        self.message_user(request, f"{updated} car(s) marked as premium.")
+
+    @admin.action(description='Remove Premium status from selected cars')
+    def unmark_premium(self, request, queryset):
+        updated = queryset.update(is_premium=False)
+        self.message_user(request, f"{updated} car(s) removed from premium status.")
+
+    @admin.action(description='Mark submission as reviewed (clear submitted_for_review flag)')
+    def mark_submission_reviewed(self, request, queryset):
+        updated = queryset.update(submitted_for_review=False)
+        self.message_user(request, f"{updated} car submission(s) marked as reviewed.")
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('car', 'buyer', 'rating', 'created_at')
-    list_filter = ('rating', 'created_at')
-    search_fields = ('car__title', 'buyer__username')
+    list_display = ('car', 'buyer', 'rating', 'is_approved', 'created_at')
+    list_filter = ('rating', 'is_approved', 'created_at')
+    search_fields = ('car__title', 'buyer__username', 'comment')
+    actions = ('approve_reviews', 'reject_reviews')
+    readonly_fields = ('car', 'buyer', 'rating', 'comment', 'created_at')
+
+    @admin.action(description='Approve selected reviews')
+    def approve_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=True)
+        self.message_user(request, f"{updated} review(s) approved and now visible to users.")
+
+    @admin.action(description='Reject selected reviews')
+    def reject_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=False)
+        self.message_user(request, f"{updated} review(s) rejected and hidden from users.")
 
 
 @admin.register(DealershipReview)
 class DealershipReviewAdmin(admin.ModelAdmin):
-    list_display = ('dealership', 'buyer', 'rating', 'created_at')
-    list_filter = ('rating', 'created_at')
-    search_fields = ('dealership__company_name', 'buyer__username')
+    list_display = ('dealership', 'buyer', 'rating', 'is_approved', 'created_at')
+    list_filter = ('rating', 'is_approved', 'created_at')
+    search_fields = ('dealership__company_name', 'buyer__username', 'comment')
+    actions = ('approve_reviews', 'reject_reviews')
+    readonly_fields = ('dealership', 'buyer', 'rating', 'comment', 'created_at')
+
+    @admin.action(description='Approve selected reviews')
+    def approve_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=True)
+        self.message_user(request, f"{updated} review(s) approved and now visible to users.")
+
+    @admin.action(description='Reject selected reviews')
+    def reject_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=False)
+        self.message_user(request, f"{updated} review(s) rejected and hidden from users.")
 
 
 @admin.register(Enquiry)
@@ -141,12 +191,12 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(SubscriptionRequest)
 class SubscriptionRequestAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'contact_person', 'email', 'subscription_type', 'status', 'created_at')
+    list_display = ('company_name', 'contact_person', 'email', 'subscription_type', 'status', 'dealership', 'created_at')
     list_filter = ('subscription_type', 'status', 'created_at')
     search_fields = ('company_name', 'email', 'contact_person')
     fieldsets = (
         ('Request Info', {'fields': ('company_name', 'contact_person', 'email', 'phone', 'subscription_type')}),
-        ('Additional Info', {'fields': ('message', 'status')}),
+        ('Additional Info', {'fields': ('message', 'dealership', 'status')}),
         ('Admin Notes', {'fields': ('admin_notes',)}),
         ('Metadata', {'fields': ('created_at', 'updated_at')}),
     )
@@ -155,18 +205,21 @@ class SubscriptionRequestAdmin(admin.ModelAdmin):
     
     @admin.action(description='Mark selected requests as Approved')
     def mark_approved(self, request, queryset):
-        updated = queryset.update(status='approved')
-        self.message_user(request, f"{updated} subscription request(s) approved.")
-        return updated
+        for subscription_request in queryset:
+            if subscription_request.dealership:
+                if 'premium' in subscription_request.subscription_type:
+                    subscription_request.dealership.is_premium = True
+                    subscription_request.dealership.save()
+                subscription_request.status = 'approved'
+                subscription_request.save()
+        self.message_user(request, f"{queryset.count()} subscription request(s) approved.")
     
     @admin.action(description='Mark selected requests as Rejected')
     def mark_rejected(self, request, queryset):
         updated = queryset.update(status='rejected')
         self.message_user(request, f"{updated} subscription request(s) rejected.")
-        return updated
     
     @admin.action(description='Mark selected requests as Completed')
     def mark_completed(self, request, queryset):
         updated = queryset.update(status='completed')
         self.message_user(request, f"{updated} subscription request(s) completed.")
-        return updated

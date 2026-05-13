@@ -1,5 +1,6 @@
 from multiprocessing import context
 
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -12,7 +13,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from datetime import timedelta
 import secrets
-from .models import UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, Favorite, EmailVerification, Report
+from .models import UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, Favorite, EmailVerification, Report, CarView, DealershipClick
 from .forms import (UserRegistrationForm, UserProfileForm, DealershipRegistrationForm,
                     CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, ReportForm)
 from django.conf import settings
@@ -52,6 +53,13 @@ def home(request):
     form = CarSearchForm(request.GET or None)
     cars = Car.objects.select_related('dealership').filter(is_sold=False, is_approved=True)  # Exclude sold cars and unapproved
     dealerships = Dealership.objects.filter(is_approved=True)  # Only show approved dealerships
+    premium_dealerships = dealerships.filter(is_premium=True).order_by('-rating')[:4]
+    highlighted_dealerships = premium_dealerships if premium_dealerships.exists() else dealerships.order_by('-rating')[:4]
+    premium_cars = Car.objects.select_related('dealership').filter(
+        is_sold=False,
+        is_approved=True,
+        is_premium=True
+    ).order_by('-created_at')[:8]
     
     # Search functionality
     if form.is_valid():
@@ -67,6 +75,10 @@ def home(request):
             cars = cars.filter(price__gte=form.cleaned_data['price_from'])
         if form.cleaned_data.get('price_to'):
             cars = cars.filter(price__lte=form.cleaned_data['price_to'])
+        if form.cleaned_data.get('mileage_from'):
+            cars = cars.filter(mileage__gte=form.cleaned_data['mileage_from'])
+        if form.cleaned_data.get('mileage_to'):
+            cars = cars.filter(mileage__lte=form.cleaned_data['mileage_to'])
         if form.cleaned_data.get('fuel_type'):
             cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
         if form.cleaned_data.get('transmission'):
@@ -92,6 +104,8 @@ def home(request):
         'cars': cars,
         'featured_cars': featured_cars,
         'dealerships': dealerships,
+        'highlighted_dealerships': highlighted_dealerships,
+        'best_cars': premium_cars,
         'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     }
     return render(request, 'home.html', context)
@@ -342,6 +356,142 @@ def dealership_dashboard(request):
 
 
 @login_required(login_url='login')
+def dealership_analytics(request):
+    """Dealership analytics dashboard"""
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+    
+    # Get dealership cars
+    cars = dealership.cars.all()
+    
+    # Most viewed car analytics
+    car_views = {}
+    total_car_views = 0
+    
+    for car in cars:
+        views_count = CarView.objects.filter(car=car).count()
+        car_views[car.id] = {
+            'car': car,
+            'views': views_count,
+            'percentage': 0  # Will calculate after getting total
+        }
+        total_car_views += views_count
+    
+    # Calculate percentages and find most viewed
+    most_viewed_car = None
+    max_views = 0
+    
+    for car_data in car_views.values():
+        if total_car_views > 0:
+            car_data['percentage'] = round((car_data['views'] / total_car_views) * 100, 1)
+        
+        if car_data['views'] > max_views:
+            max_views = car_data['views']
+            most_viewed_car = car_data['car']
+    
+    # Sort cars by views (descending)
+    sorted_car_views = sorted(car_views.values(), key=lambda x: x['views'], reverse=True)
+    
+    # Click analytics
+    click_stats = {}
+    total_clicks = 0
+    
+    # Get all click types
+    click_types = dict(DealershipClick.CLICK_TYPES)
+    
+    for click_type, display_name in click_types.items():
+        count = DealershipClick.objects.filter(dealership=dealership, click_type=click_type).count()
+        click_stats[click_type] = {
+            'name': display_name,
+            'count': count,
+            'percentage': 0  # Will calculate after getting total
+        }
+        total_clicks += count
+    
+    # Calculate percentages
+    for click_data in click_stats.values():
+        if total_clicks > 0:
+            click_data['percentage'] = round((click_data['count'] / total_clicks) * 100, 1)
+    
+    # Recent activity (last 30 days)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    recent_views = CarView.objects.filter(
+        car__dealership=dealership,
+        viewed_at__gte=thirty_days_ago
+    ).count()
+    
+    recent_clicks = DealershipClick.objects.filter(
+        dealership=dealership,
+        clicked_at__gte=thirty_days_ago
+    ).count()
+    
+    # Top performing cars (by views) - last 30 days
+    top_cars_30_days = []
+    for car in cars:
+        views_30_days = CarView.objects.filter(
+            car=car,
+            viewed_at__gte=thirty_days_ago
+        ).count()
+        if views_30_days > 0:
+            top_cars_30_days.append({
+                'car': car,
+                'views': views_30_days
+            })
+    
+    top_cars_30_days.sort(key=lambda x: x['views'], reverse=True)
+    top_cars_30_days = top_cars_30_days[:5]  # Top 5
+    
+    context = {
+        'dealership': dealership,
+        'most_viewed_car': most_viewed_car,
+        'max_views': max_views,
+        'total_car_views': total_car_views,
+        'sorted_car_views': sorted_car_views,
+        'click_stats': click_stats,
+        'total_clicks': total_clicks,
+        'recent_views': recent_views,
+        'recent_clicks': recent_clicks,
+        'top_cars_30_days': top_cars_30_days,
+        'total_cars': cars.count(),
+    }
+    
+    return render(request, 'dealership_analytics.html', context)
+
+
+@login_required(login_url='login')
+@require_http_methods(["POST"])
+def submit_cars_for_review(request):
+    """Submit selected cars for admin review"""
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Only dealerships can submit cars for review.')
+        return redirect('home')
+    
+    # Get selected car IDs from POST data
+    selected_car_ids = request.POST.getlist('selected_cars[]')
+    
+    if not selected_car_ids:
+        messages.warning(request, 'Please select at least one car to submit.')
+        return redirect('dealership_dashboard')
+    
+    try:
+        # Update the selected cars
+        cars = Car.objects.filter(id__in=selected_car_ids, dealership=dealership)
+        count = cars.update(submitted_for_review=True, submitted_at=timezone.now())
+        
+        messages.success(request, f'{count} car(s) submitted for admin review. The admin team will review and approve them shortly.')
+    except Exception as e:
+        messages.error(request, f'Error submitting cars: {str(e)}')
+    
+    return redirect('dealership_dashboard')
+
+
+@login_required(login_url='login')
 def add_car(request):
     """Add new car listing (dealership only)"""
     try:
@@ -445,6 +595,10 @@ def car_list(request):
             cars = cars.filter(price__gte=form.cleaned_data['price_from'])
         if form.cleaned_data.get('price_to'):
             cars = cars.filter(price__lte=form.cleaned_data['price_to'])
+        if form.cleaned_data.get('mileage_from'):
+            cars = cars.filter(mileage__gte=form.cleaned_data['mileage_from'])
+        if form.cleaned_data.get('mileage_to'):
+            cars = cars.filter(mileage__lte=form.cleaned_data['mileage_to'])
         if form.cleaned_data.get('fuel_type'):
             cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
         if form.cleaned_data.get('transmission'):
@@ -634,6 +788,42 @@ def pricing_page(request):
         return redirect('dealership-register')
 
 
+def pricing_subscribe(request, plan):
+    """Create a quick subscription request from the pricing page."""
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login to request a subscription plan.')
+        return redirect('login')
+
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Only dealership accounts can request subscription plans.')
+        return redirect('dealership-register')
+
+    if request.method != 'POST':
+        messages.error(request, 'Invalid request method for subscription plan selection.')
+        return redirect('pricing')
+
+    from .models import SubscriptionRequest
+
+    contact_person = request.user.get_full_name() or request.user.username
+    subscription_type = plan
+    message = 'Subscription request created from pricing page quick link.'
+
+    SubscriptionRequest.objects.create(
+        company_name=dealership.company_name,
+        contact_person=contact_person,
+        email=dealership.email,
+        phone=dealership.phone_number,
+        subscription_type=subscription_type,
+        message=message,
+        dealership=dealership
+    )
+
+    messages.success(request, 'Your subscription request has been received and will be reviewed. We will get back to you within 24 hours.')
+    return redirect('pricing')
+
+
 def subscription_request(request):
     """Handle subscription requests from users"""
     from .models import SubscriptionRequest
@@ -715,11 +905,19 @@ def your_view_name(request):
 def car_detail(request, car_id):
     car = get_object_or_404(Car, id=car_id)
 
-    reviews = car.reviews.all()
+    # Track car view for analytics
+    CarView.objects.create(
+        car=car,
+        user=request.user if request.user.is_authenticated else None,
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
+    reviews = car.reviews.filter(is_approved=True)
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
     dealership = car.dealership
-    dealership_reviews = dealership.reviews.all()
+    dealership_reviews = dealership.reviews.filter(is_approved=True)
     dealership_rating = dealership_reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
     if request.method == 'POST' and request.user.is_authenticated:
@@ -729,7 +927,7 @@ def car_detail(request, car_id):
             review.car = car
             review.buyer = request.user
             review.save()
-            messages.success(request, 'Review added successfully!')
+            messages.success(request, 'Review submitted successfully! It will be visible to other users once approved by our admin team.')
             return redirect('car_detail', car_id=car.id)
     else:
         form = ReviewForm() if request.user.is_authenticated else None
@@ -777,7 +975,7 @@ def dealership_detail(request, dealership_id):
     else:
         cars = dealership.cars.filter(is_sold=False, is_approved=True)
 
-    reviews = dealership.reviews.all()
+    reviews = dealership.reviews.filter(is_approved=True)
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
     form = None
@@ -788,7 +986,7 @@ def dealership_detail(request, dealership_id):
             review.dealership = dealership
             review.buyer = request.user
             review.save()
-            messages.success(request, 'Review added successfully!')
+            messages.success(request, 'Review submitted successfully! It will be visible to other users once approved by our admin team.')
             return redirect('dealership_detail', dealership_id=dealership.id)
 
     context = {
@@ -801,6 +999,36 @@ def dealership_detail(request, dealership_id):
     }
 
     return render(request, 'dealership_detail.html', context)
+
+
+def track_dealership_click(request, dealership_id):
+    """Track dealership clicks for analytics"""
+    dealership = get_object_or_404(Dealership, id=dealership_id)
+    click_type = request.GET.get('type', 'contact')
+
+    # Validate click type
+    valid_types = [choice[0] for choice in DealershipClick.CLICK_TYPES]
+    if click_type not in valid_types:
+        click_type = 'contact'
+
+    # Create click record
+    DealershipClick.objects.create(
+        dealership=dealership,
+        click_type=click_type,
+        user=request.user if request.user.is_authenticated else None,
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
+    # Return appropriate response based on click type
+    if click_type == 'phone':
+        return JsonResponse({'success': True, 'phone': dealership.phone_number})
+    elif click_type == 'email':
+        return JsonResponse({'success': True, 'email': dealership.email})
+    elif click_type == 'website':
+        return JsonResponse({'success': True, 'website': dealership.website})
+    else:
+        return JsonResponse({'success': True})
 
 
 def enquire_car(request, car_id):
@@ -892,10 +1120,30 @@ def view_enquiry(request, enquiry_id):
 
 @login_required(login_url='login')
 def dealerships_map(request):
-    dealerships = Dealership.objects.all()
+    dealerships = Dealership.objects.filter(is_approved=True).only(
+        'id', 'company_name', 'location', 'address', 'phone_number', 'email',
+        'area_code', 'latitude', 'longitude', 'is_premium'
+    )
+
+    # Convert to JSON for JavaScript
+    dealerships_json = json.dumps([
+        {
+            'id': d.id,
+            'company_name': d.company_name,
+            'location': d.location,
+            'address': d.address,
+            'phone_number': d.phone_number,
+            'email': d.email,
+            'area_code': d.area_code,
+            'latitude': float(d.latitude) if d.latitude else None,
+            'longitude': float(d.longitude) if d.longitude else None,
+            'is_premium': d.is_premium
+        } for d in dealerships
+    ])
 
     return render(request, 'dealerships_map.html', {
-        'dealerships': dealerships
+        'dealerships': dealerships,
+        'dealerships_json': dealerships_json
     })
 
 

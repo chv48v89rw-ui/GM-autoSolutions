@@ -64,7 +64,7 @@ class UserProfileForm(forms.ModelForm):
 class DealershipRegistrationForm(forms.ModelForm):
     class Meta:
         model = Dealership
-        fields = ('company_name', 'description', 'logo', 'website', 'email', 
+        fields = ('company_name', 'description', 'logo', 'business_certificate', 'website', 'email', 
                  'phone_number', 'location', 'area_code', 'address')
         widgets = {
             'company_name': forms.TextInput(attrs={
@@ -85,6 +85,7 @@ class DealershipRegistrationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Email address'
             }),
+            'business_certificate': forms.FileInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Phone number'
@@ -249,8 +250,51 @@ class CarSearchForm(forms.Form):
     from .models import Car
     
     def get_make_choices():
-        makes = Car.objects.values_list('make', flat=True).distinct().order_by('make')
-        return [('', '-- All Makes --')] + [(make, make) for make in makes]
+        # Popular car makes in Kenya
+        popular_makes = [
+            'Toyota',
+            'Nissan',
+            'BMW',
+            'Mercedes-Benz',
+            'Honda',
+            'Hyundai',
+            'Subaru',
+            'Isuzu',
+            'Suzuki',
+            'Mitsubishi',
+            'Ford',
+            'Daihatsu',
+            'Mazda',
+            'Kia',
+            'Volkswagen',
+            'Audi',
+            'Lexus',
+            'Range Rover',
+            'Land Rover',
+            'Chevrolet',
+            'Peugeot',
+            'Renault',
+            'Fiat',
+            'Tata',
+            'MG',
+            'Geely',
+            'JAC',
+            'BAIC',
+            'Volvo',
+            'Porsche',
+            'Jaguar',
+            'Jeep',
+            'Chery',
+            'BYD',
+            'Haval',
+            'Jetour',
+            'Dongfeng',
+            'Foton',
+        ]
+        # Get additional makes from database
+        db_makes = set(Car.objects.values_list('make', flat=True).distinct())
+        all_makes = sorted(set(popular_makes) | db_makes)
+        return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
     
     make = forms.ChoiceField(required=False, choices=get_make_choices(), widget=forms.Select(attrs={
         'class': 'form-control',
@@ -434,6 +478,106 @@ class CarSearchForm(forms.Form):
     price_to = forms.ChoiceField(required=False, choices=PRICE_TO_CHOICES, widget=forms.Select(attrs={
         'class': 'form-control',
     }))
+    
+    # Mileage choices from 1,000 to 400,000 km with 10,000 km increments
+    MILEAGE_CHOICES = [
+        ('', '--- Mileage from ---'),
+        ('1000', '1,000 km'),
+        ('10000', '10,000 km'),
+        ('20000', '20,000 km'),
+        ('30000', '30,000 km'),
+        ('40000', '40,000 km'),
+        ('50000', '50,000 km'),
+        ('60000', '60,000 km'),
+        ('70000', '70,000 km'),
+        ('80000', '80,000 km'),
+        ('90000', '90,000 km'),
+        ('100000', '100,000 km'),
+        ('110000', '110,000 km'),
+        ('120000', '120,000 km'),
+        ('130000', '130,000 km'),
+        ('140000', '140,000 km'),
+        ('150000', '150,000 km'),
+        ('160000', '160,000 km'),
+        ('170000', '170,000 km'),
+        ('180000', '180,000 km'),
+        ('190000', '190,000 km'),
+        ('200000', '200,000 km'),
+        ('210000', '210,000 km'),
+        ('220000', '220,000 km'),
+        ('230000', '230,000 km'),
+        ('240000', '240,000 km'),
+        ('250000', '250,000 km'),
+        ('260000', '260,000 km'),
+        ('270000', '270,000 km'),
+        ('280000', '280,000 km'),
+        ('290000', '290,000 km'),
+        ('300000', '300,000 km'),
+        ('310000', '310,000 km'),
+        ('320000', '320,000 km'),
+        ('330000', '330,000 km'),
+        ('340000', '340,000 km'),
+        ('350000', '350,000 km'),
+        ('360000', '360,000 km'),
+        ('370000', '370,000 km'),
+        ('380000', '380,000 km'),
+        ('390000', '390,000 km'),
+        ('400000', '400,000 km'),
+    ]
+    
+    # Mileage to choices - same as from but starting from 10,000
+    MILEAGE_TO_CHOICES = [
+        ('', '--- Mileage to ---'),
+        ('10000', '10,000 km'),
+        ('20000', '20,000 km'),
+        ('30000', '30,000 km'),
+        ('40000', '40,000 km'),
+        ('50000', '50,000 km'),
+        ('60000', '60,000 km'),
+        ('70000', '70,000 km'),
+        ('80000', '80,000 km'),
+        ('90000', '90,000 km'),
+        ('100000', '100,000 km'),
+        ('110000', '110,000 km'),
+        ('120000', '120,000 km'),
+        ('130000', '130,000 km'),
+        ('140000', '140,000 km'),
+        ('150000', '150,000 km'),
+        ('160000', '160,000 km'),
+        ('170000', '170,000 km'),
+        ('180000', '180,000 km'),
+        ('190000', '190,000 km'),
+        ('200000', '200,000 km'),
+        ('210000', '210,000 km'),
+        ('220000', '220,000 km'),
+        ('230000', '230,000 km'),
+        ('240000', '240,000 km'),
+        ('250000', '250,000 km'),
+        ('260000', '260,000 km'),
+        ('270000', '270,000 km'),
+        ('280000', '280,000 km'),
+        ('290000', '290,000 km'),
+        ('300000', '300,000 km'),
+        ('310000', '310,000 km'),
+        ('320000', '320,000 km'),
+        ('330000', '330,000 km'),
+        ('340000', '340,000 km'),
+        ('350000', '350,000 km'),
+        ('360000', '360,000 km'),
+        ('370000', '370,000 km'),
+        ('380000', '380,000 km'),
+        ('390000', '390,000 km'),
+        ('400000', '400,000 km'),
+    ]
+    
+    mileage_from = forms.ChoiceField(required=False, choices=MILEAGE_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
+    
+    mileage_to = forms.ChoiceField(required=False, choices=MILEAGE_TO_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
+    
     fuel_type = forms.ChoiceField(required=False, choices=[('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES), 
                                   widget=forms.Select(attrs={'class': 'form-select'}))
     transmission = forms.ChoiceField(required=False, choices=[('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES),
@@ -456,8 +600,7 @@ class CarSearchForm(forms.Form):
         ('7', '7 Seats'),
         ('8', '8+ Seats'),
     ], widget=forms.Select(attrs={'class': 'form-select'}))
-
-
+    
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report

@@ -37,7 +37,9 @@ class Dealership(models.Model):
     latitude = models.FloatField(null=True, blank=True)  # For Google Maps
     longitude = models.FloatField(null=True, blank=True)  # For Google Maps
     address = models.TextField()
+    business_certificate = models.FileField(upload_to='dealership_certificates/', null=True, blank=True)
     is_approved = models.BooleanField(default=False)  # Dealership must be approved to be active
+    is_premium = models.BooleanField(default=False)  # Premium dealerships appear as top picks on the home page
     rating = models.FloatField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,8 +62,9 @@ class Car(models.Model):
     ]
     
     CONDITION_CHOICES = [
-        ('new', 'New'),
-        ('used', 'Used'),
+        ('brand_new', 'Brand New'),
+        ('used_locally', 'Used Locally'),
+        ('used_foreignly', 'Used Foreignly'),
     ]
     
     ENGINE_SIZE_CHOICES = [
@@ -131,6 +134,9 @@ class Car(models.Model):
     features = models.TextField(help_text="Comma-separated list of features")  # e.g., "ABS, Power Steering, AC, etc."
     is_sold = models.BooleanField(default=False)  # Mark car as sold
     is_approved = models.BooleanField(default=False)  # Must be approved by admin to appear
+    is_premium = models.BooleanField(default=False)  # Premium cars appear in best cars section on home page
+    submitted_for_review = models.BooleanField(default=False)  # Dealership submitted for admin review
+    submitted_at = models.DateTimeField(null=True, blank=True)  # When car was submitted for review
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -156,6 +162,7 @@ class Review(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField()
+    is_approved = models.BooleanField(default=False)  # Admin approval required
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -167,6 +174,7 @@ class DealershipReview(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField()
+    is_approved = models.BooleanField(default=False)  # Admin approval required
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -276,6 +284,7 @@ class Report(models.Model):
 class Subscription(models.Model):
     SUBSCRIPTION_TYPES = [
         ('monthly', 'Monthly Subscription'),
+        ('half_yearly', 'Half-Yearly Subscription'),
         ('yearly', 'Yearly Subscription'),
         ('per_car', 'Per Car Listing'),
         ('premium', 'Premium Dealership'),
@@ -312,6 +321,7 @@ class Subscription(models.Model):
 class SubscriptionRequest(models.Model):
     SUBSCRIPTION_TYPES = [
         ('monthly', 'Monthly Subscription'),
+        ('half_yearly', 'Half-Yearly Subscription'),
         ('yearly', 'Yearly Subscription'),
         ('premium_monthly', 'Premium Monthly'),
         ('premium_yearly', 'Premium Yearly'),
@@ -334,6 +344,7 @@ class SubscriptionRequest(models.Model):
     message = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_notes = models.TextField(blank=True)
+    dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, null=True, blank=True, related_name='subscription_requests')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -342,4 +353,53 @@ class SubscriptionRequest(models.Model):
     
     def __str__(self):
         return f"{self.company_name} - {self.get_subscription_type_display()}"
+
+
+class CarView(models.Model):
+    """Track car page views for analytics"""
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='views')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # Track logged-in users
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-viewed_at']
+        indexes = [
+            models.Index(fields=['car', 'viewed_at']),
+            models.Index(fields=['car', 'user']),
+        ]
+    
+    def __str__(self):
+        return f"View of {self.car.title} at {self.viewed_at}"
+
+
+class DealershipClick(models.Model):
+    """Track clicks from dealership pages for analytics"""
+    CLICK_TYPES = [
+        ('phone', 'Phone Number Click'),
+        ('email', 'Email Click'),
+        ('website', 'Website Visit'),
+        ('directions', 'Directions Click'),
+        ('car_view', 'Car Detail View'),
+        ('contact', 'Contact Form Submission'),
+    ]
+    
+    dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, related_name='clicks')
+    click_type = models.CharField(max_length=20, choices=CLICK_TYPES)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True, blank=True, related_name='dealership_clicks')  # For car-related clicks
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    clicked_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-clicked_at']
+        indexes = [
+            models.Index(fields=['dealership', 'click_type', 'clicked_at']),
+            models.Index(fields=['dealership', 'clicked_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_click_type_display()} on {self.dealership.company_name} at {self.clicked_at}"
 

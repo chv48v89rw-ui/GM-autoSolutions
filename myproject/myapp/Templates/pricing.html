@@ -21,10 +21,48 @@
                         {% endfor %}
                     {% endif %}
                     
-                    <!-- Monthly Subscription -->
+                    <!-- Premium Dealership -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-primary">
+                        <div class="col-12">
+                            <div class="card h-100 border-warning shadow-sm">
+                                <div class="card-body text-center">
+                                    <span class="badge bg-warning text-dark mb-3">Premium Spotlight</span>
+                                    <h4 class="card-title">⭐ Premium Dealership</h4>
+                                    <h3 class="text-warning mb-3">KES 15,000/month OR KES 120,000/Year</h3>
+                                    <p class="text-muted">Top placement, verified badge, and priority exposure for your dealership.</p>
+                                    <ul class="list-unstyled text-start mx-auto" style="max-width: 640px;">
+                                        <li>✅ Featured in search results</li>
+                                        <li>✅ Premium badge display</li>
+                                        <li>✅ Priority customer support</li>
+                                        <li>✅ More trust from buyers</li>
+                                        <li>✅ One-click premium subscription</li>
+                                    </ul>
+                                    <div class="row mt-4 g-2 justify-content-center">
+                                        <div class="col-sm-6">
+                                            <form method="post" action="{% url 'pricing_subscribe' 'premium_monthly' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-warning w-100">
+                                                    Premium Monthly
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <form method="post" action="{% url 'pricing_subscribe' 'premium_yearly' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-warning w-100">
+                                                    Premium Yearly
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+                        <div class="col">
+                            <div class="card h-100 border-primary shadow-sm">
                                 <div class="card-body text-center">
                                     <h4 class="card-title">📅 Monthly</h4>
                                     <h3 class="text-primary mb-3">KES 10,000</h3>
@@ -32,44 +70,63 @@
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
                                         <li>✅ Basic dashboard access</li>
-                                        <li>✅ Customer support</li>
+                                        <li>✅ Custom support</li>
                                         <li>✅ Monthly billing</li>
                                     </ul>
-                                    <button class="btn btn-primary w-100 mt-3" onclick="selectPlan('monthly')">
-                                        Choose Monthly
-                                    </button>
+                                    <form method="post" action="{% url 'pricing_subscribe' 'monthly' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                                            Choose Monthly
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Yearly Subscription -->
-                        <div class="col-md-6">
-                            <div class="card h-100 border-success">
+                        <div class="col">
+                            <div class="card h-100 border-secondary shadow-sm">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">🟡 Half-Yearly</h4>
+                                    <h3 class="text-secondary mb-3">KES 45,000</h3>
+                                    <p class="text-muted">Six months of uninterrupted access</p>
+                                    <ul class="list-unstyled text-start">
+                                        <li>✅ Unlimited car listings</li>
+                                        <li>✅ Dashboard access</li>
+                                        <li>✅ Custom support</li>
+                                        <li>✅ Six-month billing</li>
+                                    </ul>
+                                    <form method="post" action="{% url 'pricing_subscribe' 'half_yearly' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-secondary w-100 mt-3">
+                                            Choose Half-Yearly
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100 border-success shadow-sm">
                                 <div class="card-body text-center">
                                     <h4 class="card-title">📆 Yearly</h4>
                                     <h3 class="text-success mb-3">KES 100,000</h3>
-                                    <p class="text-muted">Save 17% with annual plan</p>
+                                    <p class="text-muted">Save 17% with annual billing</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
-                                        <li>✅ Premium dashboard access</li>
+                                        <li>✅ Best value for long-term growth</li>
                                         <li>✅ Priority support</li>
                                         <li>✅ Annual billing</li>
                                         <li>🎉 <strong>Best Value!</strong></li>
                                     </ul>
-                                    <button class="btn btn-success w-100 mt-3" onclick="selectPlan('yearly')">
-                                        Choose Yearly
-                                    </button>
+                                    <form method="post" action="{% url 'pricing_subscribe' 'yearly' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success w-100 mt-3">
+                                            Choose Yearly
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <hr class="my-4">
-                    
-                    <!-- Per Car Listing -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-info">
+                        <div class="col">
+                            <div class="card h-100 border-info shadow-sm">
                                 <div class="card-body text-center">
                                     <h4 class="card-title">🚗 Per Car Listing</h4>
                                     <h3 class="text-info mb-3">KES 2,500</h3>
@@ -80,39 +137,12 @@
                                         <li>✅ 30-day featured period</li>
                                         <li>✅ One-time payment</li>
                                     </ul>
-                                    <button class="btn btn-info w-100 mt-3" onclick="selectPlan('per_car')">
-                                        Choose Per Car
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Premium Dealership -->
-                        <div class="col-md-6">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title">⭐ Premium Dealership</h4>
-                                    <h3 class="text-warning mb-3">KES 15,000/month</h3>
-                                    <p class="text-muted">Or KES 120,000/year</p>
-                                    <ul class="list-unstyled text-start">
-                                        <li>✅ All Monthly features</li>
-                                        <li>✅ Premium badge display</li>
-                                        <li>✅ Top placement in searches</li>
-                                        <li>✅ Verified checkmark</li>
-                                        <li>✅ Priority customer support</li>
-                                    </ul>
-                                    <div class="row mt-3">
-                                        <div class="col-6">
-                                            <button class="btn btn-warning w-100" onclick="selectPlan('premium_monthly')">
-                                                Premium Monthly
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
-                                            <button class="btn btn-outline-warning w-100" onclick="selectPlan('premium_yearly')">
-                                                Premium Yearly
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <form method="post" action="{% url 'pricing_subscribe' 'per_car' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-info w-100 mt-3">
+                                            Choose Per Car
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -211,31 +241,4 @@
     </div>
 </div>
 
-<script>
-function selectPlan(planType) {
-    // Store selected plan
-    localStorage.setItem('selectedPlan', planType);
-    
-    // Show loading state
-    const button = event.target;
-    const originalText = button.textContent;
-    button.textContent = 'Processing...';
-    button.disabled = true;
-    
-    // Simulate API call to backend
-    setTimeout(() => {
-        // Reset button
-        button.textContent = originalText;
-        button.disabled = false;
-        
-        // Show success message
-        alert(`Great choice! You selected the ${planType.replace('_', ' ')} plan. Our team will contact you within 24 hours to complete your subscription.`);
-        
-        // Redirect to dashboard after 2 seconds
-        setTimeout(() => {
-            window.location.href = '/dashboard/dealership/';
-        }, 2000);
-    }, 1000);
-}
-</script>
 {% endblock %}

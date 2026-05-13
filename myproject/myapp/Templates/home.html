@@ -9,6 +9,8 @@
         <h1 class="fade-in-up">Find Your Perfect Car in <span class="accent-text">Kenya</span></h1>
         <p class="fade-in-up">Browse thousands of vehicles from trusted dealerships across the country</p>
         
+
+        
         <!-- Search Section -->
         <div class="row justify-content-center mt-5">
             <div class="col-lg-10">
@@ -38,6 +40,16 @@
                         <div class="col-md-3">
                             {{ form.price_to }}
                         </div>
+                        <div class="col-md-3">
+                            {{ form.mileage_from }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.mileage_to }}
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Filters -->
+                    <div class="row g-3 mt-2">
                         <div class="col-md-2">
                             {{ form.fuel_type }}
                         </div>
@@ -47,7 +59,6 @@
                         <div class="col-md-2">
                             {{ form.condition }}
                         </div>
-                    </div>
                     
                     <!-- Additional Filters -->
                     <div class="row g-3 mt-2">
@@ -77,6 +88,131 @@
         </div>
     </div>
 </section>
+
+<!-- Top Dealerships Section -->
+{% if highlighted_dealerships %}
+    <section class="py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h2 class="section-title">🏪 Best Dealerships For You</h2>
+                    <p class="text-muted">Premium-approved dealerships recommended for buyers.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for dealership in highlighted_dealerships %}
+                    <div class="col-lg-6 col-md-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        {% if dealership.is_premium %}
+                                            <span class="badge bg-warning text-dark">Premium</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title">{{ dealership.company_name }}</h5>
+                                        <p class="card-text">{{ dealership.description|truncatewords:20 }}</p>
+                                        <p class="text-muted small">
+                                            📍 {{ dealership.location }}<br>
+                                            📞 {{ dealership.phone_number }}
+                                        </p>
+                                        <div class="stars mb-2">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= dealership.rating %}
+                                                    ★
+                                                {% else %}
+                                                    ☆
+                                                {% endif %}
+                                            {% endfor %}
+                                            <small class="text-muted">({{ dealership.rating|floatformat:1 }})</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        {% if dealership.logo %}
+                                            <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}" 
+                                                 style="max-width: 80px; max-height: 80px; object-fit: contain;">
+                                        {% else %}
+                                            <div class="bg-light-accent p-3 rounded" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                                <span class="text-accent" style="font-size: 2rem;">🏢</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <hr>
+                                <a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm">
+                                    View Dealership
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/dealerships/" class="btn btn-secondary">
+                        View All Dealerships →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+{% if best_cars %}
+    <section class="py-5" style="background-color: #f8f9fa;">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12">
+                <h2 class="section-title">🚘 Best Cars to Buy Currently</h2>
+                <p class="text-muted">Top premium cars available for purchase right now.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for car in best_cars %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div style="height: 180px; overflow: hidden;">
+                                {% if car.main_image %}
+                                    <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
+                                    <span class="badge bg-warning text-dark">Premium</span>
+                                </div>
+                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|add:"0" }}</p>
+                                <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
+                                <p class="mb-0 text-muted small">{{ car.dealership.company_name }}</p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <a href="/car/{{ car.id }}/" class="btn btn-outline-primary btn-sm w-100">View Car</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/cars/" class="btn btn-secondary">
+                        View All Cars →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
 
 <!-- Browse Cars CTA -->
 <section class="py-5">
@@ -143,71 +279,7 @@
     </div>
 </section>
 
-<!-- Top Dealerships Section -->
-{% if dealerships %}
-    <section class="py-5">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-12">
-                    <h2 class="section-title">🏪 Top Dealerships Near You</h2>
-                </div>
-            </div>
 
-            <div class="row g-4">
-                {% for dealership in dealerships|slice:":4" %}
-                    <div class="col-lg-6 col-md-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h5 class="card-title">{{ dealership.company_name }}</h5>
-                                        <p class="card-text">{{ dealership.description|truncatewords:20 }}</p>
-                                        <p class="text-muted small">
-                                            📍 {{ dealership.location }}<br>
-                                            📞 {{ dealership.phone_number }}
-                                        </p>
-                                        <div class="stars mb-2">
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= dealership.rating %}
-                                                    ★
-                                                {% else %}
-                                                    ☆
-                                                {% endif %}
-                                            {% endfor %}
-                                            <small class="text-muted">({{ dealership.rating|floatformat:1 }})</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        {% if dealership.logo %}
-                                            <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}" 
-                                                 style="max-width: 80px; max-height: 80px; object-fit: contain;">
-                                        {% else %}
-                                            <div class="bg-light-accent p-3 rounded" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                                <span class="text-accent" style="font-size: 2rem;">🏢</span>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <hr>
-                                <a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm">
-                                    View Dealership
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-12 text-center">
-                    <a href="/dealerships/" class="btn btn-secondary">
-                        View All Dealerships →
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-{% endif %}
 
 <!-- CTA Section -->
 <section class="py-5" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%); color: white;">

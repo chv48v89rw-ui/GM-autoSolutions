@@ -125,46 +125,93 @@
         </div>
         <div class="card-body">
             {% if cars %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Car</th>
-                                <th>Price</th>
-                                <th>Mileage</th>
-                                <th>Listed Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for car in cars %}
+                <form id="cars-form" method="post" action="{% url 'submit_cars_for_review' %}">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-info btn-sm" id="select-all-btn" onclick="toggleSelectAll()">
+                            <i class="fas fa-check-square"></i> Select All
+                        </button>
+                        <button type="submit" class="btn btn-success btn-sm" id="submit-btn" style="display: none;" onclick="return confirm('Submit selected cars for admin review?')">
+                            <i class="fas fa-paper-plane"></i> Submit for Review
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="deselect-all-btn" onclick="deselectAll()" style="display: none;">
+                            <i class="fas fa-times-circle"></i> Deselect All
+                        </button>
+                        <span class="align-self-center text-muted ms-auto" id="selection-count"></span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <a href="/car/{{ car.id }}/">
-                                            <strong>{{ car.year }} {{ car.make }} {{ car.model }}</strong>
-                                        </a>
-                                    </td>
-                                    <td>KES {{ car.price|floatformat:0|add:"0" }}</td>
-                                    <td>{{ car.mileage }} km</td>
-                                    <td>{{ car.created_at|date:"M d, Y" }}</td>
-                                    <td>
-                                        {% if not car.is_sold %}
-                                            <form method="post" action="/car/{{ car.id }}/mark-sold/" style="display: inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-success" 
-                                                        onclick="return confirm('Mark this car as sold?')">Mark Sold</button>
-                                            </form>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Sold</span>
-                                        {% endif %}
-                                        <a href="/car/{{ car.id }}/edit/" class="btn btn-sm btn-outline-primary ms-1">Edit</a>
-                                        <a href="/car/{{ car.id }}/delete/" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
-                                    </td>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="main-checkbox" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th>Car</th>
+                                    <th>Price</th>
+                                    <th>Mileage</th>
+                                    <th>Status</th>
+                                    <th>Listed Date</th>
+                                    <th>Actions</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {% for car in cars %}
+                                    <tr class="car-row">
+                                        <td>
+                                            <input type="checkbox" name="selected_cars[]" value="{{ car.id }}" class="car-checkbox" onchange="updateSelectionCount()">
+                                        </td>
+                                        <td>
+                                            <a href="/car/{{ car.id }}/">
+                                                <strong>{{ car.year }} {{ car.make }} {{ car.model }}</strong>
+                                            </a>
+                                        </td>
+                                        <td>KES {{ car.price|floatformat:0|add:"0" }}</td>
+                                        <td>{{ car.mileage }} km</td>
+                                        <td>
+                                            <div>
+                                                {% if car.is_approved %}
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> Approved</span>
+                                                {% elif car.submitted_for_review %}
+                                                    <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> Pending Review</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary"><i class="fas fa-circle"></i> Draft</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if car.is_sold %}
+                                                <span class="badge bg-danger"><i class="fas fa-ban"></i> Sold</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ car.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if not car.is_sold %}
+                                                <form method="post" action="/car/{{ car.id }}/mark-sold/" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-success" 
+                                                            onclick="return confirm('Mark this car as sold?')">Mark Sold</button>
+                                                </form>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Sold</span>
+                                            {% endif %}
+                                            <a href="/car/{{ car.id }}/edit/" class="btn btn-sm btn-outline-primary ms-1">Edit</a>
+                                            <a href="/car/{{ car.id }}/delete/" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="toggleSelectAll()">
+                            <i class="fas fa-check-square"></i> Select All
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submit-btn-main" style="display: none;" onclick="return confirm('Submit selected cars for admin review?')">
+                            <i class="fas fa-paper-plane"></i> Submit Selected for Review
+                        </button>
+                        <span class="align-self-center text-muted ms-auto" id="selection-count-bottom">No cars selected</span>
+                    </div>
+                </form>
             {% else %}
                 <div class="alert alert-info mb-0">
                     <p class="mb-0">You haven't listed any cars yet.</p>
@@ -173,6 +220,61 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+    function toggleSelectAll() {
+        const mainCheckbox = document.getElementById('main-checkbox');
+        const carCheckboxes = document.querySelectorAll('.car-checkbox');
+        const isChecked = mainCheckbox.checked;
+        
+        carCheckboxes.forEach(checkbox => {
+            checkbox.checked = !isChecked;
+        });
+        
+        mainCheckbox.checked = !isChecked;
+        updateSelectionCount();
+    }
+
+    function deselectAll() {
+        const mainCheckbox = document.getElementById('main-checkbox');
+        const carCheckboxes = document.querySelectorAll('.car-checkbox');
+        
+        carCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        mainCheckbox.checked = false;
+        updateSelectionCount();
+    }
+
+    function updateSelectionCount() {
+        const selectedCheckboxes = document.querySelectorAll('.car-checkbox:checked');
+        const count = selectedCheckboxes.length;
+        
+        const countElement = document.getElementById('selection-count');
+        const countElementBottom = document.getElementById('selection-count-bottom');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitBtnMain = document.getElementById('submit-btn-main');
+        const selectAllBtn = document.getElementById('select-all-btn');
+        const deselectAllBtn = document.getElementById('deselect-all-btn');
+        
+        if (count > 0) {
+            countElement.textContent = `${count} car(s) selected`;
+            countElementBottom.textContent = `${count} car(s) selected`;
+            submitBtn.style.display = 'inline-block';
+            submitBtnMain.style.display = 'inline-block';
+            selectAllBtn.style.display = 'none';
+            deselectAllBtn.style.display = 'inline-block';
+        } else {
+            countElement.textContent = '';
+            countElementBottom.textContent = 'No cars selected';
+            submitBtn.style.display = 'none';
+            submitBtnMain.style.display = 'none';
+            selectAllBtn.style.display = 'inline-block';
+            deselectAllBtn.style.display = 'none';
+        }
+    }
+    </script>
 
     <!-- Enquiries Section -->
     <div class="card mb-4">
