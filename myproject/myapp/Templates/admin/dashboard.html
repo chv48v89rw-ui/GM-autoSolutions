@@ -76,12 +76,12 @@
                                         <div class="btn-group-vertical" role="group">
                                             <a href="{% url 'approve_dealership' dealership.id %}" 
                                                class="btn btn-success btn-sm mb-2"
-                                               onclick="return confirm('Approve {{ dealership.company_name }}?')">
+                                               data-confirm-message="Approve {{ dealership.company_name|escape }}?">
                                                 <i class="fas fa-check"></i> Approve
                                             </a>
                                             <a href="{% url 'reject_dealership' dealership.id %}" 
                                                class="btn btn-danger btn-sm"
-                                               onclick="return confirm('Reject {{ dealership.company_name }}? This will delete their account.')">
+                                               data-confirm-message="Reject {{ dealership.company_name|escape }}? This will delete their account.">
                                                 <i class="fas fa-times"></i> Reject
                                             </a>
                                         </div>
@@ -228,16 +228,16 @@
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     {% if report.status == 'pending' %}
-                                                        <a href="#" class="btn btn-sm btn-success" onclick="updateReportStatus({{ report.id }}, 'under_review')">
+                                                        <a href="#" class="btn btn-sm btn-success js-update-report-status" data-report-id="{{ report.id }}" data-status="under_review">
                                                             <i class="fas fa-eye"></i> Review
                                                         </a>
                                                     {% endif %}
                                                     {% if report.status == 'under_review' %}
-                                                        <a href="#" class="btn btn-sm btn-primary" onclick="updateReportStatus({{ report.id }}, 'resolved')">
+                                                        <a href="#" class="btn btn-sm btn-primary js-update-report-status" data-report-id="{{ report.id }}" data-status="resolved">
                                                             <i class="fas fa-check"></i> Resolve
                                                         </a>
                                                     {% endif %}
-                                                    <a href="#" class="btn btn-sm btn-outline-primary" onclick="viewReportDetails({{ report.id }})">
+                                                    <a href="#" class="btn btn-sm btn-outline-primary js-view-report-details" data-report-id="{{ report.id }}">
                                                             <i class="fas fa-info-circle"></i> Details
                                                         </a>
                                                 </div>
@@ -272,7 +272,7 @@
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i> 
                         <strong>Subscription Requests:</strong> Users can now request subscriptions through the pricing page. 
-                        Contact them at <a href="mailto:autosolutionsgm@gmail.com">autosolutionsgm@gmail.com</a> to complete subscriptions.
+                        Contact them at <a href="mailto:autogmsolutions@gmail.com">autogmsolutions@gmail.com</a> to complete subscriptions.
                     </div>
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -335,4 +335,26 @@ function viewReportDetails(reportId) {
     // You can implement a modal or redirect to a details page
     alert(`Report ID: ${reportId}\n\nThis would typically open a modal with full report details.\n\nFor now, you can check the database directly for report ${reportId}.`);
 }
+
+document.querySelectorAll('[data-confirm-message]').forEach(link => {
+    link.addEventListener('click', event => {
+        if (!confirm(link.dataset.confirmMessage)) {
+            event.preventDefault();
+        }
+    });
+});
+
+document.querySelectorAll('.js-update-report-status').forEach(link => {
+    link.addEventListener('click', event => {
+        event.preventDefault();
+        updateReportStatus(link.dataset.reportId, link.dataset.status);
+    });
+});
+
+document.querySelectorAll('.js-view-report-details').forEach(link => {
+    link.addEventListener('click', event => {
+        event.preventDefault();
+        viewReportDetails(link.dataset.reportId);
+    });
+});
 </script>

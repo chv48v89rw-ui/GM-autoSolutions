@@ -63,8 +63,8 @@ class Car(models.Model):
     
     CONDITION_CHOICES = [
         ('brand_new', 'Brand New'),
-        ('used_locally', 'Used Locally'),
-        ('used_foreignly', 'Used Foreignly'),
+        ('used_locally', 'Locally Used'),
+        ('used_foreignly', 'Foreignly Used'),
     ]
     
     ENGINE_SIZE_CHOICES = [
@@ -402,4 +402,141 @@ class DealershipClick(models.Model):
     
     def __str__(self):
         return f"{self.get_click_type_display()} on {self.dealership.company_name} at {self.clicked_at}"
+
+
+class SavedSearch(models.Model):
+    """User's saved car search preferences"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
+    name = models.CharField(max_length=100, help_text="Name for this search (e.g., 'Toyota under 500k')")
+    
+    # Search parameters
+    make = models.CharField(max_length=100, blank=True)
+    model = models.CharField(max_length=100, blank=True)
+    year_from = models.IntegerField(null=True, blank=True)
+    year_to = models.IntegerField(null=True, blank=True)
+    price_from = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    price_to = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    mileage_from = models.IntegerField(null=True, blank=True)
+    mileage_to = models.IntegerField(null=True, blank=True)
+    fuel_type = models.CharField(max_length=20, blank=True)
+    transmission = models.CharField(max_length=20, blank=True)
+    condition = models.CharField(max_length=20, blank=True)
+    color = models.CharField(max_length=50, blank=True)
+    body_type = models.CharField(max_length=20, blank=True)
+    features = models.TextField(blank=True, help_text="Comma-separated features to search for")
+    
+    # Notification settings for this search
+    alert_on_new = models.BooleanField(default=True, help_text="Send alert for new matching cars")
+    alert_on_price_drop = models.BooleanField(default=False, help_text="Send alert when prices drop")
+    price_drop_percentage = models.IntegerField(default=5, help_text="Alert when price drops by this percentage")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_alerted = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
+
+
+class CarComparison(models.Model):
+    """Tool for comparing multiple cars side-by-side"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comparisons')
+    name = models.CharField(max_length=255, blank=True)
+    cars = models.ManyToManyField(Car, related_name='comparisons')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-updated_at']
+    
+    def __str__(self):
+        return f"Comparison by {self.user.username} - {self.cars.count()} cars"
+    
+    def get_cars_list(self):
+        return self.cars.all()[:10]  # Max 10 cars for comparison
+
+
+class Notification(models.Model):
+    """Notification system for users"""
+    NOTIFICATION_TYPES = [
+        ('new_car', 'New Car Matching Search'),
+        ('price_drop', 'Price Drop Alert'),
+        ('enquiry_response', 'Dealership Response to Enquiry'),
+        ('review_approved', 'Your Review Was Approved'),
+        ('dealership_message', 'New Message from Dealership'),
+        ('new_listing', 'New Listing from Followed Dealership'),
+        ('promotion', 'Special Promotion'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=25, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True, blank=True)
+    dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    
+    # Channels
+    is_sent_email = models.BooleanField(default=False)
+    is_sent_sms = models.BooleanField(default=False)
+    is_sent_push = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+            models.Index(fields=['user', 'created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} to {self.user.username}"
+    
+    def mark_as_read(self):
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save()
+
+
+class NotificationPreference(models.Model):
+    """User notification preferences"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preference')
+    
+    # Email preferences
+    email_on_new_car = models.BooleanField(default=True)
+    email_on_price_drop = models.BooleanField(default=True)
+    email_on_enquiry_response = models.BooleanField(default=True)
+    email_on_review_approved = models.BooleanField(default=True)
+    email_on_promotions = models.BooleanField(default=False)
+    
+    # SMS preferences (requires phone number)
+    sms_on_new_car = models.BooleanField(default=False)
+    sms_on_price_drop = models.BooleanField(default=False)
+    sms_on_enquiry_response = models.BooleanField(default=True)
+    sms_phone_number = models.CharField(max_length=15, blank=True)
+    
+    # Push preferences
+    push_on_new_car = models.BooleanField(default=False)
+    push_on_price_drop = models.BooleanField(default=False)
+    push_on_enquiry_response = models.BooleanField(default=True)
+    
+    # Notification frequency
+    FREQUENCY_CHOICES = [
+        ('instant', 'Instant'),
+        ('daily', 'Daily Digest'),
+        ('weekly', 'Weekly Digest'),
+    ]
+    notification_frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default='instant')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Notification preferences for {self.user.username}"
 

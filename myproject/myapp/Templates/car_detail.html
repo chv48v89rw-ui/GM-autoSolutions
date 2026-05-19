@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}{{ car.year }} {{ car.make }} {{ car.model }} - GM autoSolutions{% endblock %}
 
 {% block content %}
 <div class="container py-5">
+    <div id="flash-message-container"></div>
     <div class="row">
         <div class="col-lg-8 col-md-12">
             <!-- Image Gallery -->
@@ -39,7 +41,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h2 class="mb-3">{{ car.year }} {{ car.make }} {{ car.model }}</h2>
-                    <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|add:"0" }}</h3>
+                    <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|intcomma }}</h3>
 
                     <div class="row g-4">
                         <div class="col-md-6">
@@ -113,6 +115,13 @@
                             <a href="/dealership/{{ car.dealership.id }}/" class="btn btn-outline-secondary w-100 btn-lg">
                                 🏢 View Dealership
                             </a>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-outline-secondary w-100 btn-lg js-add-comparison" data-car-id="{{ car.id }}">
+                                📊 Add to Comparison
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -193,7 +202,103 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Similar Cars Section -->
+            {% if similar_cars %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Similar Cars You Might Like</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for similar_car in similar_cars %}
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm">
+                                        <div style="height: 180px; overflow: hidden;">
+                                            {% if similar_car.main_image %}
+                                                <img src="{{ similar_car.main_image.url }}" class="card-img-top" alt="{{ similar_car.title }}"
+                                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                                    <span class="text-muted">No Image</span>
+                                                </div>
+                                            {% endif %}
+                                            <span class="badge bg-primary position-absolute top-0 end-0 m-2" style="font-size: 0.75rem;">
+                                                {{ similar_car.get_condition_display }}
+                                            </span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ similar_car.year }} {{ similar_car.make }} {{ similar_car.model }}</h6>
+                                            <p class="card-text text-accent fw-bold">KES {{ similar_car.price|floatformat:0|intcomma }}</p>
+                                            <small class="text-muted d-block mb-2">{{ similar_car.dealership.company_name }}</small>
+                                            <ul style="list-style: none; padding: 0; font-size: 0.85rem;">
+                                                <li>⛽ {{ similar_car.get_fuel_type_display }}</li>
+                                                <li>🎯 {{ similar_car.mileage }} km</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <a href="{% url 'car_detail' similar_car.id %}" class="btn btn-sm btn-primary w-100">View Car</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
+    </div>
+</div>
+
+<style>
+#flash-message-container {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+#flash-message-container .alert {
+    margin: 0 auto;
+    max-width: 600px;
+}
+</style>
+
+<script>
+function showMessage(message, type = 'success', containerId = 'flash-message-container') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.innerHTML = '';
+    container.appendChild(alert);
+}
+
+function addToComparison(carId) {
+    fetch(`/comparison/add/${carId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Car added to comparison. Go to the Compare page to see selected cars.', 'success');
+            } else if (data.error) {
+                showMessage(data.error, 'warning');
+            }
+        })
+        .catch(() => showMessage('Unable to add car to comparison.', 'danger'));
+}
+
+document.querySelectorAll('.js-add-comparison').forEach(button => {
+    button.addEventListener('click', () => addToComparison(button.dataset.carId));
+});
+</script>
 
         <!-- Sidebar: Dealership Info -->
         <div class="col-lg-4 col-md-12">
@@ -270,7 +375,7 @@
                         <a href="tel:{{ dealership.phone_number }}" class="btn btn-outline-primary">
                             📞 Call Now
                         </a>
-                        <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary">
+                        <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary">
                             ✉️ Email
                         </a>
                         <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary">

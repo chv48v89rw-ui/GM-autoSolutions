@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card">
-                <div class="card-header bg-primary text-white text-center">
+                <div class="card-header bg-primary text-black text-center">
                     <h2 class="mb-0">💰 Pricing Plans</h2>
                     <p class="mb-0">Choose the perfect plan for your dealership</p>
                 </div>
@@ -25,7 +25,7 @@
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card h-100 border-warning shadow-sm">
-                                <div class="card-body text-center">
+                                <div class="card-body text-center d-flex flex-column">
                                     <span class="badge bg-warning text-dark mb-3">Premium Spotlight</span>
                                     <h4 class="card-title">⭐ Premium Dealership</h4>
                                     <h3 class="text-warning mb-3">KES 15,000/month OR KES 120,000/Year</h3>
@@ -37,7 +37,7 @@
                                         <li>✅ More trust from buyers</li>
                                         <li>✅ One-click premium subscription</li>
                                     </ul>
-                                    <div class="row mt-4 g-2 justify-content-center">
+                                    <div class="row g-2 justify-content-center mt-auto">
                                         <div class="col-sm-6">
                                             <form method="post" action="{% url 'pricing_subscribe' 'premium_monthly' %}">
                                                 {% csrf_token %}
@@ -63,7 +63,7 @@
                     <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
                         <div class="col">
                             <div class="card h-100 border-primary shadow-sm">
-                                <div class="card-body text-center">
+                                <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">📅 Monthly</h4>
                                     <h3 class="text-primary mb-3">KES 10,000</h3>
                                     <p class="text-muted">Perfect for growing dealerships</p>
@@ -73,9 +73,9 @@
                                         <li>✅ Custom support</li>
                                         <li>✅ Monthly billing</li>
                                     </ul>
-                                    <form method="post" action="{% url 'pricing_subscribe' 'monthly' %}">
+                                    <form method="post" class="mt-auto" action="{% url 'pricing_subscribe' 'monthly' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <button type="submit" class="btn btn-primary w-100">
                                             Choose Monthly
                                         </button>
                                     </form>
@@ -84,9 +84,9 @@
                         </div>
                         <div class="col">
                             <div class="card h-100 border-secondary shadow-sm">
-                                <div class="card-body text-center">
+                                <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">🟡 Half-Yearly</h4>
-                                    <h3 class="text-secondary mb-3">KES 45,000</h3>
+                                    <h3 class="text-secondary mb-3">KES 50,000</h3>
                                     <p class="text-muted">Six months of uninterrupted access</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
@@ -94,9 +94,9 @@
                                         <li>✅ Custom support</li>
                                         <li>✅ Six-month billing</li>
                                     </ul>
-                                    <form method="post" action="{% url 'pricing_subscribe' 'half_yearly' %}">
+                                    <form method="post" class="mt-auto" action="{% url 'pricing_subscribe' 'half_yearly' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-secondary w-100 mt-3">
+                                        <button type="submit" class="btn btn-secondary w-100">
                                             Choose Half-Yearly
                                         </button>
                                     </form>
@@ -105,20 +105,20 @@
                         </div>
                         <div class="col">
                             <div class="card h-100 border-success shadow-sm">
-                                <div class="card-body text-center">
+                                <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">📆 Yearly</h4>
                                     <h3 class="text-success mb-3">KES 100,000</h3>
                                     <p class="text-muted">Save 17% with annual billing</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
-                                        <li>✅ Best value for long-term growth</li>
+                                        <li>✅ Premium badge for 2 Months</li>
                                         <li>✅ Priority support</li>
                                         <li>✅ Annual billing</li>
                                         <li>🎉 <strong>Best Value!</strong></li>
                                     </ul>
-                                    <form method="post" action="{% url 'pricing_subscribe' 'yearly' %}">
+                                    <form method="post" class="mt-auto" action="{% url 'pricing_subscribe' 'yearly' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-success w-100 mt-3">
+                                        <button type="submit" class="btn btn-success w-100">
                                             Choose Yearly
                                         </button>
                                     </form>
@@ -127,7 +127,7 @@
                         </div>
                         <div class="col">
                             <div class="card h-100 border-info shadow-sm">
-                                <div class="card-body text-center">
+                                <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">🚗 Per Car Listing</h4>
                                     <h3 class="text-info mb-3">KES 2,500</h3>
                                     <p class="text-muted">Pay only for cars you want featured</p>
@@ -137,9 +137,9 @@
                                         <li>✅ 30-day featured period</li>
                                         <li>✅ One-time payment</li>
                                     </ul>
-                                    <form method="post" action="{% url 'pricing_subscribe' 'per_car' %}">
+                                    <form method="post" class="mt-auto" action="{% url 'pricing_subscribe' 'per_car' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-info w-100 mt-3">
+                                        <button type="submit" class="btn btn-info w-100">
                                             Choose Per Car
                                         </button>
                                     </form>
@@ -172,7 +172,7 @@
                                                     <td><strong>Car Listings</strong></td>
                                                     <td>✅ Unlimited</td>
                                                     <td>✅ Unlimited</td>
-                                                    <td>❌ 1 car</td>
+                                                    <td>✅ 1 car</td>
                                                     <td>✅ Unlimited</td>
                                                 </tr>
                                                 <tr>
@@ -185,7 +185,7 @@
                                                 <tr>
                                                     <td><strong>Premium Badge</strong></td>
                                                     <td>❌</td>
-                                                    <td>❌</td>
+                                                    <td>✅ 2 Months</td>
                                                     <td>❌</td>
                                                     <td>✅ Always</td>
                                                 </tr>
@@ -193,7 +193,7 @@
                                                     <td><strong>Priority Support</strong></td>
                                                     <td>✅ Standard</td>
                                                     <td>✅ Standard</td>
-                                                    <td>❌</td>
+                                                    <td>✅ Priority</td>
                                                     <td>✅ Priority</td>
                                                 </tr>
                                                 <tr>
@@ -220,7 +220,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header bg-secondary text-dark text-center">
                     <h5>📞 Need Help Choosing a Plan?</h5>
                 </div>
                 <div class="card-body">
@@ -228,7 +228,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h6>📧 Email Support</h6>
-                            <p><a href="mailto:autosolutionsgm@gmail.com" class="text-decoration-none">autosolutionsgm@gmail.com</a></p>
+                            <p><a href="mailto:autogmsolutions@gmail.com" class="text-decoration-none">autogmsolutions@gmail.com</a></p>
                         </div>
                         <div class="col-md-6">
                             <h6>📞 Phone Support</h6>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}Report an Issue - GM autoSolutions{% endblock %}
 
@@ -56,7 +57,7 @@
                             <select name="car_id" class="form-select">
                                 <option value="">Choose a car...</option>
                                 {% for car in cars %}
-                                    <option value="{{ car.id }}">{{ car.year }} {{ car.make }} {{ car.model }} - {{ car.price|floatformat:"0,intcomma" }} KES</option>
+                                    <option value="{{ car.id }}">{{ car.year }} {{ car.make }} {{ car.model }} - {{ car.price|floatformat:0|intcomma }} KES</option>
                                 {% endfor %}
                             </select>
                         </div>

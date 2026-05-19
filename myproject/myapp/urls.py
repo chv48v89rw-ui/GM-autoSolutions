@@ -62,4 +62,18 @@ urlpatterns = [
     path('admin/approve-dealership/<int:dealership_id>/', views.approve_dealership, name='approve_dealership'),
     path('admin/reject-dealership/<int:dealership_id>/', views.reject_dealership, name='reject_dealership'),
     path('admin/update-report/<int:report_id>/', views.update_report_status, name='update_report_status'),
+    
+    # Feature #5: Advanced Search & Filters
+    path('saved-searches/', views.saved_searches, name='saved_searches'),
+    path('saved-search/<int:search_id>/apply/', views.apply_saved_search, name='apply_saved_search'),
+    path('saved-search/<int:search_id>/delete/', views.delete_saved_search, name='delete_saved_search'),
+    
+    # Feature #6: Car Comparison
+    path('comparison/add/<int:car_id>/', views.add_to_comparison, name='add_to_comparison'),
+    path('comparison/remove/<int:car_id>/', views.remove_from_comparison, name='remove_from_comparison'),
+    path('comparison/', views.view_comparison, name='view_comparison'),
+    
+    # Feature #7: Notifications
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/preferences/', views.notification_preferences, name='notification_preferences'),
 ]

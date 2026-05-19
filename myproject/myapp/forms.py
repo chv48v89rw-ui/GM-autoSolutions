@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import UserProfile, Dealership, Car, Review, DealershipReview, Enquiry
-from .models import Report
+from .models import (UserProfile, Dealership, Car, Review, DealershipReview, Enquiry, Report, 
+                     SavedSearch, CarComparison, Notification, NotificationPreference)
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -601,6 +601,17 @@ class CarSearchForm(forms.Form):
         ('8', '8+ Seats'),
     ], widget=forms.Select(attrs={'class': 'form-select'}))
     
+    # Additional filters
+    color = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Color (e.g., Red, Black, White)'
+    }))
+    features = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Features (e.g., ABS, AC, Power Steering)'
+    }))
+
+    
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
@@ -608,6 +619,84 @@ class ReportForm(forms.ModelForm):
         widgets = {
             'report_type': forms.Select(choices=Report.REPORT_TYPES),
             'description': forms.Textarea(attrs={'rows': 4}),
+        }
+
+
+# New Forms for Features #5, #6, #7, #8
+
+class SavedSearchForm(forms.ModelForm):
+    class Meta:
+        model = SavedSearch
+        fields = ('name', 'make', 'model', 'year_from', 'year_to', 'price_from', 'price_to',
+                 'mileage_from', 'mileage_to', 'fuel_type', 'transmission', 'condition', 
+                 'color', 'body_type', 'features', 'alert_on_new', 'alert_on_price_drop',
+                 'price_drop_percentage')
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Name your search (e.g., Toyota under 500k)'
+            }),
+            'make': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Make'}),
+            'model': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Model'}),
+            'year_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From year'}),
+            'year_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To year'}),
+            'price_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From price'}),
+            'price_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To price'}),
+            'mileage_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From mileage'}),
+            'mileage_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To mileage'}),
+            'fuel_type': forms.Select(attrs={'class': 'form-select'}),
+            'transmission': forms.Select(attrs={'class': 'form-select'}),
+            'condition': forms.Select(attrs={'class': 'form-select'}),
+            'color': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Color'}),
+            'body_type': forms.Select(attrs={'class': 'form-select'}),
+            'features': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Comma-separated features'}),
+            'alert_on_new': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'alert_on_price_drop': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'price_drop_percentage': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class ComparisonForm(forms.Form):
+    """Form for adding cars to comparison"""
+    car_ids = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+        help_text="Comma-separated car IDs"
+    )
+    
+    def clean_car_ids(self):
+        car_ids = self.cleaned_data.get('car_ids', '')
+        if car_ids:
+            return [int(id.strip()) for id in car_ids.split(',') if id.strip().isdigit()]
+        return []
+
+
+class NotificationPreferenceForm(forms.ModelForm):
+    
+    class Meta:
+        model = NotificationPreference
+        fields = ('email_on_new_car', 'email_on_price_drop', 'email_on_enquiry_response',
+                 'email_on_review_approved', 'email_on_promotions',
+                 'sms_on_new_car', 'sms_on_price_drop', 'sms_on_enquiry_response',
+                 'sms_phone_number', 'push_on_new_car', 'push_on_price_drop',
+                 'push_on_enquiry_response', 'notification_frequency')
+        widgets = {
+            'email_on_new_car': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_on_price_drop': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_on_enquiry_response': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_on_review_approved': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_on_promotions': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_on_new_car': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_on_price_drop': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_on_enquiry_response': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+254712345678'
+            }),
+            'push_on_new_car': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'push_on_price_drop': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'push_on_enquiry_response': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notification_frequency': forms.Select(attrs={'class': 'form-select'}),
         }
 
 

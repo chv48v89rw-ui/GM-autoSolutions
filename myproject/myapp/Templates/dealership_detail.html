@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}{{ dealership.company_name }} - GM autoSolutions{% endblock %}
 
@@ -97,7 +98,7 @@
                     </h5>
                 </div>
                 <div class="card-body p-0">
-                    <div id="dealership-map" style="height: 400px; width: 100%;"></div>
+                    <div id="dealership-map" style="height: 400px; width: 100%;" data-latitude="{{ dealership.latitude }}" data-longitude="{{ dealership.longitude }}" data-name="{{ dealership.company_name|escape }}" data-address="{{ dealership.address|escape }}" data-phone="{{ dealership.phone_number|escape }}" data-email="{{ dealership.email|escape }}" data-track-url="/dealership/{{ dealership.id }}/track-click/"></div>
                     <div class="p-3">
                         <div class="row">
                             <div class="col-md-6">
@@ -160,7 +161,7 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
                             <p class="card-text text-accent fw-bold fs-5">
-                                KES {{ car.price|floatformat:0|add:"0" }}
+                                KES {{ car.price|floatformat:0|intcomma }}
                             </p>
 
                             <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
@@ -172,8 +173,17 @@
                         </div>
 
                         <div class="card-footer bg-light">
-                            <a href="/car/{{ car.id }}/" class="btn btn-primary btn-sm w-100 mb-2">View Details</a>
-                            <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100">Enquire</a>
+                            <div class="row g-1 mb-2">
+                                <div class="col-6">
+                                    <a href="/car/{{ car.id }}/" class="btn btn-primary btn-sm w-100">View Details</a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100">Enquire</a>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 js-add-comparison" data-car-id="{{ car.id }}">
+                                📊 Compare
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -248,18 +258,72 @@
     </div>
 </div>
 
+<script>
+    function trackClick(clickType) {
+        var dealershipMapElement = document.getElementById('dealership-map');
+        var trackUrl = dealershipMapElement ? dealershipMapElement.dataset.trackUrl : '/dealership/{{ dealership.id }}/track-click/';
+
+        fetch(trackUrl + '?type=' + clickType, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).catch(function(error) {
+            console.log('Tracking failed:', error);
+        });
+    }
+
+    function showMessage(message, type = 'success') {
+        var alertPlaceholder = document.getElementById('flash-message-container');
+        if (!alertPlaceholder) {
+            alertPlaceholder = document.createElement('div');
+            alertPlaceholder.id = 'flash-message-container';
+            document.body.appendChild(alertPlaceholder);
+        }
+
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
+        alert.role = 'alert';
+        alert.innerHTML = message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+        alertPlaceholder.innerHTML = '';
+        alertPlaceholder.appendChild(alert);
+    }
+
+    function addToComparison(carId) {
+        fetch('/comparison/add/' + carId + '/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Car added to comparison. Visit the Compare page to view your selected cars.', 'success');
+                } else if (data.error) {
+                    showMessage(data.error, 'warning');
+                }
+            })
+            .catch(() => showMessage('Unable to add car to comparison.', 'danger'));
+    }
+
+    document.querySelectorAll('.js-add-comparison').forEach(function(button) {
+        button.addEventListener('click', function() {
+            addToComparison(this.dataset.carId);
+        });
+    });
+</script>
+
 <!-- Map JavaScript -->
 {% if dealership.latitude and dealership.longitude %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
     // Pass Django variables to JavaScript
+    var dealershipMapElement = document.getElementById('dealership-map');
     var dealershipData = {
-        latitude: {{ dealership.latitude|default:"null" }},
-        longitude: {{ dealership.longitude|default:"null" }},
-        name: "{{ dealership.company_name|escapejs }}",
-        address: "{{ dealership.address|escapejs }}",
-        phone: "{{ dealership.phone_number|escapejs }}",
-        email: "{{ dealership.email|escapejs }}"
+        latitude: Number(dealershipMapElement.dataset.latitude),
+        longitude: Number(dealershipMapElement.dataset.longitude),
+        name: dealershipMapElement.dataset.name,
+        address: dealershipMapElement.dataset.address,
+        phone: dealershipMapElement.dataset.phone,
+        email: dealershipMapElement.dataset.email
     };
 
     // Initialize the map
@@ -307,17 +371,6 @@
     // Open popup by default
     marker.openPopup();
 
-    // Click tracking function
-    function trackClick(clickType) {
-        fetch('/dealership/{{ dealership.id }}/track-click/?type=' + clickType, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).catch(function(error) {
-            console.log('Tracking failed:', error);
-        });
-    }
 </script>
 {% endif %}
 

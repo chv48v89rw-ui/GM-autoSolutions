@@ -21,30 +21,45 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
+                    <form method="get" class="row g-3 align-items-end mb-3">
+                        <div class="col-md-4">
+                            <label for="buyer-location" class="form-label fw-bold">Your Location</label>
+                            <input type="text" name="buyer_location" id="buyer-location" class="form-control" placeholder="Enter your city (e.g., Nairobi, Mombasa)" value="{{ buyer_location }}" title="Enter your location to see distances to dealerships">
+                            <div class="form-text">Enter your location to see distances in km</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="area-search" class="form-label fw-bold">Search Dealerships</label>
                             <div class="input-group">
-                                <input type="text" id="area-search" class="form-control" placeholder="Search by area code, name, or location...">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchByArea()">
+                                <input type="text" name="q" id="area-search" class="form-control" placeholder="Search by postcode or location..." value="{{ search_query }}">
+                                <button class="btn btn-outline-secondary text-dark" type="submit"> Search
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Filter Options</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="premium-filter" onchange="filterDealerships()">
+                                <input class="form-check-input" type="checkbox" name="premium" id="premium-filter" value="1" onchange="this.form.submit()" {% if premium_filter %}checked{% endif %}>
                                 <label class="form-check-label" for="premium-filter">
                                     <i class="fas fa-star text-warning"></i> Show only premium dealerships
                                 </label>
                             </div>
                         </div>
-                    </div>
-                    
+                    </form>
+
+                    {% if buyer_location %}
+                        <div class="alert alert-info py-2 mb-3">
+                            <small><i class="fas fa-info-circle"></i> Showing dealerships near <strong>{{ buyer_location }}</strong> (sorted by distance)</small>
+                        </div>
+                    {% endif %}
+
                     <div id="dealership-list" class="row g-4">
-                        {% for dealership in dealerships %}
+                        {% for item in dealership_list %}
+                            {% with dealership=item.dealership %}
                             <div class="col-md-6 col-lg-4 dealership-item" 
                                  data-name="{{ dealership.company_name }}"
-                                 data-area="{{ dealership.area_code|default:'' }}">
+                                 data-area="{{ dealership.area_code|default:'' }}"
+                                 data-location="{{ dealership.location|default:'' }}">
                                 <div class="card h-100 shadow-sm">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -60,6 +75,11 @@
                                                 <br><span class="badge bg-info">{{ dealership.area_code }}</span>
                                             {% endif %}
                                         </p>
+                                        {% if item.distance %}
+                                            <p class="text-success small mb-2 fw-bold">
+                                                <i class="fas fa-route"></i> {{ item.distance|floatformat:1 }} km away from you
+                                            </p>
+                                        {% endif %}
                                         
                                         <p class="text-muted small mb-2">
                                             <i class="fas fa-phone"></i> <a href="tel:{{ dealership.phone_number }}" class="text-decoration-none">{{ dealership.phone_number }}</a>
@@ -84,6 +104,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {% endwith %}
                         {% empty %}
                             <div class="col-12">
                                 <div class="text-center py-5">
@@ -120,11 +141,13 @@ document.addEventListener('DOMContentLoaded', function() {
         dealershipItems.forEach(function(item) {
             const areaCode = (item.dataset.area || '').toLowerCase();
             const name = (item.dataset.name || '').toLowerCase();
+            const location = (item.dataset.location || '').toLowerCase();
             const isPremium = item.querySelector('.badge.bg-warning') !== null;
 
             const matchesSearch = !searchTerm || 
                                 areaCode.includes(searchTerm) ||
-                                name.includes(searchTerm);
+                                name.includes(searchTerm) ||
+                                location.includes(searchTerm);
             
             const matchesPremium = !premiumOnly || isPremium;
 

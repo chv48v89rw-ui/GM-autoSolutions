@@ -151,8 +151,8 @@
                                     <div style="font-size: 2.5rem; margin-bottom: 1rem;">📧</div>
                                     <h6>Email Us</h6>
                                     <p class="text-muted small mb-3">Send detailed inquiries via email</p>
-                                    <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary w-100">
-                                        {{ dealership.email }}
+                                    <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary w-100">
+                                        terrogamez1@gmail.com
                                     </a>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                                     <div style="font-size: 2.5rem; margin-bottom: 1rem;">📍</div>
                                     <h6>Visit Us</h6>
                                     <p class="text-muted small mb-3">Come see us in person</p>
-                                    <button class="btn btn-outline-primary w-100" onclick="alert('Address: {{ dealership.address }}')">
+                                    <button class="btn btn-outline-primary w-100 js-show-address" data-address="{{ dealership.address|escape }}">
                                         Get Directions
                                     </button>
                                 </div>
@@ -206,4 +206,10 @@
         </div>
     </div>
 </div>
+
+<script>
+document.querySelectorAll('.js-show-address').forEach(button => {
+    button.addEventListener('click', () => alert(`Address: ${button.dataset.address}`));
+});
+</script>
 {% endblock %}

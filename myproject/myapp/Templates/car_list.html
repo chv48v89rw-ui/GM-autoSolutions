@@ -1,18 +1,120 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}Browse Cars - GM autoSolutions{% endblock %}
 
 {% block content %}
 <div class="container py-5">
+    <div id="flash-message-container"></div>
     <div class="row">
         <div class="col-12 mb-4">
             <h1 class="section-title">Browse All Cars</h1>
         </div>
     </div>
 
+    <div class="row d-lg-none mb-4">
+        <div class="col-12">
+            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilters" aria-expanded="false" aria-controls="mobileFilters">
+                Filters
+            </button>
+            <div class="collapse mt-3" id="mobileFilters">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="filterFormMobile">
+                            <div class="mb-3">
+                                <label class="form-label">Make</label>
+                                {{ form.make }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Model</label>
+                                {{ form.model }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Year From</label>
+                                {{ form.year_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Year To</label>
+                                {{ form.year_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Price From (KES)</label>
+                                {{ form.price_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Price To (KES)</label>
+                                {{ form.price_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mileage From (km)</label>
+                                {{ form.mileage_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mileage To (km)</label>
+                                {{ form.mileage_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Fuel Type</label>
+                                {{ form.fuel_type }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Transmission</label>
+                                {{ form.transmission }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Condition</label>
+                                {{ form.condition }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Engine Size</label>
+                                {{ form.engine_size }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Number of Doors</label>
+                                {{ form.doors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Body Type</label>
+                                {{ form.body_type }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Previous Owners</label>
+                                {{ form.previous_owners }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Seats</label>
+                                {{ form.seats }}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Filters Sidebar -->
-        <div class="col-lg-3 col-md-4 mb-4">
+        <div class="col-lg-3 col-md-4 mb-4 d-none d-lg-block">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Filters</h5>
@@ -135,7 +237,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
                                     <p class="card-text text-accent fw-bold fs-5">
-                                        KES {{ car.price|floatformat:0|add:"0" }}
+                                        KES {{ car.price|floatformat:0|intcomma }}
                                     </p>
 
                                     <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
@@ -165,7 +267,7 @@
                                 </div>
 
                                 <div class="card-footer bg-light">
-                                    <div class="row g-1">
+                                    <div class="row g-1 mb-2">
                                         <div class="col-6">
                                             <a href="/car/{{ car.id }}/" class="btn btn-primary btn-sm w-100">View Details</a>
                                         </div>
@@ -187,7 +289,12 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100 mt-1">Enquire</a>
+                                    <div class="d-grid gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm w-100 js-add-comparison" data-car-id="{{ car.id }}">
+                                            📊 Compare
+                                        </button>
+                                        <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100">Enquire</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -202,4 +309,54 @@
         </div>
     </div>
 </div>
+
+<style>
+#flash-message-container {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+#flash-message-container .alert {
+    margin: 0 auto;
+    max-width: 600px;
+}
+</style>
+
+<script>
+function showMessage(message, type = 'success', containerId = 'flash-message-container') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.innerHTML = '';
+    container.appendChild(alert);
+}
+
+function addToComparison(carId) {
+    fetch(`/comparison/add/${carId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Car added to comparison. Visit the Compare page to view your selected cars.', 'success');
+            } else if (data.error) {
+                showMessage(data.error, 'warning');
+            }
+        })
+        .catch(() => showMessage('Unable to add car to comparison.', 'danger'));
+}
+
+document.querySelectorAll('.js-add-comparison').forEach(button => {
+    button.addEventListener('click', () => addToComparison(button.dataset.carId));
+});
+</script>
 {% endblock %}

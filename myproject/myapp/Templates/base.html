@@ -638,6 +638,22 @@
             border-color: rgba(26, 188, 156, 0.25);
             border-right-color: var(--accent-teal);
         }
+
+        @media (max-width: 991.98px) {
+            .sticky-filter-bar {
+                position: sticky;
+                top: 0;
+                z-index: 1030;
+                background-color: #ffffff;
+                padding: 0.75rem 0;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            }
+
+            .sticky-filter-bar .btn {
+                min-height: 48px;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -659,6 +675,9 @@
                         <a class="nav-link" href="/cars/">Browse Cars</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/comparison/">Compare</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/dealerships/">Dealerships</a>
                     </li>
                     {% if user.is_authenticated %}
@@ -670,8 +689,8 @@
                             <a class="nav-link" href="/dashboard/dealership/analytics/">Analytics</a>
                         </li>
                         {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-secondary ms-2" href="/logout/">Logout</a>
+                        <li class="nav-item d-flex mt-3 justify-content-center">
+                            <a class="nav-link btn btn-secondary px-4" href="/logout/">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
@@ -717,17 +736,21 @@
                     <h5>About GM autoSolutions</h5>
                     <p>Kenya's leading online car marketplace connecting buyers and dealerships.</p>
                 </div>
+                 
                 <div class="col-md-3 col-sm-6 mb-4">
                     <h5>Quick Links</h5>
+                    {% if user.profile and user.profile.user_type == 'dealership' or user.profile.user_type == 'buyer' %}
                     <ul style="list-style: none; padding: 0;">
                         <li><a href="/">Home</a></li>
                         <li><a href="/cars/">Browse Cars</a></li>
                         <li><a href="/dealerships/">Find Dealerships</a></li>
+                        <li><a href="/report/">Report an Issue</a></li>
                         <li><a href="/terms/">Terms & Conditions</a></li>
                         <li><a href="/privacy/">Privacy Policy</a></li>
-                        <li><a href="/report/">Report an Issue</a></li>
+                        
                     </ul>
                 </div>
+                    {% endif %}
                 <div class="col-md-3 col-sm-6 mb-4">
                     {% if user.profile and user.profile.user_type == 'dealership' %}
                     <h5>For Dealerships</h5>
@@ -740,9 +763,9 @@
                 </div>
                 <div class="col-md-3 col-sm-6 mb-4">
                     <h5>Contact Info</h5>
-                    <p>📞 +254 (0)700 000 000</p>
+                    <p>📞 +254 710926895</p>
                     <p>📍 Nairobi, Kenya</p>
-                    <p><strong>For Subscriptions:</strong> <a href="mailto:autosolutionsgm@gmail.com" class="text-decoration-none">autosolutionsgm@gmail.com</a></p>
+                    <p><strong>For Issues:</strong> <a href="mailto:autogmsolutions@gmail.com" class="text-decoration-none">autogmsolutions@gmail.com</a></p>
                 </div>
             </div>
             <div class="footer-bottom">

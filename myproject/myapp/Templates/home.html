@@ -1,4 +1,17 @@
 {% extends 'base.html' %}
+{% load humanize %}
+
+{% block extra_css %}
+<style>
+    @media (min-width: 992px) {
+        #homeFiltersCollapse {
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block title %}Home - GM autoSolutions{% endblock %}
 
@@ -16,71 +29,73 @@
             <div class="col-lg-10">
                 <form method="get" action="/cars/" class="card p-4" style="background-color: rgba(255,255,255,0.95);">
                     <h5 class="text-dark mb-4">Search for Your Perfect Car</h5>
-                    <div class="row g-3">
-                        <div class="col-md-3">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-6 col-sm-6 col-md-3">
                             {{ form.make }}
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-6 col-sm-6 col-md-3">
                             {{ form.model }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-sm-6 col-md-2">
                             {{ form.year_from }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-sm-6 col-md-2">
                             {{ form.year_to }}
                         </div>
-
-                    </div>
-                    
-                    <!-- Advanced Filters -->
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-3">
-                            {{ form.price_from }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form.price_to }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form.mileage_from }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form.mileage_to }}
-                        </div>
-                    </div>
-                    
-                    <!-- Additional Filters -->
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-2">
-                            {{ form.fuel_type }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.transmission }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.condition }}
-                        </div>
-                    
-                    <!-- Additional Filters -->
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-2">
-                            {{ form.engine_size }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.doors }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.body_type }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.previous_owners }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ form.seats }}
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-2 text-end text-md-start">
                             <button type="submit" class="btn btn-primary w-100">
                                 🔍 Search Cars
                             </button>
+                        </div>
+                    </div>
+
+                    <div class="row d-lg-none sticky-filter-bar mt-3">
+                        <div class="col-12">
+                            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#homeFiltersCollapse" aria-expanded="false" aria-controls="homeFiltersCollapse">
+                               More Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="collapse mt-3" id="homeFiltersCollapse">
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.price_from }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.price_to }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.mileage_from }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.mileage_to }}
+                            </div>
+
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.fuel_type }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.transmission }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.condition }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.engine_size }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.doors }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-2">
+                                {{ form.body_type }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.previous_owners }}
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-3">
+                                {{ form.seats }}
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -191,7 +206,7 @@
                                     <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
                                     <span class="badge bg-warning text-dark">Premium</span>
                                 </div>
-                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|add:"0" }}</p>
+                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
                                 <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
                                 <p class="mb-0 text-muted small">{{ car.dealership.company_name }}</p>
                             </div>
@@ -246,6 +261,8 @@
                     <p>Protected buyer-seller communication and verified dealerships</p>
                 </div>
             </div>
+
+              {% if user.profile and user.profile.user_type == 'dealership' %}
             <div class="col-md-3 col-sm-6">
                 <div class="feature-card">
                     <div class="feature-icon">💎</div>
@@ -254,6 +271,7 @@
                     <a href="#" class="btn btn-outline-primary btn-sm">View Pricing Plans</a>
                 </div>
             </div>
+            {% endif %}
             <div class="col-md-3 col-sm-6">
                 <div class="feature-card">
                     <div class="feature-icon">⭐</div>
