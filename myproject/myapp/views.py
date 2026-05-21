@@ -596,7 +596,6 @@ def delete_car(request, car_id):
     return render(request, 'confirm_delete.html', context)
 
 
-@login_required(login_url='login')
 def car_list(request):
     """List all cars with filters"""
     form = CarSearchForm(request.GET or None)
@@ -936,7 +935,6 @@ def get_dealerships_json(request):
     return JsonResponse(data, safe=False)
 
 
-@login_required(login_url='login')
 def car_detail(request, car_id):
     car = get_object_or_404(Car, id=car_id)
 
@@ -1168,7 +1166,6 @@ def view_enquiry(request, enquiry_id):
 
 
 
-@login_required(login_url='login')
 def dealerships_map(request):
     query = request.GET.get('q', '').strip()
     premium_filter = request.GET.get('premium') == '1'
