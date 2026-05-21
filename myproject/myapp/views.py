@@ -50,7 +50,7 @@ def send_verification_email(user, verification_code):
     )
 
 
-@login_required(login_url='login')
+
 def home(request):
     """Home page with search filters and featured cars"""
     form = CarSearchForm(request.GET or None)
@@ -662,14 +662,14 @@ def car_list(request):
     }
     return render(request, 'car_list.html', context)
 
-@login_required(login_url='login')
+
 
 def terms(request):
     return render(request, 'terms.html')
-@login_required(login_url='login')
 
 
-@login_required(login_url='login')
+
+
 def privacy(request):
     return render(request, 'privacy.html')
 
@@ -1161,7 +1161,6 @@ def enquiry_conversation(request, enquiry_id):
     return render(request, 'view_enquiry.html', context)
 
 
-@login_required(login_url='login')
 @login_required(login_url='login')
 def view_enquiry(request, enquiry_id):
     return enquiry_conversation(request, enquiry_id)
