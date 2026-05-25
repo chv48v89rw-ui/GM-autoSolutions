@@ -30,28 +30,33 @@ from .utils import geocode_address, haversine_distance
 
 def send_verification_email(user, verification_code):
     """Send verification email to user"""
-    subject = 'Verify Your Email - Car Dealership'
-    message = f"""
-    Hello {user.first_name},
-    
-    Welcome to Car Dealership! Please verify your email address using the code below:
-    
-    Verification Code: {verification_code}
-    
-    This code will expire in 24 hours.
-    
-    If you did not create this account, please ignore this email.
-    
-    Best regards,
-    Car Dealership Team
-    """
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL or 'noreply@cardealership.com',
-        [user.email],
-        fail_silently=False,
-    )
+    try:
+        subject = 'Verify Your Email - GM Auto Solutions'
+        message = f"""
+Hello {user.first_name or user.username},
+
+Welcome to GM Auto Solutions! Please verify your email address using the code below:
+
+Verification Code: {verification_code}
+
+This code will expire in 24 hours.
+
+If you did not create this account, please ignore this email.
+
+Best regards,
+GM Auto Solutions Team
+        """
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        logger.error(f'Failed to send verification email to {user.email}: {str(e)}')
+        return False
 
 
 
@@ -125,19 +130,19 @@ def register(request):
         profile_form = UserProfileForm(request.POST, request.FILES)
         
         if user_form.is_valid() and profile_form.is_valid():
-            # Create user
-            user = user_form.save(commit=False)
-            user.set_password(user_form.cleaned_data['password'])
-            user.save()
-            
-            # Create profile
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.user_type = 'buyer'  # Explicitly set user type
-            profile.save()
-            
-            # Send verification email for buyers
             try:
+                # Create user
+                user = user_form.save(commit=False)
+                user.set_password(user_form.cleaned_data['password'])
+                user.save()
+                
+                # Create profile
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.user_type = 'buyer'  # Explicitly set user type
+                profile.save()
+                
+                # Send verification email for buyers
                 verification_code = secrets.token_hex(3).upper()  # Generate 6-character code
                 expires_at = timezone.now() + timedelta(hours=24)
                 
@@ -150,17 +155,28 @@ def register(request):
                     }
                 )
                 
-                # Send email
-                send_verification_email(user, verification_code)
-                messages.success(request, 'Registration successful! A verification code has been sent to your email. Please verify your email to log in.')
-                return redirect('verify_email')
+                # Try to send email
+                email_sent = send_verification_email(user, verification_code)
+                
+                if email_sent:
+                    messages.success(request, 'Registration successful! A verification code has been sent to your email. Please check your email and verify your account.')
+                    return redirect('verify_email')
+                else:
+                    # If email cannot be sent, mark as verified and allow login
+                    profile.is_verified = True
+                    profile.save()
+                    logger.warning(f'Email delivery failed for user {user.email}, allowing login without verification')
+                    messages.warning(request, 'Registration successful! Email delivery failed, but you can log in now. Please contact support to verify your email.')
+                    return redirect('login')
+                    
             except Exception as e:
-                logger.exception('Email verification send failed for user %s', user.email)
-                # If email cannot be sent, allow login so users are not blocked by mail delivery issues.
-                profile.is_verified = True
-                profile.save()
-                messages.warning(request, 'Registration successful, but email delivery failed. You can still log in now. Please contact support to verify your email later.')
-                return redirect('login')
+                logger.exception(f'Registration failed: {str(e)}')
+                messages.error(request, f'Registration failed: {str(e)}. Please try again.')
+                # Clean up partially created user if something went wrong
+                try:
+                    user.delete()
+                except:
+                    pass
     else:
         user_form = UserRegistrationForm()
         profile_form = UserProfileForm()
@@ -276,33 +292,43 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            # Check if user is a dealership and if they are approved
-            try:
-                if user.profile.user_type == 'dealership':
-                    if not user.dealership.is_approved:
-                        messages.error(request, 'Your dealership account is pending approval. Please contact the administrator.')
-                        return redirect('login')
-                # Check if buyer is verified
-                elif user.profile.user_type == 'buyer':
-                    if not user.profile.is_verified:
-                        messages.error(request, 'Please verify your email first. Check your email for the verification code.')
-                        return redirect('verify_email')
-            except:
-                pass
-            
-            login(request, user)
-            # Redirect based on user type
-            try:
-                if user.profile.user_type == 'dealership':
-                    return redirect('dealership_dashboard')
-                else:
-                    return redirect('buyer_dashboard')
-            except:
-                return redirect('buyer_dashboard')
-        else:
-            messages.error(request, 'Invalid username or password!')
+        try:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                try:
+                    profile = user.profile
+                    # Check if user is a dealership and if they are approved
+                    if profile.user_type == 'dealership':
+                        try:
+                            if not user.dealership.is_approved:
+                                messages.error(request, 'Your dealership account is pending approval. Please contact the administrator.')
+                                return redirect('login')
+                        except Dealership.DoesNotExist:
+                            logger.error(f'Dealership profile missing for user {user.username}')
+                            messages.error(request, 'Dealership profile not found. Please contact support.')
+                            return redirect('login')
+                    # Check if buyer is verified
+                    elif profile.user_type == 'buyer':
+                        if not profile.is_verified:
+                            messages.info(request, 'Please verify your email first. Check your email for the verification code.')
+                            return redirect('verify_email')
+                    
+                    login(request, user)
+                    # Redirect based on user type
+                    if profile.user_type == 'dealership':
+                        return redirect('dealership_dashboard')
+                    else:
+                        return redirect('buyer_dashboard')
+                        
+                except UserProfile.DoesNotExist:
+                    logger.error(f'User profile missing for user {user.username}')
+                    messages.error(request, 'User profile not found. Please contact support.')
+                    return redirect('login')
+            else:
+                messages.error(request, 'Invalid username or password!')
+        except Exception as e:
+            logger.exception(f'Login error: {str(e)}')
+            messages.error(request, 'An error occurred during login. Please try again.')
     
     return render(request, 'login.html')
 
@@ -321,8 +347,13 @@ def buyer_dashboard(request):
         profile = request.user.profile
         if profile.user_type != 'buyer':
             return redirect('dealership_dashboard')
-    except:
+    except UserProfile.DoesNotExist:
+        logger.error(f'User profile missing for user {request.user.username}')
         messages.error(request, 'Profile not found. Please complete your registration.')
+        return redirect('home')
+    except Exception as e:
+        logger.exception(f'Error accessing buyer dashboard: {str(e)}')
+        messages.error(request, 'An error occurred. Please try again.')
         return redirect('home')
     
     # Get user's enquiries
