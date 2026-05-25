@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-tl7hjk7#b24f6-w$8ba=xkq7$76^#v*bon6-rerjm8is$8^w=%')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'False'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS = ['192.168.5.104', '127.0.0.1', 'localhost']
 ALLOWED_HOSTS = ['*']  # Allow all hosts (for development only)
@@ -147,25 +147,20 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'YOUR_GOOGLE_MAPS_AP
 # Login URL for @login_required decorator
 LOGIN_URL = 'login'
 
-# Email Configuration
-# if DEBUG:
-#     # Use console backend for development
-#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# else:
-#     # Use SMTP for production
-#     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#     EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-#     EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-#     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-#     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
-#     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'izeywyexyxgvpycj')
 
-# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
-# Email Configuration - temporary fix for Render
+if DEBUG:
+    # Use console backend for development
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Use SMTP for production
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'izeywyexyxgvpycj')
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
 
-DEFAULT_FROM_EMAIL = "noreply@gmautosolutions.com"
 
-EMAIL_TIMEOUT = 10
  
