@@ -148,16 +148,24 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'YOUR_GOOGLE_MAPS_AP
 LOGIN_URL = 'login'
 
 # Email Configuration
-if DEBUG:
-    # Use console backend for development
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    # Use SMTP for production
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
-    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'izeywyexyxgvpycj')
+# if DEBUG:
+#     # Use console backend for development
+#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# else:
+#     # Use SMTP for production
+#     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#     EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+#     EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+#     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+#     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
+#     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'izeywyexyxgvpycj')
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
+# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
+# Email Configuration - temporary fix for Render
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = "noreply@gmautosolutions.com"
+
+EMAIL_TIMEOUT = 10
+ 
