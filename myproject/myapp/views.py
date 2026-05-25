@@ -185,7 +185,7 @@ def dealership_register(request):
             
             dealership.save()
             
-            messages.success(request, 'Dealership registration successful! Your account will be reviewed and approved within 24 hours.')
+            messages.success(request, 'Dealership registration successful! Your account has been submitted for review and will be reviewed by our admin team on the admin dashboard. You will be able to log in once approved.')
             return redirect('login')
     else:
         user_form = UserRegistrationForm()
