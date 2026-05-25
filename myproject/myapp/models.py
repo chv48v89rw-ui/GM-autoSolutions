@@ -231,18 +231,6 @@ class Favorite(models.Model):
         return f"{self.user.username} favorited {self.car}"
 
 
-class EmailVerification(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification')
-    verification_code = models.CharField(max_length=6, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    
-    def is_expired(self):
-        return timezone.now() > self.expires_at
-    
-    def __str__(self):
-        return f"Verification for {self.user.email}"
-
 
 class Report(models.Model):
     REPORT_TYPES = [

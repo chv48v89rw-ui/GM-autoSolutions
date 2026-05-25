@@ -14,7 +14,6 @@ urlpatterns = [
     # Authentication
     path('register/', views.register, name='register'),
     path('dealership-register/', views.dealership_register, name='dealership_register'),
-    path('verify-email/', views.verify_email, name='verify_email'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     

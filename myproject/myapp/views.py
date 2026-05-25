@@ -17,49 +17,18 @@ from django.core.mail import send_mail
 from datetime import timedelta
 import secrets
 from .models import (UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, 
-                     Favorite, EmailVerification, Report, CarView, DealershipClick, SavedSearch, CarComparison, 
+                     Favorite, Report, CarView, DealershipClick, SavedSearch, CarComparison, 
                      Notification, NotificationPreference)
 
 logger = logging.getLogger(__name__)
 from .forms import (UserRegistrationForm, UserProfileForm, DealershipRegistrationForm,
-                    EmailVerificationForm, CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
+                    CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
                     ReportForm, SavedSearchForm, ComparisonForm, NotificationPreferenceForm)
 from django.conf import settings
 from .utils import geocode_address, haversine_distance
 
 
-def send_verification_email(user, verification_code):
-    """Send verification email to user"""
-    try:
-        subject = 'Verify Your Email - GM Auto Solutions'
-        message = f"""
-Hello {user.first_name or user.username},
-
-Welcome to GM Auto Solutions! Please verify your email address using the code below:
-
-Verification Code: {verification_code}
-
-This code will expire in 24 hours.
-
-If you did not create this account, please ignore this email.
-
-Best regards,
-GM Auto Solutions Team
-        """
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        logger.error(f'Failed to send verification email to {user.email}: {str(e)}')
-        return False
-
-
-
+# Email verification removed: send_verification_email no longer used
 def home(request):
     """Home page with search filters and featured cars"""
     form = CarSearchForm(request.GET or None)
@@ -142,32 +111,11 @@ def register(request):
                 profile.user_type = 'buyer'  # Explicitly set user type
                 profile.save()
                 
-                # Send verification email for buyers
-                verification_code = secrets.token_hex(3).upper()  # Generate 6-character code
-                expires_at = timezone.now() + timedelta(hours=24)
-                
-                # Create or update verification record
-                EmailVerification.objects.update_or_create(
-                    user=user,
-                    defaults={
-                        'verification_code': verification_code,
-                        'expires_at': expires_at
-                    }
-                )
-                
-                # Try to send email
-                email_sent = send_verification_email(user, verification_code)
-                
-                if email_sent:
-                    messages.success(request, 'Registration successful! A verification code has been sent to your email. Please check your email and verify your account.')
-                    return redirect('verify_email')
-                else:
-                    # If email cannot be sent, mark as verified and allow login
-                    profile.is_verified = True
-                    profile.save()
-                    logger.warning(f'Email delivery failed for user {user.email}, allowing login without verification')
-                    messages.warning(request, 'Registration successful! Email delivery failed, but you can log in now. Please contact support to verify your email.')
-                    return redirect('login')
+                # Mark profile as verified (email verification removed)
+                profile.is_verified = True
+                profile.save()
+                messages.success(request, 'Registration successful! You can now log in.')
+                return redirect('login')
                     
             except Exception as e:
                 logger.exception(f'Registration failed: {str(e)}')
@@ -188,43 +136,7 @@ def register(request):
     return render(request, 'register.html', context)
 
 
-def verify_email(request):
-    """Email verification page"""
-    if request.method == 'POST':
-        form = EmailVerificationForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username'].strip()
-            verification_code = form.cleaned_data['verification_code'].strip()
-            try:
-                user = User.objects.get(username=username)
-                email_verification = EmailVerification.objects.get(user=user)
-                
-                if email_verification.is_expired():
-                    email_verification.delete()
-                    messages.error(request, 'Verification code has expired. Please register again.')
-                    return redirect('register')
-                
-                if email_verification.verification_code == verification_code:
-                    profile = user.profile
-                    profile.is_verified = True
-                    profile.save()
-                    
-                    email_verification.delete()
-                    
-                    messages.success(request, 'Email verified successfully! You can now log in.')
-                    return redirect('login')
-                else:
-                    messages.error(request, 'Invalid verification code. Please try again.')
-            except User.DoesNotExist:
-                messages.error(request, 'User not found.')
-            except EmailVerification.DoesNotExist:
-                messages.error(request, 'No verification record found. Please register again.')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = EmailVerificationForm()
-    
-    return render(request, 'verify_email.html', {'form': form})
+# Email verification views removed
 
 
 def dealership_register(request):
@@ -307,11 +219,7 @@ def login_view(request):
                             logger.error(f'Dealership profile missing for user {user.username}')
                             messages.error(request, 'Dealership profile not found. Please contact support.')
                             return redirect('login')
-                    # Check if buyer is verified
-                    elif profile.user_type == 'buyer':
-                        if not profile.is_verified:
-                            messages.info(request, 'Please verify your email first. Check your email for the verification code.')
-                            return redirect('verify_email')
+                    # Buyer users: no email verification required
                     
                     login(request, user)
                     # Redirect based on user type
