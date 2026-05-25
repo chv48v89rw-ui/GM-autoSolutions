@@ -23,17 +23,34 @@
 
                     <form method="post">
                         {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
                         <div class="mb-4">
                             <label class="form-label">Username</label>
-                            <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.username.errors.0 }}
+                                </div>
+                            {% endif %}
                             <small class="text-muted">The username you used during registration</small>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label">Verification Code</label>
-                            <input type="text" name="verification_code" class="form-control text-center" placeholder="Enter 6-character code" maxlength="6" style="letter-spacing: 5px; font-weight: bold; font-size: 24px;" required>
-                            <small class="text-muted">Check your email for the 6-character verification code</small>
+                            {{ form.verification_code }}
+                            {% if form.verification_code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.verification_code.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Enter the 6-character code sent to your email</small>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 mb-3">Verify Email</button>

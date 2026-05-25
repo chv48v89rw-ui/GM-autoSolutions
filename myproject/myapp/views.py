@@ -2,6 +2,8 @@ from multiprocessing import context
 
 import json
 from decimal import Decimal
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -17,8 +19,10 @@ import secrets
 from .models import (UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, 
                      Favorite, EmailVerification, Report, CarView, DealershipClick, SavedSearch, CarComparison, 
                      Notification, NotificationPreference)
+
+logger = logging.getLogger(__name__)
 from .forms import (UserRegistrationForm, UserProfileForm, DealershipRegistrationForm,
-                    CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
+                    EmailVerificationForm, CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
                     ReportForm, SavedSearchForm, ComparisonForm, NotificationPreferenceForm)
 from django.conf import settings
 from .utils import geocode_address, haversine_distance
@@ -151,7 +155,11 @@ def register(request):
                 messages.success(request, 'Registration successful! A verification code has been sent to your email. Please verify your email to log in.')
                 return redirect('verify_email')
             except Exception as e:
-                messages.error(request, f'Registration successful, but failed to send verification email: {str(e)}. Please contact support.')
+                logger.exception('Email verification send failed for user %s', user.email)
+                # If email cannot be sent, allow login so users are not blocked by mail delivery issues.
+                profile.is_verified = True
+                profile.save()
+                messages.warning(request, 'Registration successful, but email delivery failed. You can still log in now. Please contact support to verify your email later.')
                 return redirect('login')
     else:
         user_form = UserRegistrationForm()
@@ -167,36 +175,40 @@ def register(request):
 def verify_email(request):
     """Email verification page"""
     if request.method == 'POST':
-        verification_code = request.POST.get('verification_code', '').strip()
-        username = request.POST.get('username', '').strip()
-        
-        try:
-            user = User.objects.get(username=username)
-            email_verification = EmailVerification.objects.get(user=user)
-            
-            if email_verification.is_expired():
-                messages.error(request, 'Verification code has expired. Please register again.')
-                return redirect('register')
-            
-            if email_verification.verification_code == verification_code:
-                # Mark user as verified
-                profile = user.profile
-                profile.is_verified = True
-                profile.save()
+        form = EmailVerificationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username'].strip()
+            verification_code = form.cleaned_data['verification_code'].strip()
+            try:
+                user = User.objects.get(username=username)
+                email_verification = EmailVerification.objects.get(user=user)
                 
-                # Delete verification record
-                email_verification.delete()
+                if email_verification.is_expired():
+                    email_verification.delete()
+                    messages.error(request, 'Verification code has expired. Please register again.')
+                    return redirect('register')
                 
-                messages.success(request, 'Email verified successfully! You can now log in.')
-                return redirect('login')
-            else:
-                messages.error(request, 'Invalid verification code. Please try again.')
-        except User.DoesNotExist:
-            messages.error(request, 'User not found.')
-        except EmailVerification.DoesNotExist:
-            messages.error(request, 'No verification record found. Please register again.')
+                if email_verification.verification_code == verification_code:
+                    profile = user.profile
+                    profile.is_verified = True
+                    profile.save()
+                    
+                    email_verification.delete()
+                    
+                    messages.success(request, 'Email verified successfully! You can now log in.')
+                    return redirect('login')
+                else:
+                    messages.error(request, 'Invalid verification code. Please try again.')
+            except User.DoesNotExist:
+                messages.error(request, 'User not found.')
+            except EmailVerification.DoesNotExist:
+                messages.error(request, 'No verification record found. Please register again.')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = EmailVerificationForm()
     
-    return render(request, 'verify_email.html')
+    return render(request, 'verify_email.html', {'form': form})
 
 
 def dealership_register(request):

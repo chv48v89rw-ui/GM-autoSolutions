@@ -61,6 +61,24 @@ class UserProfileForm(forms.ModelForm):
         }
 
 
+class EmailVerificationForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Username'
+        })
+    )
+    verification_code = forms.CharField(
+        max_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-center',
+            'placeholder': 'Enter verification code',
+            'maxlength': '6'
+        })
+    )
+
+
 class DealershipRegistrationForm(forms.ModelForm):
     class Meta:
         model = Dealership
