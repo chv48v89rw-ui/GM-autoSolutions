@@ -24,17 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-tl7hjk7#b24f6-w$8ba=xkq7$76^#v*bon6-rerjm8is$8^w=%')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'False'
 
 # ALLOWED_HOSTS = ['192.168.5.104', '127.0.0.1', 'localhost']
-ALLOWED_HOSTS = [
-    'gmautosolutions.com',
-    'www.gmautosolutions.com',
-    '.onrender.com',
-    '127.0.0.1',
-    'localhost',
-]
-  # Allow all hosts (for development only)
+ALLOWED_HOSTS = ['*']  # Allow all hosts (for development only)
 
 
 # Application definition
@@ -52,14 +45,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -86,13 +78,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 # Use dj_database_url to automatically configure from DATABASE_URL environment variable
-# Default to PostgreSQL locally if DATABASE_URL is not set
+# On Render, DATABASE_URL is automatically set to PostgreSQL
+# Locally, it falls back to SQLite for development
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv(
-            'DATABASE_URL',
-            'postgresql://postgres:postgres@127.0.0.1:5432/gmautosolutions'
-        ),
+        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
         conn_max_age=600,
         conn_health_checks=True,
     )
