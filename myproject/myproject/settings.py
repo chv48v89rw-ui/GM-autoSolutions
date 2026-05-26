@@ -163,9 +163,17 @@ LOGIN_URL = 'login'
 # DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
 # Email Configuration - temporary fix for Render
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-DEFAULT_FROM_EMAIL = "noreply@gmautosolutions.com"
+# DEFAULT_FROM_EMAIL = "noreply@gmautosolutions.com"
 
-EMAIL_TIMEOUT = 10
+# EMAIL_TIMEOUT = 10
  
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'autogmsolutions@gmail.com'
+EMAIL_HOST_PASSWORD = 'izeywyexyxgvpycj'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

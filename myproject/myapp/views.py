@@ -1,5 +1,5 @@
 from multiprocessing import context
-
+import random
 import json
 from decimal import Decimal
 import logging
@@ -93,50 +93,89 @@ def home(request):
 
 
 def register(request):
-    """User registration page"""
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         profile_form = UserProfileForm(request.POST, request.FILES)
-        
+
         if user_form.is_valid() and profile_form.is_valid():
             try:
                 # Create user
                 user = user_form.save(commit=False)
                 user.set_password(user_form.cleaned_data['password'])
                 user.save()
-                
+
+                # Generate OTP
+                otp = str(random.randint(100000, 999999))
+
                 # Create profile
                 profile = profile_form.save(commit=False)
                 profile.user = user
-                profile.user_type = 'buyer'  # Explicitly set user type
+                profile.user_type = 'buyer'
+                profile.otp_code = otp
+                profile.is_verified = False
                 profile.save()
-                
-                # Mark profile as verified (email verification removed)
-                profile.is_verified = True
-                profile.save()
-                messages.success(request, 'Registration successful! You can now log in.')
-                return redirect('login')
-                    
+
+                # 📩 SEND EMAIL (THIS WAS MISSING)
+                send_mail(
+                    subject="GM AutoSolutions OTP Verification",
+                    message=f"Your OTP code is: {otp}",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
+                # Save user id in session (IMPORTANT FIX)
+                request.session['verify_user_id'] = user.id
+
+                return redirect('verify_otp')
+
             except Exception as e:
                 logger.exception(f'Registration failed: {str(e)}')
-                messages.error(request, f'Registration failed: {str(e)}. Please try again.')
-                # Clean up partially created user if something went wrong
+                messages.error(request, f'Registration failed: {str(e)}')
                 try:
                     user.delete()
                 except:
                     pass
+
     else:
         user_form = UserRegistrationForm()
         profile_form = UserProfileForm()
-    
-    context = {
+
+    return render(request, 'register.html', {
         'user_form': user_form,
-        'profile_form': profile_form,
-    }
-    return render(request, 'register.html', context)
+        'profile_form': profile_form
+    })
 
 
-# Email verification views removed
+def verify_otp(request):
+    user_id = request.session.get('verify_user_id')
+
+    if not user_id:
+        messages.error(request, "Session expired. Please register again.")
+        return redirect('register')
+
+    user = User.objects.get(id=user_id)
+    profile = user.profile
+
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+
+        if profile.otp_code == otp:
+
+            profile.is_verified = True
+            profile.otp_code = ""
+            profile.save()
+
+            # clear session
+            del request.session['verify_user_id']
+
+            messages.success(request, "Verification successful!")
+            return redirect('login')
+
+        else:
+            messages.error(request, "Invalid OTP")
+
+    return render(request, 'verify_otp.html')
 
 
 def dealership_register(request):
@@ -219,7 +258,10 @@ def login_view(request):
                             logger.error(f'Dealership profile missing for user {user.username}')
                             messages.error(request, 'Dealership profile not found. Please contact support.')
                             return redirect('login')
-                    # Buyer users: no email verification required
+                        
+                        if not profile.is_verified:
+                            messages.error(request, 'Please verify your account first.')
+                            return redirect('verify_otp')
                     
                     login(request, user)
                     # Redirect based on user type

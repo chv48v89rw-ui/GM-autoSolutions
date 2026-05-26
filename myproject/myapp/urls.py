@@ -16,6 +16,7 @@ urlpatterns = [
     path('dealership-register/', views.dealership_register, name='dealership_register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
     
     # Dashboards
     path('dashboard/buyer/', views.buyer_dashboard, name='buyer_dashboard'),

@@ -11,18 +11,28 @@ class UserProfile(models.Model):
         ('buyer', 'Buyer'),
         ('dealership', 'Dealership'),
     ]
-    
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+
     phone_number = models.CharField(max_length=15, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    is_verified = models.BooleanField(default=False)  # For buyer email verification
+
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        null=True,
+        blank=True
+    )
+
+    is_verified = models.BooleanField(default=False)
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
+
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.get_user_type_display()}"
-
 
 class Dealership(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='dealership')
