@@ -67,7 +67,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'myapp' / 'templates'],
+        'DIRS': [BASE_DIR / 'myapp' / 'Templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,7 +137,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
-    BASE_DIR / 'myapp' / 'static',
+    BASE_DIR / 'myapp' / 'Static',
 ]
 
 # Media files (User uploads)
