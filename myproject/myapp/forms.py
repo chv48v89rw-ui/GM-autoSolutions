@@ -251,6 +251,7 @@ class ConversationMessageForm(forms.Form):
 class CarSearchForm(forms.Form):
     from .models import Car
  
+    @staticmethod
     def get_make_choices():
         popular_makes = [
             'Toyota', 'Nissan', 'BMW', 'Mercedes-Benz', 'Honda',
