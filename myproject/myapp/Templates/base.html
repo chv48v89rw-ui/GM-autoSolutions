@@ -644,6 +644,32 @@
             border-color: rgba(26, 188, 156, 0.25);
             border-right-color: var(--accent-teal);
         }
+        .quick-links a {
+            color: #212529;        /* dark grey instead of blue */
+            text-decoration: none; /* removes underline */
+        }
+
+        .quick-links a:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+
+        footer {
+            padding: 50px 0;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 991px) {
+            footer {
+                text-align: center;
+            }
+        }
 
         @media (max-width: 991.98px) {
             .sticky-filter-bar {
@@ -735,46 +761,47 @@
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <h5>About GM autoSolutions</h5>
-                    <p>Kenya's leading online car marketplace connecting buyers and dealerships.</p>
-                </div>
-                 
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <h5>Quick Links</h5>
-                        <li><a href="/terms/">Terms & Conditions</a></li>
-                        <li><a href="/privacy/">Privacy Policy</a></li>
-                    {% if user.profile and user.profile.user_type == 'dealership' or user.profile.user_type == 'buyer' %}
-                    <ul style="list-style: none; padding: 0;">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/cars/">Browse Cars</a></li>
-                        <li><a href="/dealerships/">Find Dealerships</a></li>
-                        <li><a href="/report/">Report an Issue</a></li>
-                       
-                        
-                    </ul>
-                </div>
-                    {% endif %}
-                <div class="col-md-3 col-sm-6 mb-4">
-                    {% if user.profile and user.profile.user_type == 'dealership' %}
-                    <h5>For Dealerships</h5>
-                    <ul style="list-style: none; padding: 0;">
-                        <li><a href="/dealership-register/">Register Your Business</a></li>
-                        <li><a href="/dashboard/dealership/">Manage Listings</a></li>
-                        <li><a href="/pricing/">Pricing Plans</a></li>
-                    </ul>
-                    {% endif %}
-                </div>
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <h5>Contact Info</h5>
-                    <p>📞 +254 710926895</p>
-                    <p>📍 Nairobi, Kenya</p>
-                    <p><strong>For Issues:</strong> <a href="mailto:autogmsolutions@gmail.com" class="text-decoration-none">autogmsolutions@gmail.com</a></p>
-                </div>
-            </div>
+    <div class="row">
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>About GM autoSolutions</h5>
+        <p>Kenya's leading online car marketplace connecting buyers and dealerships.</p>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 quick-links">
+            <h5>Quick Links</h5>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/terms/">Terms & Conditions</a></li>
+                <li><a href="/privacy/">Privacy Policy</a></li>
+
+            {% if user.profile and user.profile.user_type == 'dealership' or user.profile.user_type == 'buyer' %}
+                
+                <li><a href="/cars/">Browse Cars</a></li>
+                <li><a href="/dealerships/">Find Dealerships</a></li>
+                <li><a href="/report/">Report an Issue</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% if user.profile and user.profile.user_type == 'dealership' %}
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>For Dealerships</h5>
+        <ul class="list-unstyled">
+            <li><a href="/dealership-register/">Register Your Business</a></li>
+            <li><a href="/dashboard/dealership/">Manage Listings</a></li>
+            <li><a href="/pricing/">Pricing Plans</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>Contact Info</h5>
+        <p>📞 +254 710926895</p>
+        <p>📍 Nairobi, Kenya</p>
+        <p><strong>For Issues:</strong><br>
+        <a href="mailto:autogmsolutions@gmail.com">autogmsolutions@gmail.com</a></p>
+    </div>
+</div>
             <div class="footer-bottom">
                 <p>&copy; 2026 GM autoSolutions. All rights reserved.</p>
             </div>
