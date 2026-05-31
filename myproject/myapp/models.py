@@ -47,7 +47,7 @@ class Dealership(models.Model):
     latitude = models.FloatField(null=True, blank=True)  # For Google Maps
     longitude = models.FloatField(null=True, blank=True)  # For Google Maps
     address = models.TextField()
-    business_certificate = models.FileField(upload_to='dealership_certificates/', null=True, blank=True)
+    business_certificate = models.FileField(upload_to='dealership_certificates/', null=True, blank=False)
     is_approved = models.BooleanField(default=False)  # Dealership must be approved to be active
     is_premium = models.BooleanField(default=False)  # Premium dealerships appear as top picks on the home page
     rating = models.FloatField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])

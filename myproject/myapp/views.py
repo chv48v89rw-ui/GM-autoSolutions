@@ -196,7 +196,8 @@ def dealership_register(request):
             profile = UserProfile.objects.create(
                 user=user,
                 user_type='dealership',
-                phone_number=dealership_form.cleaned_data['phone_number']
+                phone_number=dealership_form.cleaned_data['phone_number'],
+                is_verified=True
             )
             
             # Create dealership
@@ -260,7 +261,7 @@ def login_view(request):
                             logger.error(f'Dealership profile missing for user {user.username}')
                             messages.error(request, 'Dealership profile not found. Please contact support.')
                             return redirect('login')
-                        
+                    else:
                         if not profile.is_verified:
                             messages.error(request, 'Please verify your account first.')
                             return redirect('verify_otp')
