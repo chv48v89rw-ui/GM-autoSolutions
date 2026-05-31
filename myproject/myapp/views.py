@@ -48,6 +48,8 @@ def home(request):
             cars = cars.filter(make__icontains=form.cleaned_data['make'])
         if form.cleaned_data.get('model'):
             cars = cars.filter(model__icontains=form.cleaned_data['model'])
+        if form.cleaned_data.get('variant'):
+            cars = cars.filter(variant__icontains=form.cleaned_data['variant'])
         if form.cleaned_data.get('year_from'):
             cars = cars.filter(year__gte=form.cleaned_data['year_from'])
         if form.cleaned_data.get('year_to'):
@@ -602,6 +604,8 @@ def car_list(request):
             cars = cars.filter(make__icontains=form.cleaned_data['make'])
         if form.cleaned_data.get('model'):
             cars = cars.filter(model__icontains=form.cleaned_data['model'])
+        if form.cleaned_data.get('variant'):
+            cars = cars.filter(variant__icontains=form.cleaned_data['variant'])
         if form.cleaned_data.get('year_from'):
             cars = cars.filter(year__gte=form.cleaned_data['year_from'])
         if form.cleaned_data.get('year_to'):

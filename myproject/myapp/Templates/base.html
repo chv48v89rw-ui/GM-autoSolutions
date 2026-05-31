@@ -810,7 +810,114 @@
 
     <!-- Bootstrap JS -->
     <script src="/static/js/bootstrap.bundle.min.js"></script>
-    
+    <script id="car_hierarchy_data" type="application/json">{{ car_hierarchy_json|default:'{}'|safe }}</script>
+    <script>
+        const CAR_HIERARCHY = JSON.parse(document.getElementById('car_hierarchy_data').textContent || '{}');
+
+        function buildOptions(options, selectedValue, placeholder) {
+            const fragment = document.createDocumentFragment();
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = placeholder;
+            fragment.appendChild(emptyOption);
+
+            if (selectedValue && options.indexOf(selectedValue) === -1) {
+                const currentOption = document.createElement('option');
+                currentOption.value = selectedValue;
+                currentOption.textContent = selectedValue;
+                currentOption.selected = true;
+                fragment.appendChild(currentOption);
+            }
+
+            options.forEach(value => {
+                if (!value) return;
+                if (value === selectedValue) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    option.selected = true;
+                    fragment.appendChild(option);
+                } else {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    fragment.appendChild(option);
+                }
+            });
+
+            return fragment;
+        }
+
+        function updateCarDropdowns(form) {
+            const makeSelect = form.querySelector('select[name="make"]');
+            const modelSelect = form.querySelector('select[name="model"]');
+            const variantSelect = form.querySelector('select[name="variant"]');
+            if (!makeSelect || !modelSelect || !variantSelect) return;
+
+            const getModelPlaceholder = (hasMake) => hasMake ? '-- Select Model --' : '-- Select Make First --';
+            const getVariantPlaceholder = (hasMake, hasModel) => {
+                if (!hasMake) return '-- Select Make First --';
+                if (!hasModel) return '-- Select Model First --';
+                return '-- Select Variant --';
+            };
+
+            const getModelNames = (makeValue) => {
+                if (!makeValue) return [];
+                const makeMap = CAR_HIERARCHY[makeValue] || {};
+                return Object.keys(makeMap).sort();
+            };
+
+            const getVariantNames = (makeValue, modelValue) => {
+                if (!makeValue || !modelValue) return [];
+                const variants = CAR_HIERARCHY[makeValue]?.[modelValue] || [];
+                return Array.from(new Set(variants)).sort();
+            };
+
+            const refreshModelOptions = () => {
+                const selectedMake = makeSelect.value;
+                const selectedModel = modelSelect.value;
+                const modelNames = getModelNames(selectedMake);
+                const options = buildOptions(modelNames, selectedModel, getModelPlaceholder(!!selectedMake));
+                modelSelect.innerHTML = '';
+                modelSelect.appendChild(options);
+                modelSelect.disabled = !selectedMake;
+                if (selectedModel && modelNames.indexOf(selectedModel) !== -1) {
+                    modelSelect.value = selectedModel;
+                }
+                refreshVariantOptions();
+            };
+
+            const refreshVariantOptions = () => {
+                const selectedMake = makeSelect.value;
+                const selectedModel = modelSelect.value;
+                const selectedVariant = variantSelect.value;
+                const variantNames = getVariantNames(selectedMake, selectedModel);
+                const options = buildOptions(variantNames, selectedVariant, getVariantPlaceholder(!!selectedMake, !!selectedModel));
+                variantSelect.innerHTML = '';
+                variantSelect.appendChild(options);
+                variantSelect.disabled = !selectedMake || !selectedModel;
+                if (selectedVariant && variantNames.indexOf(selectedVariant) !== -1) {
+                    variantSelect.value = selectedVariant;
+                }
+            };
+
+            makeSelect.addEventListener('change', () => {
+                modelSelect.value = '';
+                variantSelect.value = '';
+                refreshModelOptions();
+            });
+            modelSelect.addEventListener('change', () => {
+                variantSelect.value = '';
+                refreshVariantOptions();
+            });
+
+            refreshModelOptions();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form').forEach(form => updateCarDropdowns(form));
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

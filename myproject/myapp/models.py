@@ -120,6 +120,7 @@ class Car(models.Model):
     title = models.CharField(max_length=255)
     make = models.CharField(max_length=100)  # Toyota, BMW, etc.
     model = models.CharField(max_length=100)  # Camry, 3 Series, etc.
+    variant = models.CharField(max_length=100, blank=True)
     year = models.IntegerField(validators=[MinValueValidator(1990), MaxValueValidator(datetime.now().year + 1)])
     price = models.DecimalField(max_digits=12, decimal_places=2)
     mileage = models.IntegerField()  # in kilometers
@@ -155,7 +156,8 @@ class Car(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.year} {self.make} {self.model}"
+        variant_text = f" {self.variant}" if self.variant else ""
+        return f"{self.year} {self.make} {self.model}{variant_text}"
 
 
 class CarImage(models.Model):

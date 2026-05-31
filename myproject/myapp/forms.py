@@ -4,6 +4,224 @@ from django.utils import timezone
 from .models import (UserProfile, Dealership, Car, Review, DealershipReview, Enquiry, Report, 
                      SavedSearch, CarComparison, Notification, NotificationPreference)
 
+CAR_HIERARCHY = {
+    'Toyota': {
+        'Corolla': ['Axio', 'Fielder', 'NZE', 'RunX'],
+        'Premio': ['X', 'G', 'G Superior'],
+        'Allion': ['X', 'G'],
+        'Mark X': ['250G', '300G'],
+        'Crown': ['Athlete', 'Royal Saloon', 'Majesta'],
+        'Vitz': ['F', 'U', 'RS'],
+        'Yaris': ['F', 'Sport'],
+        'Aqua': ['Hybrid'],
+        'IST': ['150G'],
+        'Passo': ['X', 'G'],
+        'Harrier': ['Elegance', 'Premium', 'Progress', 'Hybrid'],
+        'RAV4': ['J', 'G', 'Adventure', 'Limited', '4WD'],
+        'Vanguard': ['240S', '350S'],
+        'Land Cruiser': ['Prado', '70 Series', '200 Series', '300 Series', 'V8'],
+        'Hilux': ['Single Cab', 'Extra Cab', 'Double Cab', '2WD', '4WD', 'Revo'],
+        'Probox': ['DX', 'GL'],
+        'Succeed': ['UL', 'UL-X'],
+        'Noah': ['X', 'G', 'Hybrid'],
+        'Voxy': ['X', 'ZS', 'Hybrid'],
+        'Esquire': ['Gi', 'Hybrid'],
+        'Alphard': ['240S', '350S', 'Executive Lounge'],
+        'Vellfire': ['2.4Z', '3.5Z', 'Executive Lounge'],
+        'Hiace': ['Commuter', 'DX', 'GL'],
+    },
+
+    'Honda': {
+        'Fit': ['F', 'RS', 'Hybrid'],
+        'Jazz': ['Base'],
+        'Civic': ['LX', 'EX', 'RS', 'Sport'],
+        'Accord': ['LX', 'EX', 'Touring', 'Hybrid'],
+        'Insight': ['Hybrid'],
+        'Vezel': ['Hybrid', 'RS'],
+        'CR-V': ['LX', 'EX', 'EX-L'],
+        'HR-V': ['LX', 'EX'],
+        'Stepwgn': ['Spada', 'Air'],
+        'Freed': ['G', 'Hybrid'],
+        'Odyssey': ['Absolute', 'Hybrid'],
+    },
+
+    'BMW': {
+        '1 Series': ['116i', '118i'],
+        '3 Series': ['318i', '320i', '330i', 'M Sport'],
+        '5 Series': ['520i', '530i', '540i', 'M Sport'],
+        '7 Series': ['730i', '740i'],
+        'X1': ['sDrive18i', 'xDrive20i'],
+        'X3': ['xDrive20i', 'xDrive30i'],
+        'X5': ['xDrive30d', 'xDrive40i'],
+        'X6': ['xDrive40i', 'M50i'],
+        'M Models': ['M2', 'M3', 'M4', 'M5'],
+    },
+
+    'Mercedes-Benz': {
+        'A-Class': ['A180', 'A200'],
+        'C-Class': ['C180', 'C200', 'C220d', 'C300'],
+        'E-Class': ['E200', 'E250', 'E300'],
+        'S-Class': ['S350', 'S450', 'S500', 'Maybach'],
+        'GLA': ['GLA180', 'GLA200'],
+        'GLB': ['GLB200'],
+        'GLC': ['GLC200', 'GLC300'],
+        'GLE': ['GLE350', 'GLE400'],
+        'GLS': ['GLS350', 'GLS450'],
+        'G-Class': ['G350d', 'G63 AMG'],
+        'CLA': ['CLA180', 'CLA200'],
+        'CLS': ['CLS350'],
+        'Vito': ['111 CDI'],
+        'Sprinter': ['313 CDI'],
+    },
+
+    'Audi': {
+        'A1': ['Sportback'],
+        'A3': ['30 TFSI', '35 TFSI'],
+        'A4': ['30 TFSI', '40 TFSI'],
+        'A5': ['40 TFSI'],
+        'A6': ['40 TFSI', '45 TFSI'],
+        'Q2': ['30 TFSI'],
+        'Q3': ['35 TFSI'],
+        'Q5': ['40 TFSI', '45 TDI'],
+        'Q7': ['45 TFSI', '50 TDI'],
+        'Q8': ['55 TFSI'],
+    },
+
+    'Lexus': {
+        'IS': ['250', '300h F Sport'],
+        'ES': ['250', '300h'],
+        'GS': ['350'],
+        'LS': ['460', '600h'],
+        'NX': ['200t', '300h', '350h'],
+        'RX': ['270', '350', '450h'],
+        'LX': ['570', '600'],
+        'GX': ['460'],
+    },
+
+    'Volkswagen': {
+        'Golf': ['TSI', 'GTI', 'R'],
+        'Polo': ['TSI', 'GTI'],
+        'Passat': ['TSI', 'TDI'],
+        'Tiguan': ['TSI', '4Motion'],
+        'Touareg': ['V6 TDI'],
+        'Amarok': ['TDI'],
+        'Jetta': ['TSI'],
+    },
+
+    'Ford': {
+        'Ranger': ['2.2 TDCi', '3.2 TDCi', 'Wildtrak'],
+        'Everest': ['Trend', 'Titanium'],
+        'Focus': ['S', 'SE'],
+        'Kuga': ['EcoBoost'],
+        'Explorer': ['Limited'],
+        'Mustang': ['GT V8'],
+    },
+
+    'Chevrolet': {
+        'Cruze': ['LS', 'LT'],
+        'Captiva': ['LS', 'LT'],
+        'Trailblazer': ['LT'],
+        'Malibu': ['LT'],
+    },
+
+    'Hyundai': {
+        'i10': ['Base'],
+        'i20': ['Base'],
+        'Accent': ['GLS'],
+        'Elantra': ['SE', 'SEL'],
+        'Sonata': ['SE', 'SEL'],
+        'Tucson': ['GLS', 'Limited'],
+        'Santa Fe': ['Sport', 'Limited'],
+        'Kona': ['Base'],
+        'Palisade': ['Calligraphy'],
+    },
+
+    'Kia': {
+        'Picanto': ['Base'],
+        'Rio': ['Base'],
+        'Cerato': ['S', 'EX'],
+        'Sportage': ['LX', 'EX', 'GT-Line'],
+        'Sorento': ['LX', 'EX'],
+        'Seltos': ['EX'],
+    },
+
+    'Nissan': {
+        'March': ['Base'],
+        'Note': ['e-Power', 'X'],
+        'Juke': ['Base'],
+        'Tiida': ['Latio'],
+        'X-Trail': ['20S', '20X', 'Hybrid', '4WD'],
+        'Qashqai': ['2WD', '4WD'],
+        'Patrol': ['Y61', 'Y62'],
+        'Navara': ['King Cab', 'Double Cab', '4WD'],
+        'Serena': ['Highway Star'],
+    },
+
+    'Mazda': {
+        'Demio': ['13S', '15S'],
+        'Axela': ['15S', '20S'],
+        'Atenza': ['20S', '25S'],
+        'CX-3': ['20S'],
+        'CX-5': ['20S', '25S', '2.2D'],
+        'CX-9': ['25T'],
+        'BT-50': ['Double Cab'],
+    },
+
+    'Subaru': {
+        'Impreza': ['1.6i', '2.0i'],
+        'Legacy': ['2.5i'],
+        'Outback': ['2.5i'],
+        'Forester': ['2.0i', '2.0XT', 'Premium'],
+        'XV': ['1.6i', '2.0i'],
+        'WRX': ['STI', 'Turbo'],
+    },
+
+    'Volvo': {
+        'S60': ['T5', 'T6'],
+        'S90': ['T5', 'T6'],
+        'V40': ['T4'],
+        'XC40': ['T4', 'T5'],
+        'XC60': ['T5', 'T6'],
+        'XC90': ['T6'],
+    },
+
+    'Land Rover': {
+        'Discovery': ['3', '4', '5'],
+        'Discovery Sport': ['S', 'SE', 'HSE'],
+        'Defender': ['90', '110', '130'],
+    },
+
+    'Range Rover': {
+        'Range Rover': ['Vogue', 'Autobiography', 'SV'],
+        'Range Rover Sport': ['HSE', 'SE', 'SVR'],
+        'Velar': ['S', 'SE', 'R-Dynamic'],
+        'Evoque': ['S', 'SE', 'HSE'],
+    }
+}
+
+def get_combined_car_hierarchy():
+    hierarchy = {
+        make: {model: variants.copy() for model, variants in models.items()}
+        for make, models in CAR_HIERARCHY.items()
+    }
+    try:
+        for car in Car.objects.all().values('make', 'model', 'variant'):
+            make_value = car.get('make') or ''
+            model_value = car.get('model') or ''
+            variant_value = car.get('variant') or ''
+            if not make_value or not model_value:
+                continue
+            if make_value not in hierarchy:
+                hierarchy[make_value] = {}
+            if model_value not in hierarchy[make_value]:
+                hierarchy[make_value][model_value] = []
+            if variant_value and variant_value not in hierarchy[make_value][model_value]:
+                hierarchy[make_value][model_value].append(variant_value)
+    except Exception:
+        pass
+    return hierarchy
+
+
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         'class': 'form-control',
@@ -110,9 +328,25 @@ class DealershipRegistrationForm(forms.ModelForm):
 
 
 class CarForm(forms.ModelForm):
+    make = forms.ChoiceField(
+        required=True,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    model = forms.ChoiceField(
+        required=True,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    variant = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Variant --')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Car
-        fields = ('title', 'make', 'model', 'year', 'price', 'mileage', 
+        fields = ('title', 'make', 'model', 'variant', 'year', 'price', 'mileage', 
                  'fuel_type', 'transmission', 'condition', 'color', 'seats',
                  'engine_size', 'doors', 'body_type', 'previous_owners',
                  'description', 'main_image', 'features')
@@ -120,14 +354,6 @@ class CarForm(forms.ModelForm):
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Car title'
-            }),
-            'make': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Make (Toyota, BMW, etc.)'
-            }),
-            'model': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Model (Camry, 3 Series, etc.)'
             }),
             'year': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -171,6 +397,61 @@ class CarForm(forms.ModelForm):
                 'rows': 3
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        make_value = self.data.get('make') or self.initial.get('make') or (instance.make if instance else '')
+        model_value = self.data.get('model') or self.initial.get('model') or (instance.model if instance else '')
+        variant_value = self.data.get('variant') or self.initial.get('variant') or (instance.variant if instance else '')
+
+        self.fields['make'].choices = self.get_make_choices()
+        self.fields['model'].choices = self.get_model_choices(make_value)
+        self.fields['variant'].choices = self.get_variant_choices(make_value, model_value)
+
+        if make_value and model_value and variant_value:
+            variant_values = [choice[0] for choice in self.fields['variant'].choices]
+            if variant_value not in variant_values:
+                self.fields['variant'].choices.append((variant_value, variant_value))
+
+    @staticmethod
+    def get_make_choices():
+        try:
+            hierarchy = get_combined_car_hierarchy()
+            all_makes = sorted(hierarchy.keys())
+        except Exception:
+            all_makes = sorted(set(CAR_HIERARCHY.keys()))
+        return [('', '-- Select Make --')] + [(make, make) for make in all_makes]
+
+    @staticmethod
+    def get_model_choices(make=None):
+        if not make:
+            return [('', '-- Select Make First --')]
+
+        models = set()
+        try:
+            hierarchy = get_combined_car_hierarchy()
+            models.update(hierarchy.get(make, {}).keys())
+        except Exception:
+            models.update(CAR_HIERARCHY.get(make, {}).keys())
+
+        return [('', '-- Select Model --')] + [(model, model) for model in sorted(models) if model]
+
+    @staticmethod
+    def get_variant_choices(make=None, model=None):
+        if not make:
+            return [('', '-- Select Make First --')]
+        if not model:
+            return [('', '-- Select Model First --')]
+
+        variants = []
+        try:
+            hierarchy = get_combined_car_hierarchy()
+            variants = hierarchy.get(make, {}).get(model, [])
+        except Exception:
+            variants = CAR_HIERARCHY.get(make, {}).get(model, [])
+        variants = [v for v in sorted(set(v for v in variants if v))]
+        return [('', '-- Select Variant --')] + [(variant, variant) for variant in variants]
 
 
 class ReviewForm(forms.ModelForm):
@@ -249,29 +530,45 @@ class ConversationMessageForm(forms.Form):
 
 
 class CarSearchForm(forms.Form):
-    from .models import Car
- 
     @staticmethod
     def get_make_choices():
-        popular_makes = [
-            'Toyota', 'Nissan', 'BMW', 'Mercedes-Benz', 'Honda',
-            'Hyundai', 'Subaru', 'Isuzu', 'Suzuki', 'Mitsubishi',
-            'Ford', 'Daihatsu', 'Mazda', 'Kia', 'Volkswagen',
-            'Audi', 'Lexus', 'Range Rover', 'Land Rover',
-            'Chevrolet', 'Peugeot', 'Renault', 'Fiat', 'Tata',
-            'MG', 'Geely', 'JAC', 'BAIC', 'Volvo', 'Porsche',
-            'Jaguar', 'Jeep', 'Chery', 'BYD', 'Haval', 'Jetour',
-            'Dongfeng', 'Foton',
-        ]
- 
         try:
-            db_makes = set(Car.objects.values_list('make', flat=True).distinct())
+            hierarchy = get_combined_car_hierarchy()
+            all_makes = sorted(hierarchy.keys())
         except Exception:
-            db_makes = set()
- 
-        all_makes = sorted(set(popular_makes) | db_makes)
+            all_makes = sorted(set(CAR_HIERARCHY.keys()))
         return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
- 
+
+    @staticmethod
+    def get_model_choices(make=None):
+        if not make:
+            return [('', '-- Select Make First --')]
+
+        models = set()
+        try:
+            hierarchy = get_combined_car_hierarchy()
+            models.update(hierarchy.get(make, {}).keys())
+        except Exception:
+            models.update(CAR_HIERARCHY.get(make, {}).keys())
+
+        return [('', '-- All Models --')] + [(model, model) for model in sorted(models) if model]
+
+    @staticmethod
+    def get_variant_choices(make=None, model=None):
+        if not make:
+            return [('', '-- Select Make First --')]
+        if not model:
+            return [('', '-- Select Model First --')]
+
+        variants = []
+        try:
+            hierarchy = get_combined_car_hierarchy()
+            variants = hierarchy.get(make, {}).get(model, [])
+        except Exception:
+            variants = CAR_HIERARCHY.get(make, {}).get(model, [])
+        variants = [v for v in sorted(set(v for v in variants if v))]
+        return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
+
     make = forms.ChoiceField(
         required=False,
         choices=[],
@@ -279,19 +576,35 @@ class CarSearchForm(forms.Form):
             'class': 'form-control'
         })
     )
- 
+
+    model = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    variant = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
- 
         try:
             self.fields['make'].choices = self.get_make_choices()
         except Exception:
             self.fields['make'].choices = [('', '-- All Makes --')]
- 
-    model = forms.CharField(required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Model'
-    }))
+
+        selected_make = self.data.get('make') or self.initial.get('make')
+        selected_model = self.data.get('model') or self.initial.get('model')
+
+        self.fields['model'].choices = self.get_model_choices(selected_make)
+        self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
  
     current_year = timezone.now().year
  

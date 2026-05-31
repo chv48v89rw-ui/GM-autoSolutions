@@ -37,15 +37,19 @@
                             {{ form.model }}
                         </div>
                         <div class="col-6 col-sm-6 col-md-2">
+                            {{ form.variant }}
+                        </div>
+                        <div class="col-6 col-sm-6 col-md-2">
                             {{ form.year_from }}
                         </div>
                         <div class="col-6 col-sm-6 col-md-2">
                             {{ form.year_to }}
                         </div>
-                        <div class="col-12 col-md-2 text-end text-md-start">
+                        <div class="col-12">
                             <button type="submit" class="btn btn-primary w-100">
                                 🔍 Search Cars
                             </button>
+                            <div class="small text-muted mt-2 d-md-block">More Filters</div>
                         </div>
                     </div>
 
