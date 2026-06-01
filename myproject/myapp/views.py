@@ -78,6 +78,18 @@ def home(request):
             cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
         if form.cleaned_data.get('seats'):
             cars = cars.filter(seats__gte=form.cleaned_data['seats'])
+        if form.cleaned_data.get('exterior_color'):
+            exterior_colors = form.cleaned_data['exterior_color']
+            cars = cars.filter(exterior_color__in=exterior_colors)
+        if form.cleaned_data.get('interior_color'):
+            interior_colors = form.cleaned_data['interior_color']
+            cars = cars.filter(interior_color__in=interior_colors)
+        if form.cleaned_data.get('seat_material'):
+            seat_materials = form.cleaned_data['seat_material']
+            cars = cars.filter(seat_material__in=seat_materials)
+        if form.cleaned_data.get('interior_trim'):
+            interior_trims = form.cleaned_data['interior_trim']
+            cars = cars.filter(interior_trim__in=interior_trims)
     
     # Get featured/recent cars
     featured_cars = cars[:12]
@@ -635,7 +647,17 @@ def car_list(request):
             cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
         if form.cleaned_data.get('seats'):
             cars = cars.filter(seats__gte=form.cleaned_data['seats'])
-        
+
+        # Color filtering with single selection
+        if form.cleaned_data.get('exterior_color'):
+            cars = cars.filter(exterior_color=form.cleaned_data['exterior_color'])
+        if form.cleaned_data.get('interior_color'):
+            cars = cars.filter(interior_color=form.cleaned_data['interior_color'])
+        if form.cleaned_data.get('seat_material'):
+            cars = cars.filter(seat_material=form.cleaned_data['seat_material'])
+        if form.cleaned_data.get('interior_trim'):
+            cars = cars.filter(interior_trim=form.cleaned_data['interior_trim'])
+
         # NEW: Color filtering (Feature #5)
         if form.cleaned_data.get('color'):
             cars = cars.filter(color__icontains=form.cleaned_data['color'])

@@ -61,7 +61,7 @@ CAR_HIERARCHY = {
         'A-Class': ['A180', 'A200'],
         'C-Class': ['C180', 'C200', 'C220d', 'C300'],
         'E-Class': ['E200', 'E250', 'E300'],
-        'S-Class': ['S350', 'S450', 'S500', 'Maybach'],
+        'S-Class': ['S350', 'S450', 'S500', 'Maybach', 'S680'],
         'GLA': ['GLA180', 'GLA200'],
         'GLB': ['GLB200'],
         'GLC': ['GLC200', 'GLC300'],
@@ -196,6 +196,122 @@ CAR_HIERARCHY = {
         'Range Rover Sport': ['HSE', 'SE', 'SVR'],
         'Velar': ['S', 'SE', 'R-Dynamic'],
         'Evoque': ['S', 'SE', 'HSE'],
+    }
+    ,
+    'Suzuki': {
+        'Alto': ['Base'],
+        'Swift': ['GL', 'RS'],
+        'Baleno': ['GL'],
+        'Jimny': ['JL', 'GLX'],
+        'Vitara': ['GLX'],
+        'Escudo': ['XG', 'XL'],
+        'Wagon R': ['FX'],
+        'Every': ['Van', 'Join'],
+    },
+
+    'Mitsubishi': {
+        'Lancer': ['GLX', 'EX'],
+        'Outlander': ['24G', 'PHEV'],
+        'ASX': ['2WD', '4WD'],
+        'Pajero': ['Short Wheel Base', 'Long Wheel Base', 'Exceed'],
+        'Pajero Sport': ['Dakar'],
+        'Triton': ['Single Cab', 'Double Cab'],
+    },
+
+    'Isuzu': {
+        'D-Max': ['Single Cab', 'Double Cab', '4WD'],
+        'MU-X': ['LS', 'LS-T'],
+        'N-Series': ['Truck'],
+    },
+
+    'Daihatsu': {
+        'Mira': ['L', 'X'],
+        'Move': ['L', 'Custom'],
+        'Tanto': ['L', 'Custom'],
+        'Terios': ['CX', 'TX'],
+        'Boon': ['CL'],
+        'Hijet': ['Cargo', 'Truck'],
+    },
+
+    'Peugeot': {
+        '208': ['Active', 'Allure'],
+        '3008': ['Active', 'GT'],
+        '5008': ['Active', 'GT'],
+        '508': ['Allure'],
+    },
+
+    'Renault': {
+        'Duster': ['Expression', 'Dynamique'],
+        'Koleos': ['Zen', 'Intens'],
+        'Captur': ['Zen'],
+        'Megane': ['GT Line'],
+    },
+
+    'Jeep': {
+        'Wrangler': ['Sport', 'Rubicon'],
+        'Grand Cherokee': ['Limited', 'Overland'],
+        'Compass': ['Longitude', 'Limited'],
+        'Cherokee': ['Limited'],
+    },
+
+    'Porsche': {
+        'Macan': ['Base', 'S', 'GTS'],
+        'Cayenne': ['Base', 'S', 'Turbo'],
+        'Panamera': ['4', '4S'],
+    },
+
+    'Mini': {
+        'Cooper': ['Base', 'S'],
+        'Countryman': ['Cooper', 'Cooper S'],
+        'Clubman': ['Cooper S'],
+    },
+
+    'Jaguar': {
+        'XE': ['Prestige', 'R-Sport'],
+        'XF': ['Prestige', 'Portfolio'],
+        'F-Pace': ['Prestige', 'R-Dynamic'],
+        'E-Pace': ['SE'],
+    },
+
+    'BYD': {
+        'Atto 3': ['Standard Range', 'Extended Range'],
+        'Dolphin': ['Comfort', 'Premium'],
+        'Seal': ['Premium', 'Performance'],
+    },
+
+    'Jetour': {
+        'X70 Plus': ['Comfort', 'Luxury'],
+        'Dashing': ['Comfort', 'Luxury'],
+        'X90 Plus': ['Luxury'],
+    },
+
+    'Chery': {
+        'Tiggo 4 Pro': ['Comfort', 'Luxury'],
+        'Tiggo 7 Pro': ['Luxury'],
+        'Tiggo 8 Pro': ['Executive'],
+    },
+
+    'Haval': {
+        'Jolion': ['Premium', 'Luxury'],
+        'H6': ['Premium', 'Luxury'],
+    },
+
+    'GWM': {
+        'Poer': ['Commercial', 'Passenger'],
+        'Tank 300': ['Luxury'],
+    },
+
+    'Tesla': {
+        'Model 3': ['Standard Range', 'Long Range', 'Performance'],
+        'Model Y': ['Long Range', 'Performance'],
+        'Model S': ['Long Range', 'Plaid'],
+        'Model X': ['Long Range', 'Plaid'],
+    },
+
+    'MG': {
+        'ZS': ['Comfort', 'Luxury'],
+        'HS': ['Comfort', 'Luxury'],
+        'MG4': ['Standard', 'Luxury'],
     }
 }
 
@@ -881,6 +997,170 @@ class CarSearchForm(forms.Form):
             ('7', '7 Seats'),
             ('8', '8+ Seats'),
         ],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    EXTERIOR_COLOR_CHOICES = sorted([
+        ('Arctic White', 'Arctic White'),
+        ('Black', 'Black'),
+        ('Blue', 'Blue'),
+        ('Bright Red', 'Bright Red'),
+        ('Bronze', 'Bronze'),
+        ('Brown', 'Brown'),
+        ('Burgundy', 'Burgundy'),
+        ('Candy Red', 'Candy Red'),
+        ('Champagne Gold', 'Champagne Gold'),
+        ('Charcoal Grey', 'Charcoal Grey'),
+        ('Cherry Red', 'Cherry Red'),
+        ('Chocolate Brown', 'Chocolate Brown'),
+        ('Copper', 'Copper'),
+        ('Copper Orange', 'Copper Orange'),
+        ('Cream', 'Cream'),
+        ('Dark Brown', 'Dark Brown'),
+        ('Dark Grey', 'Dark Grey'),
+        ('Electric Blue', 'Electric Blue'),
+        ('Emerald Green', 'Emerald Green'),
+        ('Forest Green', 'Forest Green'),
+        ('Gold', 'Gold'),
+        ('Grey', 'Grey'),
+        ('Gunmetal Grey', 'Gunmetal Grey'),
+        ('Ivory', 'Ivory'),
+        ('Jet Black', 'Jet Black'),
+        ('Light Blue', 'Light Blue'),
+        ('Light Grey', 'Light Grey'),
+        ('Lime Green', 'Lime Green'),
+        ('Matte Black', 'Matte Black'),
+        ('Matte Blue', 'Matte Blue'),
+        ('Matte Green', 'Matte Green'),
+        ('Matte Grey', 'Matte Grey'),
+        ('Matte Silver', 'Matte Silver'),
+        ('Metallic Silver', 'Metallic Silver'),
+        ('Midnight Blue', 'Midnight Blue'),
+        ('Mocha', 'Mocha'),
+        ('Multi-Color', 'Multi-Color'),
+        ('Mustard Yellow', 'Mustard Yellow'),
+        ('Nardo Grey', 'Nardo Grey'),
+        ('Navy Blue', 'Navy Blue'),
+        ('Olive Green', 'Olive Green'),
+        ('Orange', 'Orange'),
+        ('Other', 'Other'),
+        ('Pearl White', 'Pearl White'),
+        ('Pink', 'Pink'),
+        ('Purple', 'Purple'),
+        ('Red', 'Red'),
+        ('Royal Blue', 'Royal Blue'),
+        ('Ruby Red', 'Ruby Red'),
+        ('Slate Grey', 'Slate Grey'),
+        ('Sky Blue', 'Sky Blue'),
+        ('Steel Blue', 'Steel Blue'),
+        ('Sunflower Yellow', 'Sunflower Yellow'),
+        ('Teal', 'Teal'),
+        ('Titanium Silver', 'Titanium Silver'),
+        ('Turquoise', 'Turquoise'),
+        ('Two-Tone', 'Two-Tone'),
+        ('Violet', 'Violet'),
+        ('White', 'White'),
+        ('Wine Red', 'Wine Red'),
+        ('Yellow', 'Yellow'),
+    ])
+
+    exterior_color = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    INTERIOR_COLOR_CHOICES = sorted([
+        ('Anthracite', 'Anthracite'),
+        ('Beige', 'Beige'),
+        ('Black', 'Black'),
+        ('Black / Beige', 'Black / Beige'),
+        ('Black / Blue', 'Black / Blue'),
+        ('Black / Brown', 'Black / Brown'),
+        ('Black / Grey', 'Black / Grey'),
+        ('Black / Red', 'Black / Red'),
+        ('Black / White', 'Black / White'),
+        ('Blue', 'Blue'),
+        ('Brown', 'Brown'),
+        ('Brown / Beige', 'Brown / Beige'),
+        ('Burgundy', 'Burgundy'),
+        ('Camel', 'Camel'),
+        ('Charcoal', 'Charcoal'),
+        ('Chocolate Brown', 'Chocolate Brown'),
+        ('Cream', 'Cream'),
+        ('Dark Brown', 'Dark Brown'),
+        ('Dark Grey', 'Dark Grey'),
+        ('Espresso Brown', 'Espresso Brown'),
+        ('Green', 'Green'),
+        ('Grey', 'Grey'),
+        ('Ivory', 'Ivory'),
+        ('Jet Black', 'Jet Black'),
+        ('Light Grey', 'Light Grey'),
+        ('Mocha', 'Mocha'),
+        ('Navy Blue', 'Navy Blue'),
+        ('Orange', 'Orange'),
+        ('Other', 'Other'),
+        ('Oyster', 'Oyster'),
+        ('Red', 'Red'),
+        ('Red / Black', 'Red / Black'),
+        ('Saddle Tan', 'Saddle Tan'),
+        ('Sand Beige', 'Sand Beige'),
+        ('Tan', 'Tan'),
+        ('Tan / Black', 'Tan / Black'),
+        ('Taupe', 'Taupe'),
+        ('White', 'White'),
+        ('White / Black', 'White / Black'),
+    ])
+
+    interior_color = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    SEAT_MATERIAL_CHOICES = sorted([
+        ('Alcantara', 'Alcantara'),
+        ('Cloth', 'Cloth'),
+        ('Fabric', 'Fabric'),
+        ('Leather', 'Leather'),
+        ('Leatherette', 'Leatherette'),
+        ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
+        ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
+        ('Nappa Leather', 'Nappa Leather'),
+        ('Other', 'Other'),
+        ('Premium Leather', 'Premium Leather'),
+        ('Suede', 'Suede'),
+        ('Synthetic Leather', 'Synthetic Leather'),
+        ('Velour', 'Velour'),
+        ('Vinyl', 'Vinyl'),
+    ])
+
+    seat_material = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    INTERIOR_TRIM_CHOICES = sorted([
+        ('Aluminum', 'Aluminum'),
+        ('Brushed Aluminum', 'Brushed Aluminum'),
+        ('Carbon Fiber', 'Carbon Fiber'),
+        ('Carbon Fiber Look', 'Carbon Fiber Look'),
+        ('Chrome', 'Chrome'),
+        ('Gloss Wood', 'Gloss Wood'),
+        ('Leather Wrapped', 'Leather Wrapped'),
+        ('Matte Wood', 'Matte Wood'),
+        ('Mixed Materials', 'Mixed Materials'),
+        ('Open-Pore Wood', 'Open-Pore Wood'),
+        ('Other', 'Other'),
+        ('Piano Black', 'Piano Black'),
+        ('Satin Chrome', 'Satin Chrome'),
+        ('Wood Trim', 'Wood Trim'),
+    ])
+
+    interior_trim = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
