@@ -83,6 +83,12 @@
 
                     <hr>
 
+                    {% if dealership.response_time_badge_enabled and dealership.response_time_badge_choice %}
+                        <div class="alert alert-info py-2">
+                            <strong>Response estimate:</strong> {{ dealership.response_time_badge_label }}
+                        </div>
+                    {% endif %}
+
                     <div class="row g-2">
                         <div class="col-md-3">
                             <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary w-100 btn-lg">

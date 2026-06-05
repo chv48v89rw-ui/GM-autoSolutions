@@ -50,10 +50,30 @@ class Dealership(models.Model):
     business_certificate = models.FileField(upload_to='dealership_certificates/', null=True, blank=False)
     is_approved = models.BooleanField(default=False)  # Dealership must be approved to be active
     is_premium = models.BooleanField(default=False)  # Premium dealerships appear as top picks on the home page
+    RESPONSE_TIME_CHOICES = [
+        ('10_min', '10 min'),
+        ('1_hr', '1 hr'),
+        ('3_hr', '3 hr'),
+        ('6_hr', '6 hr'),
+        ('24_hr', '24 hr'),
+    ]
+    response_time_badge_enabled = models.BooleanField(default=False)
+    response_time_badge_choice = models.CharField(
+        max_length=20,
+        choices=RESPONSE_TIME_CHOICES,
+        blank=True,
+        default=''
+    )
     rating = models.FloatField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    @property
+    def response_time_badge_label(self):
+        if self.response_time_badge_enabled and self.response_time_badge_choice:
+            return dict(self.RESPONSE_TIME_CHOICES).get(self.response_time_badge_choice, '')
+        return ''
+
     def __str__(self):
         return self.company_name
 

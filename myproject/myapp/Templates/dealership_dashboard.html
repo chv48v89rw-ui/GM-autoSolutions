@@ -231,6 +231,42 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">⏱️ Response Time Badge</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" class="row g-3 align-items-end">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="response_time_settings">
+
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="response-time-toggle" name="response_time_badge_enabled" {% if dealership.response_time_badge_enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="response-time-toggle">
+                            Show response time badge to buyers
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="response-time-choice">Estimated reply time</label>
+                    <select class="form-select" id="response-time-choice" name="response_time_badge_choice" {% if not dealership.response_time_badge_enabled %}disabled{% endif %}>
+                        <option value="">Select estimate</option>
+                        {% for value, label in response_time_choices %}
+                            <option value="{{ value }}" {% if dealership.response_time_badge_choice == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Save Response Time Setting</button>
+                    <small class="text-muted ms-3">This badge will appear on your car details and messaging pages.</small>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
     function toggleSelectAll() {
         const mainCheckbox = document.getElementById('main-checkbox');
@@ -284,6 +320,17 @@
             deselectAllBtn.style.display = 'none';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const responseToggle = document.getElementById('response-time-toggle');
+        const responseChoice = document.getElementById('response-time-choice');
+
+        if (responseToggle && responseChoice) {
+            responseToggle.addEventListener('change', function () {
+                responseChoice.disabled = !responseToggle.checked;
+            });
+        }
+    });
     </script>
 
     <!-- Enquiries Section -->

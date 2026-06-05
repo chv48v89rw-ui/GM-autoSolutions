@@ -353,6 +353,21 @@ def dealership_dashboard(request):
     reviews = dealership.reviews.all()
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
     
+    if request.method == 'POST' and request.POST.get('form_type') == 'response_time_settings':
+        response_time_badge_enabled = request.POST.get('response_time_badge_enabled') == 'on'
+        response_time_badge_choice = request.POST.get('response_time_badge_choice', '')
+
+        if response_time_badge_enabled and response_time_badge_choice in dict(Dealership.RESPONSE_TIME_CHOICES):
+            dealership.response_time_badge_enabled = True
+            dealership.response_time_badge_choice = response_time_badge_choice
+        else:
+            dealership.response_time_badge_enabled = False
+            dealership.response_time_badge_choice = ''
+
+        dealership.save()
+        messages.success(request, 'Response time badge settings updated.')
+        return redirect('dealership_dashboard')
+
     enquiries = Enquiry.objects.filter(
         Q(dealership=dealership) | Q(car__dealership=dealership)
     ).order_by('-created_at')
@@ -367,6 +382,7 @@ def dealership_dashboard(request):
         'total_cars': cars.count(),
         'total_enquiries': enquiries.count(),
         'unread_enquiries': unread_enquiries,
+        'response_time_choices': Dealership.RESPONSE_TIME_CHOICES,
     }
     return render(request, 'dealership_dashboard.html', context)
 

@@ -12,6 +12,11 @@
                     <p class="text-muted mb-0 mt-2">{{ car.year }} {{ car.make }} {{ car.model }}</p>
                 </div>
                 <div class="card-body p-5">
+                    {% if car.dealership.response_time_badge_enabled and car.dealership.response_time_badge_choice %}
+                        <div class="alert alert-info mb-4">
+                            <strong>Estimated response time:</strong> {{ car.dealership.response_time_badge_label }}
+                        </div>
+                    {% endif %}
                     <form method="post">
                         {% csrf_token %}
 

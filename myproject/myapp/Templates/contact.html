@@ -39,6 +39,12 @@
                                         <small class="text-muted ms-2">({{ dealership_rating|floatformat:1 }})</small>
                                     </div>
 
+                                    {% if dealership.response_time_badge_enabled and dealership.response_time_badge_choice %}
+                                        <div class="badge bg-info text-dark mb-3">
+                                            Estimated reply time: {{ dealership.response_time_badge_label }}
+                                        </div>
+                                    {% endif %}
+
                                     <p class="text-muted">{{ dealership.description|truncatewords:20 }}</p>
 
                                     <hr>
