@@ -1548,7 +1548,6 @@ def delete_saved_search(request, search_id):
 
 # ========== FEATURE #6: CAR COMPARISON TOOL ==========
 
-@login_required(login_url='login')
 def add_to_comparison(request, car_id):
     """Add car to comparison"""
     try:
@@ -1571,7 +1570,6 @@ def add_to_comparison(request, car_id):
         return JsonResponse({'error': 'Already in comparison'}, status=400)
 
 
-@login_required(login_url='login')
 def remove_from_comparison(request, car_id):
     """Remove car from comparison"""
     if 'comparison_cars' in request.session:
@@ -1582,7 +1580,6 @@ def remove_from_comparison(request, car_id):
     return JsonResponse({'error': 'Car not in comparison'}, status=404)
 
 
-@login_required(login_url='login')
 def view_comparison(request):
     """View car comparison"""
     comparison_ids = request.session.get('comparison_cars', [])
