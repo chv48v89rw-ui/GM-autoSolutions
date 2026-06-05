@@ -459,11 +459,31 @@ class CarForm(forms.ModelForm):
         choices=[('', '-- Select Variant --')],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    exterior_color = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Exterior Color --')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    interior_color = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Interior Color --')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    seat_material = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Seat Material --')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    interior_trim = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Interior Trim --')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = Car
         fields = ('title', 'make', 'model', 'variant', 'year', 'price', 'mileage', 
-                 'fuel_type', 'transmission', 'condition', 'color', 'seats',
+                 'fuel_type', 'transmission', 'condition', 'color', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'seats',
                  'engine_size', 'doors', 'body_type', 'previous_owners',
                  'description', 'main_image', 'features')
         widgets = {
@@ -490,6 +510,10 @@ class CarForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Color'
             }),
+            'exterior_color': forms.Select(attrs={'class': 'form-select'}),
+            'interior_color': forms.Select(attrs={'class': 'form-select'}),
+            'seat_material': forms.Select(attrs={'class': 'form-select'}),
+            'interior_trim': forms.Select(attrs={'class': 'form-select'}),
             'seats': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Number of seats'
@@ -524,6 +548,11 @@ class CarForm(forms.ModelForm):
         self.fields['make'].choices = self.get_make_choices()
         self.fields['model'].choices = self.get_model_choices(make_value)
         self.fields['variant'].choices = self.get_variant_choices(make_value, model_value)
+
+        self.fields['exterior_color'].choices = [('', '-- Select Exterior Color --')] + CarSearchForm.EXTERIOR_COLOR_CHOICES
+        self.fields['interior_color'].choices = [('', '-- Select Interior Color --')] + CarSearchForm.INTERIOR_COLOR_CHOICES
+        self.fields['seat_material'].choices = [('', '-- Select Seat Material --')] + CarSearchForm.SEAT_MATERIAL_CHOICES
+        self.fields['interior_trim'].choices = [('', '-- Select Interior Trim --')] + CarSearchForm.INTERIOR_TRIM_CHOICES
 
         if make_value and model_value and variant_value:
             variant_values = [choice[0] for choice in self.fields['variant'].choices]
@@ -1063,6 +1092,7 @@ class CarSearchForm(forms.Form):
         ('Wine Red', 'Wine Red'),
         ('Yellow', 'Yellow'),
     ])
+    EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
 
     exterior_color = forms.ChoiceField(
         required=False,
@@ -1111,6 +1141,7 @@ class CarSearchForm(forms.Form):
         ('White', 'White'),
         ('White / Black', 'White / Black'),
     ])
+    INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
 
     interior_color = forms.ChoiceField(
         required=False,
@@ -1134,6 +1165,7 @@ class CarSearchForm(forms.Form):
         ('Velour', 'Velour'),
         ('Vinyl', 'Vinyl'),
     ])
+    SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
 
     seat_material = forms.ChoiceField(
         required=False,
@@ -1157,6 +1189,7 @@ class CarSearchForm(forms.Form):
         ('Satin Chrome', 'Satin Chrome'),
         ('Wood Trim', 'Wood Trim'),
     ])
+    INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
 
     interior_trim = forms.ChoiceField(
         required=False,
