@@ -159,7 +159,7 @@
                         </div>
 
                         <div class="card-body">
-                            <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
+                            <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
                             <p class="card-text text-accent fw-bold fs-5">
                                 KES {{ car.price|floatformat:0|intcomma }}
                             </p>

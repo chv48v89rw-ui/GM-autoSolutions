@@ -25,7 +25,7 @@
                                             No Image
                                         </div>
                                     {% endif %}
-                                    <p class="mt-2 font-weight-bold">{{ car.year }} {{ car.make }} {{ car.model }}</p>
+                                    <p class="mt-2 font-weight-bold">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</p>
                                     <small class="text-muted">{{ car.dealership.company_name }}</small>
                                     <p class="mt-2"><strong class="h5">KES {{ car.price|floatformat:0|intcomma }}</strong></p>
                                     <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-primary">View Details</a>

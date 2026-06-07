@@ -218,7 +218,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
+                                    <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
                                     <span class="badge bg-warning text-dark">Premium</span>
                                 </div>
                                 <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>

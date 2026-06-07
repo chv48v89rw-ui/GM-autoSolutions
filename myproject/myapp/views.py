@@ -548,11 +548,20 @@ def add_car(request):
         return redirect('home')
     
     if request.method == 'POST':
-        form = CarForm(request.POST, request.FILES)
+        post_data = request.POST.copy()
+        if not post_data.get('title'):
+            make = post_data.get('make', '').strip()
+            model = post_data.get('model', '').strip()
+            year = post_data.get('year', '').strip()
+            post_data['title'] = ' '.join(part for part in [year, make, model] if part)
+        if not post_data.get('color'):
+            post_data['color'] = post_data.get('exterior_color', '').strip() or 'Not specified'
+
+        form = CarForm(post_data, request.FILES)
         images = request.FILES.getlist('images')
         if form.is_valid():
             if len(images) > 15:
-                form.add_error('images', 'You can upload up to 15 images only.')
+                form.add_error(None, 'You can upload up to 15 images only.')
             else:
                 car = form.save(commit=False)
                 car.dealership = dealership

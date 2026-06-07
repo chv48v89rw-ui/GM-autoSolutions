@@ -401,7 +401,7 @@ class UserProfileForm(forms.ModelForm):
 class DealershipRegistrationForm(forms.ModelForm):
     class Meta:
         model = Dealership
-        fields = ('company_name', 'description', 'logo', 'business_certificate', 'website', 'email', 
+        fields = ('company_name', 'description', 'logo', 'website', 'email', 
                  'phone_number', 'location', 'area_code', 'address')
         widgets = {
             'company_name': forms.TextInput(attrs={
@@ -422,7 +422,6 @@ class DealershipRegistrationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Email address'
             }),
-            'business_certificate': forms.FileInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Phone number'

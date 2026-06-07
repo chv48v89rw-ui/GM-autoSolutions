@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block title %}{{ car.year }} {{ car.make }} {{ car.model }} - GM autoSolutions{% endblock %}
+{% block title %}{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %} - GM autoSolutions{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -40,7 +40,7 @@
             <!-- Car Details -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h2 class="mb-3">{{ car.year }} {{ car.make }} {{ car.model }}</h2>
+                    <h2 class="mb-3">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h2>
                     <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|intcomma }}</h3>
 
                     <div class="row g-4">
