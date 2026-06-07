@@ -32,13 +32,54 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Password</label>
-                                {{ user_form.password }}
+                                <div class="input-group">
+                                    <input type="password" name="password" id="dealership-password" class="form-control" placeholder="Enter password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="dealership-password-toggle" title="Show/Hide password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted d-block mt-1">Minimum 8 characters, must include a number or symbol</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Confirm Password</label>
-                                {{ user_form.password_confirm }}
+                                <div class="input-group">
+                                    <input type="password" name="password_confirm" id="dealership-password-confirm" class="form-control" placeholder="Confirm password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="dealership-password-confirm-toggle" title="Show/Hide password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
+                        <script>
+                            // Toggle dealership password visibility
+                            document.getElementById('dealership-password-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('dealership-password');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+
+                            // Toggle dealership confirm password visibility
+                            document.getElementById('dealership-password-confirm-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('dealership-password-confirm');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+                        </script>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -57,8 +98,9 @@
 
                         <!-- Dealership Form Fields -->
                         <div class="mb-3">
-                            <label class="form-label">Company Name</label>
+                            <label class="form-label">Company Name (Optional)</label>
                             {{ dealership_form.company_name }}
+                            <small class="form-text text-muted">Leave blank to use your username as the company name</small>
                         </div>
 
                         <div class="mb-3">

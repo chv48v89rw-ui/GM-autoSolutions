@@ -22,8 +22,28 @@
 
                         <div class="mb-4">
                             <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                            <div class="input-group">
+                                <input type="password" name="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="login-password-toggle" title="Show/Hide password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
+
+                        <script>
+                            document.getElementById('login-password-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('login-password');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+                        </script>
 
                         <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
                     </form>

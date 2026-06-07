@@ -49,23 +49,68 @@
 
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            {{ user_form.password }}
+                            <div class="input-group">
+                                <input type="password" name="password" id="register-password" class="form-control" placeholder="Enter password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="register-password-toggle" title="Show/Hide password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted d-block mt-1">{{ user_form.password.help_text }}</small>
                             {% if user_form.password.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ user_form.password.errors.0 }}
+                                    {% for error in user_form.password.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Confirm Password</label>
-                            {{ user_form.password_confirm }}
+                            <div class="input-group">
+                                <input type="password" name="password_confirm" id="register-password-confirm" class="form-control" placeholder="Confirm password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="register-password-confirm-toggle" title="Show/Hide password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             {% if user_form.password_confirm.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ user_form.password_confirm.errors.0 }}
+                                    {% for error in user_form.password_confirm.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
+
+                        <script>
+                            // Toggle password visibility
+                            document.getElementById('register-password-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('register-password');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+
+                            // Toggle confirm password visibility
+                            document.getElementById('register-password-confirm-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('register-password-confirm');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+                        </script>
 
                         <!-- Profile Form Fields -->
                         <div class="mb-3">

@@ -339,14 +339,21 @@ def get_combined_car_hierarchy():
 
 
 class UserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Enter password'
-    }))
-    password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Confirm password'
-    }))
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter password',
+            'id': 'password-input'
+        }),
+        help_text='Minimum 8 characters, must include a number or symbol (!@#$%^&*)'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm password',
+            'id': 'password-confirm-input'
+        })
+    )
     
     class Meta:
         model = User
@@ -369,6 +376,25 @@ class UserRegistrationForm(forms.ModelForm):
                 'placeholder': 'Last name'
             }),
         }
+    
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        
+        if password:
+            # Check minimum length
+            if len(password) < 8:
+                raise forms.ValidationError(
+                    "Password must be at least 8 characters long."
+                )
+            
+            # Check for at least one number or symbol
+            import re
+            if not re.search(r'[0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]', password):
+                raise forms.ValidationError(
+                    "Password must include at least one number or symbol (!@#$%^&*)."
+                )
+        
+        return password
     
     def clean(self):
         cleaned_data = super().clean()
@@ -399,15 +425,20 @@ class UserProfileForm(forms.ModelForm):
 
 
 class DealershipRegistrationForm(forms.ModelForm):
+    company_name = forms.CharField(
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Company name (optional - defaults to username)'
+        })
+    )
+
     class Meta:
         model = Dealership
         fields = ('company_name', 'description', 'logo', 'website', 'email', 
                  'phone_number', 'location', 'area_code', 'address')
         widgets = {
-            'company_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Company name'
-            }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Describe your dealership',

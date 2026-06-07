@@ -261,9 +261,14 @@
                                     <hr>
 
                                     <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <small class="text-muted">
-                                            <strong>{{ car.dealership.company_name }}</strong>
-                                        </small>
+                                        <div>
+                                            <small class="text-muted">
+                                                <strong>{{ car.dealership.company_name }}</strong>
+                                                {% if car.dealership.website %}
+                                                    <br><a href="{{ car.dealership.website }}" target="_blank" class="text-primary small">Website</a>
+                                                {% endif %}
+                                            </small>
+                                        </div>
                                         <span class="stars">
                                             {% for i in "12345" %}
                                                 {% if forloop.counter <= car.dealership.rating %}

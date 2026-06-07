@@ -217,6 +217,10 @@ def dealership_register(request):
             dealership.user = user
             dealership.is_approved = False  # Dealership needs approval
             
+            # Auto-populate company_name with username if not provided
+            if not dealership.company_name or dealership.company_name.strip() == '':
+                dealership.company_name = user.username
+            
             # Try to geocode the address for precise coordinates
             # Build comprehensive address with area code for better precision
             address_parts = []

@@ -223,7 +223,12 @@
                                 </div>
                                 <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
                                 <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
-                                <p class="mb-0 text-muted small">{{ car.dealership.company_name }}</p>
+                                <div class="mb-0 text-muted small">
+                                    {{ car.dealership.company_name }}
+                                    {% if car.dealership.website %}
+                                        • <a href="{{ car.dealership.website }}" target="_blank" class="text-primary small">Website</a>
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="card-footer bg-white border-top-0">
                                 <a href="/car/{{ car.id }}/" class="btn btn-outline-primary btn-sm w-100">View Car</a>
