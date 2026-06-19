@@ -1087,7 +1087,8 @@ def dealership_detail(request, dealership_id):
             return redirect('dealership_detail', dealership_id=dealership.id)
 
     def _compute_whatsapp_number(dealership):
-        # Prefer the phone stored on the related user profile if available, else dealership.phone_number
+        # Normalize phone to international format required by wa.me (no +, digits only)
+        DEFAULT_CC = '254'  # fallback country code (Kenya)
         num = ''
         try:
             num = getattr(dealership.user.profile, 'phone_number', '') or ''
@@ -1096,14 +1097,21 @@ def dealership_detail(request, dealership_id):
         if not num:
             num = dealership.phone_number or ''
 
-        # Clean non-digits
         cleaned = re.sub(r'\D', '', str(num))
-        # If area_code is provided, prepend it (and strip leading zeros from number)
-        if dealership.area_code:
-            area = re.sub(r'\D', '', str(dealership.area_code))
+
+        if not cleaned:
+            return ''
+
+        # Handle different local/international formats
+        if cleaned.startswith('00'):
+            # remove international prefix (00) -> left with country + number
             cleaned = cleaned.lstrip('0')
-            if area and not cleaned.startswith(area):
-                cleaned = area + cleaned
+        elif cleaned.startswith('0'):
+            # replace leading 0 with default country code
+            cleaned = DEFAULT_CC + cleaned[1:]
+        elif not cleaned.startswith(DEFAULT_CC) and len(cleaned) <= 9:
+            # too short and missing country code
+            cleaned = DEFAULT_CC + cleaned.lstrip('0')
 
         return cleaned
 
@@ -1343,6 +1351,7 @@ def contact_dealership(request, dealership_id):
     
     # compute whatsapp number similar to dealership_detail
     def _compute_whatsapp_number(dealership):
+        DEFAULT_CC = '254'
         num = ''
         try:
             num = getattr(dealership.user.profile, 'phone_number', '') or ''
@@ -1351,11 +1360,15 @@ def contact_dealership(request, dealership_id):
         if not num:
             num = dealership.phone_number or ''
         cleaned = re.sub(r'\D', '', str(num))
-        if dealership.area_code:
-            area = re.sub(r'\D', '', str(dealership.area_code))
+        if not cleaned:
+            return ''
+
+        if cleaned.startswith('00'):
             cleaned = cleaned.lstrip('0')
-            if area and not cleaned.startswith(area):
-                cleaned = area + cleaned
+        elif cleaned.startswith('0'):
+            cleaned = DEFAULT_CC + cleaned[1:]
+        elif not cleaned.startswith(DEFAULT_CC) and len(cleaned) <= 9:
+            cleaned = DEFAULT_CC + cleaned.lstrip('0')
         return cleaned
 
     whatsapp_number = _compute_whatsapp_number(dealership)

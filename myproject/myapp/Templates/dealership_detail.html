@@ -79,7 +79,7 @@
                         <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary" onclick="trackClick('email')">
                             ✉️ Email
                         </a>
-                        <button type="button" class="btn btn-success" onclick="openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', 'Hi %20{{ dealership.company_name|escapejs }}%20I%20am%20interested%20in%20your%20listings')">
+                        <button type="button" class="btn btn-success" onclick="openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} I am interested in your listings')">
                             💬 WhatsApp
                         </button>
                         {% if user.is_authenticated %}
