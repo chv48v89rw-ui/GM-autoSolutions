@@ -79,6 +79,9 @@
                         <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary" onclick="trackClick('email')">
                             ✉️ Email
                         </a>
+                        <button type="button" class="btn btn-success" onclick="openWhatsapp('{{ dealership.phone_number|escapejs }}', 'Hi %20{{ dealership.company_name|escapejs }}%20I%20am%20interested%20in%20your%20listings')">
+                            💬 WhatsApp
+                        </button>
                         <a href="/dealership/{{ dealership.id }}/contact/" class="btn btn-secondary" onclick="trackClick('contact')">
                             💬 Contact Form
                         </a>
@@ -282,6 +285,20 @@
         }).catch(function(error) {
             console.log('Tracking failed:', error);
         });
+    }
+
+    function openWhatsapp(number, defaultText) {
+        try {
+            // sanitize number: remove non-digits and leading +
+            var sanitized = String(number).replace(/[^0-9]/g, '');
+            if (!sanitized) return;
+            var text = defaultText || '';
+            var url = 'https://wa.me/' + sanitized + '?text=' + encodeURIComponent(text);
+            trackClick('whatsapp');
+            window.open(url, '_blank');
+        } catch (e) {
+            console.error('WhatsApp open failed', e);
+        }
     }
 
     function showMessage(message, type = 'success') {

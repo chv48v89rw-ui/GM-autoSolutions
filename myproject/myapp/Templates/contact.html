@@ -124,6 +124,9 @@
                                         <button type="submit" class="btn btn-primary w-100 btn-lg">
                                             📤 Send Message
                                         </button>
+                                        <button type="button" id="send-whatsapp" class="btn btn-success w-100 btn-lg mt-2">
+                                            💬 Send via WhatsApp
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -160,6 +163,19 @@
                                     <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary w-100">
                                         terrogamez1@gmail.com
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">💬</div>
+                                    <h6>WhatsApp</h6>
+                                    <p class="text-muted small mb-3">Start a chat on WhatsApp</p>
+                                    <button class="btn btn-success w-100" id="quick-whatsapp">
+                                        Message on WhatsApp
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -217,5 +233,45 @@
 document.querySelectorAll('.js-show-address').forEach(button => {
     button.addEventListener('click', () => alert(`Address: ${button.dataset.address}`));
 });
+
+function sanitizeNumber(number) {
+    return String(number || '').replace(/[^0-9]/g, '');
+}
+
+function openWhatsapp(number, text) {
+    var sanitized = sanitizeNumber(number);
+    if (!sanitized) {
+        alert('WhatsApp number not available for this dealership.');
+        return;
+    }
+    var url = 'https://wa.me/' + sanitized + '?text=' + encodeURIComponent(text || '');
+    // Track the click on server
+    fetch('/dealership/{{ dealership.id }}/track-click/?type=whatsapp').catch(() => {});
+    window.open(url, '_blank');
+}
+
+// Quick WhatsApp button in the contact cards
+var quickBtn = document.getElementById('quick-whatsapp');
+if (quickBtn) {
+    quickBtn.addEventListener('click', function() {
+        openWhatsapp('{{ dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} - I would like to enquire about your listings.');
+    });
+}
+
+// Send the current form content via WhatsApp instead of form submit
+var sendWhatsappBtn = document.getElementById('send-whatsapp');
+if (sendWhatsappBtn) {
+    sendWhatsappBtn.addEventListener('click', function() {
+        var name = document.querySelector('[name="buyer_name"]').value || '';
+        var email = document.querySelector('[name="buyer_email"]').value || '';
+        var phone = document.querySelector('[name="buyer_phone"]').value || '';
+        var subject = document.querySelector('[name="subject"]').value || '';
+        var message = document.querySelector('[name="message"]').value || '';
+
+        var full = 'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email + '\nSubject: ' + subject + '\n\nMessage: ' + message;
+        openWhatsapp('{{ dealership.phone_number|escapejs }}', full);
+    });
+}
+
 </script>
 {% endblock %}
