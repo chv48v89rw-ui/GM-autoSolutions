@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from datetime import timedelta
 import secrets
+import re
 from .models import (UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, 
                      Favorite, Report, CarView, DealershipClick, SavedSearch, CarComparison, 
                      Notification, NotificationPreference)
@@ -1085,6 +1086,29 @@ def dealership_detail(request, dealership_id):
             messages.success(request, 'Review submitted successfully! It will be visible to other users once approved by our admin team.')
             return redirect('dealership_detail', dealership_id=dealership.id)
 
+    def _compute_whatsapp_number(dealership):
+        # Prefer the phone stored on the related user profile if available, else dealership.phone_number
+        num = ''
+        try:
+            num = getattr(dealership.user.profile, 'phone_number', '') or ''
+        except Exception:
+            num = ''
+        if not num:
+            num = dealership.phone_number or ''
+
+        # Clean non-digits
+        cleaned = re.sub(r'\D', '', str(num))
+        # If area_code is provided, prepend it (and strip leading zeros from number)
+        if dealership.area_code:
+            area = re.sub(r'\D', '', str(dealership.area_code))
+            cleaned = cleaned.lstrip('0')
+            if area and not cleaned.startswith(area):
+                cleaned = area + cleaned
+
+        return cleaned
+
+    whatsapp_number = _compute_whatsapp_number(dealership)
+
     context = {
         'dealership': dealership,
         'cars': cars,
@@ -1094,6 +1118,7 @@ def dealership_detail(request, dealership_id):
         'dealership_rating': avg_rating,
         'form': form,
         'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+        'whatsapp_number': whatsapp_number,
     }
 
     return render(request, 'dealership_detail.html', context)
@@ -1286,8 +1311,9 @@ def dealerships_map(request):
 
 
 
+@login_required(login_url='login')
 def contact_dealership(request, dealership_id):
-    """Contact page for a specific dealership"""
+    """Contact page for a specific dealership (login required)"""
     dealership = get_object_or_404(Dealership, id=dealership_id, is_approved=True)  # Only approved dealerships
     reviews = dealership.reviews.all()
     dealership_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
@@ -1315,11 +1341,31 @@ def contact_dealership(request, dealership_id):
     else:
         form = EnquiryForm()
     
+    # compute whatsapp number similar to dealership_detail
+    def _compute_whatsapp_number(dealership):
+        num = ''
+        try:
+            num = getattr(dealership.user.profile, 'phone_number', '') or ''
+        except Exception:
+            num = ''
+        if not num:
+            num = dealership.phone_number or ''
+        cleaned = re.sub(r'\D', '', str(num))
+        if dealership.area_code:
+            area = re.sub(r'\D', '', str(dealership.area_code))
+            cleaned = cleaned.lstrip('0')
+            if area and not cleaned.startswith(area):
+                cleaned = area + cleaned
+        return cleaned
+
+    whatsapp_number = _compute_whatsapp_number(dealership)
+
     context = {
         'dealership': dealership,
         'reviews': reviews,
         'dealership_rating': dealership_rating,
         'form': form,
+        'whatsapp_number': whatsapp_number,
     }
     return render(request, 'contact.html', context)
 

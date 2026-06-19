@@ -254,7 +254,7 @@ function openWhatsapp(number, text) {
 var quickBtn = document.getElementById('quick-whatsapp');
 if (quickBtn) {
     quickBtn.addEventListener('click', function() {
-        openWhatsapp('{{ dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} - I would like to enquire about your listings.');
+        openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} - I would like to enquire about your listings.');
     });
 }
 
@@ -269,7 +269,7 @@ if (sendWhatsappBtn) {
         var message = document.querySelector('[name="message"]').value || '';
 
         var full = 'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email + '\nSubject: ' + subject + '\n\nMessage: ' + message;
-        openWhatsapp('{{ dealership.phone_number|escapejs }}', full);
+        openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', full);
     });
 }
 
