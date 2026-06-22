@@ -52,7 +52,7 @@
                         {% endif %}
                     </p>
 
-                    <a href="/edit-profile/" class="btn btn-primary w-100">Edit Profile</a>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-primary w-100">Edit Profile</a>
                 </div>
             </div>
         </div>
@@ -104,10 +104,18 @@
                                                 {% if enquiry.car %}
                                                     <a href="/dealership/{{ enquiry.car.dealership.id }}/">
                                                         {{ enquiry.car.dealership.company_name }}
+                                                        {% include 'includes/dealership_rating.html' with dealership=enquiry.car.dealership %}
+                                                        {% if enquiry.car.dealership.is_verified %}
+                                                            <span class="badge bg-success text-white small ms-1">Verified</span>
+                                                        {% endif %}
                                                     </a>
                                                 {% else %}
                                                     <a href="/dealership/{{ enquiry.dealership.id }}/">
                                                         {{ enquiry.dealership.company_name }}
+                                                        {% include 'includes/dealership_rating.html' with dealership=enquiry.dealership %}
+                                                        {% if enquiry.dealership.is_verified %}
+                                                            <span class="badge bg-success text-white small ms-1">Verified</span>
+                                                        {% endif %}
                                                     </a>
                                                 {% endif %}
                                             </td>
@@ -155,7 +163,7 @@
                                 <div class="col-lg-6 col-md-12">
                                     <div class="card h-100">
                                         <div class="row g-0">
-                                            <div class="col-md-4">
+                                            <div class="col-md-4" style="position: relative;">
                                             {% if favorite.car.main_image %}
                                                 <img src="{{ favorite.car.main_image.url }}" class="img-fluid rounded-start h-100" 
                                                      alt="{{ favorite.car.title }}" style="object-fit: cover;">
@@ -163,6 +171,9 @@
                                                 <div class="bg-light d-flex align-items-center justify-content-center rounded-start h-100">
                                                     <span class="text-muted">No Image</span>
                                                 </div>
+                                            {% endif %}
+                                            {% if favorite.car.is_top_pick %}
+                                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2" style="font-size: 0.7rem;">⭐ Top Pick</span>
                                             {% endif %}
                                         </div>
                                             <div class="col-md-8">

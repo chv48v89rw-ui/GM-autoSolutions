@@ -122,6 +122,7 @@
                                                     <div class="mt-3 p-3 bg-light border">
                                                         <strong>Related Dealership:</strong>
                                                         <p class="mb-0">{{ report.dealership.company_name }}</p>
+                                                        <p class="mb-0 small text-muted">Joined: {{ report.dealership.created_at|date:"M d, Y" }}</p>
                                                         <a href="{% url 'dealership_detail' report.dealership.id %}" class="small text-primary">View Dealership</a>
                                                     </div>
                                                 {% elif report.reported_user %}

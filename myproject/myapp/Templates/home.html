@@ -144,7 +144,13 @@
                                 </div>
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
-                                        <h5 class="card-title">{{ dealership.company_name }}</h5>
+                                        <h5 class="card-title">
+                                            {{ dealership.company_name }}
+                                            {% if dealership.is_verified %}
+                                                <span class="badge bg-success text-white ms-2"><i class="fas fa-check-circle"></i> Verified</span>
+                                            {% endif %}
+                                        </h5>
+                                        <small class="text-muted d-block">Joined: {{ dealership.created_at|date:"M d, Y" }}</small>
                                         <p class="card-text">{{ dealership.description|truncatewords:20 }}</p>
                                         <p class="text-muted small">
                                             📍 {{ dealership.location }}<br>
@@ -193,6 +199,70 @@
     </section>
 {% endif %}
 
+{% if top_pick_cars %}
+    <section class="py-5" style="background-color: #fff3cd;">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12">
+                <h2 class="section-title">⭐ Top Picks for You</h2>
+                <p class="text-muted">Handpicked cars selected by our team - don't miss these great deals!</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for car in top_pick_cars %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 shadow-sm border-warning">
+                            <div style="height: 180px; overflow: hidden; position: relative;">
+                                {% if car.main_image %}
+                                    <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                {% endif %}
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
+                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
+                                <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
+                                <div class="mb-0 text-muted small">
+                                    {{ car.dealership.company_name }}
+                                    {% include 'includes/dealership_rating.html' with dealership=car.dealership %}
+                                    {% if car.dealership.is_verified %}
+                                        <span class="badge bg-success text-white small ms-1"><i class="fas fa-check-circle"></i> Verified</span>
+                                    {% endif %}
+                                    {% if car.dealership.is_premium and not car.dealership.is_verified %}
+                                        <span class="badge bg-warning text-dark small ms-1">Premium</span>
+                                    {% endif %}
+                                    {% if car.dealership.website %}
+                                        <br>
+                                        <a href="{{ car.dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">Added: {{ car.created_at|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <a href="/car/{{ car.id }}/" class="btn btn-outline-primary btn-sm w-100">View Car</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/cars/" class="btn btn-secondary">
+                        View All Cars →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
 {% if best_cars %}
     <section class="py-5" style="background-color: #f8f9fa;">
         <div class="container">
@@ -219,15 +289,27 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
-                                    <span class="badge bg-warning text-dark">Premium</span>
+                                    {% if car.dealership.is_premium %}
+                                        <span class="badge bg-warning text-dark">Premium</span>
+                                    {% endif %}
                                 </div>
                                 <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
                                 <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
                                 <div class="mb-0 text-muted small">
                                     {{ car.dealership.company_name }}
-                                    {% if car.dealership.website %}
-                                        • <a href="{{ car.dealership.website }}" target="_blank" class="text-primary small">Website</a>
+                                    {% include 'includes/dealership_rating.html' with dealership=car.dealership %}
+                                    {% if car.dealership.is_verified %}
+                                        <span class="badge bg-success text-white small ms-1"><i class="fas fa-check-circle"></i> Verified</span>
                                     {% endif %}
+                                    {% if car.dealership.is_premium and not car.dealership.is_verified %}
+                                        <span class="badge bg-warning text-dark small ms-1">Premium</span>
+                                    {% endif %}
+                                    {% if car.dealership.website %}
+                                        <br>
+                                        <a href="{{ car.dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">Added: {{ car.created_at|date:"M d, Y" }}</small>
                                 </div>
                             </div>
                             <div class="card-footer bg-white border-top-0">

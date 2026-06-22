@@ -14,6 +14,8 @@ urlpatterns = [
     # Authentication
     path('register/', views.register, name='register'),
     path('dealership-register/', views.dealership_register, name='dealership_register'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('edit-dealership/', views.edit_dealership_profile, name='edit_dealership'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
@@ -51,6 +53,7 @@ urlpatterns = [
     # Pricing
     path('pricing/', views.pricing_page, name='pricing'),
     path('pricing/subscribe/<str:plan>/', views.pricing_subscribe, name='pricing_subscribe'),
+    path('pricing/choose-car/', views.pricing_choose_car, name='pricing_choose_car'),
     
     # API endpoints
     path('api/subscription-request/', views.subscription_request, name='subscription_request'),
@@ -76,4 +79,7 @@ urlpatterns = [
     # Feature #7: Notifications
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/preferences/', views.notification_preferences, name='notification_preferences'),
+
+    # AI Chat Assistant
 ]
+

@@ -19,14 +19,16 @@
                             <p class="mb-1"><strong>Email:</strong> {{ enquiry.buyer_email }}</p>
                             <p class="mb-1"><strong>Phone:</strong> {{ enquiry.buyer_phone }}</p>
                         </div>
-                        <div class="col-md-6">
+                                <div class="col-md-6">
                             <h5>Dealership</h5>
                             {% if enquiry.dealership %}
-                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.dealership.company_name }}</p>
+                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.dealership.company_name }}{% if enquiry.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}</p>
                                 <p class="mb-1"><strong>Location:</strong> {{ enquiry.dealership.location }}</p>
+                                <p class="mb-1 small text-muted">Joined: {{ enquiry.dealership.created_at|date:"M d, Y" }}</p>
                             {% elif enquiry.car %}
-                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.car.dealership.company_name }}</p>
+                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.car.dealership.company_name }}{% if enquiry.car.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}</p>
                                 <p class="mb-1"><strong>Location:</strong> {{ enquiry.car.dealership.location }}</p>
+                                <p class="mb-1 small text-muted">Joined: {{ enquiry.car.dealership.created_at|date:"M d, Y" }}</p>
                             {% endif %}
                             <p class="mb-1"><strong>Listing:</strong>
                                 {% if enquiry.car %}

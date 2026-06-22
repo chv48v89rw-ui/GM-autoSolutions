@@ -229,7 +229,7 @@
                         <div class="col-lg-6 col-md-12">
                             <div class="card h-100">
                                 <!-- Car Image -->
-                                <div style="height: 250px; overflow: hidden;">
+                                <div style="height: 250px; overflow: hidden; position: relative;">
                                     {% if car.main_image %}
                                         <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}"
                                              style="width: 100%; height: 100%; object-fit: cover;">
@@ -238,6 +238,9 @@
                                              style="width: 100%; height: 100%;">
                                             <span class="text-muted">No Image</span>
                                         </div>
+                                    {% endif %}
+                                    {% if car.is_top_pick %}
+                                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
                                     {% endif %}
                                     <span class="badge bg-primary position-absolute top-0 end-0 m-2">
                                         {{ car.get_condition_display }}
@@ -260,24 +263,25 @@
 
                                     <hr>
 
-                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-start justify-content-between mb-3 flex-column flex-sm-row gap-2">
                                         <div>
                                             <small class="text-muted">
                                                 <strong>{{ car.dealership.company_name }}</strong>
-                                                {% if car.dealership.website %}
-                                                    <br><a href="{{ car.dealership.website }}" target="_blank" class="text-primary small">Website</a>
+                                                {% include 'includes/dealership_rating.html' with dealership=car.dealership %}
+                                                {% if car.dealership.is_verified %}
+                                                    <span class="badge bg-success text-white small ms-1">Verified</span>
                                                 {% endif %}
+                                                {% if car.dealership.is_premium and not car.dealership.is_verified %}
+                                                    <span class="badge bg-warning text-dark small ms-1">Premium</span>
+                                                {% endif %}
+                                                {% if car.dealership.website %}
+                                                    <br>
+                                                    <a href="{{ car.dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
+                                                {% endif %}
+                                                <br>
+                                                <small>Joined: {{ car.dealership.created_at|date:"M d, Y" }}</small>
                                             </small>
                                         </div>
-                                        <span class="stars">
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= car.dealership.rating %}
-                                                    ★
-                                                {% else %}
-                                                    ☆
-                                                {% endif %}
-                                            {% endfor %}
-                                        </span>
                                     </div>
                                 </div>
 

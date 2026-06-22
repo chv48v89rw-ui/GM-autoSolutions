@@ -22,7 +22,7 @@ from .models import (UserProfile, Dealership, Car, CarImage, Review, DealershipR
                      Notification, NotificationPreference)
 
 logger = logging.getLogger(__name__)
-from .forms import (UserRegistrationForm, UserProfileForm, DealershipRegistrationForm,
+from .forms import (UserRegistrationForm, BuyerUserForm, UserProfileForm, DealershipRegistrationForm,
                     CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
                     ReportForm, SavedSearchForm, ComparisonForm, NotificationPreferenceForm)
 from django.conf import settings
@@ -41,6 +41,11 @@ def home(request):
         is_sold=False,
         is_approved=True,
         is_premium=True
+    ).order_by('-created_at')[:8]
+    top_pick_cars = Car.objects.select_related('dealership').filter(
+        is_sold=False,
+        is_approved=True,
+        is_top_pick=True
     ).order_by('-created_at')[:8]
     
     # Search functionality
@@ -102,6 +107,7 @@ def home(request):
         'dealerships': dealerships,
         'highlighted_dealerships': highlighted_dealerships,
         'best_cars': premium_cars,
+        'top_pick_cars': top_pick_cars,
         'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     }
     return render(request, 'home.html', context)
@@ -341,6 +347,59 @@ def buyer_dashboard(request):
 
 
 @login_required(login_url='login')
+def edit_profile(request):
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'buyer':
+        messages.error(request, 'Only buyers can edit this profile.')
+        return redirect('home')
+
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        user_form = BuyerUserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('buyer_dashboard')
+    else:
+        user_form = BuyerUserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=profile)
+
+    return render(request, 'edit_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    })
+
+
+@login_required(login_url='login')
+def edit_dealership_profile(request):
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'Only dealerships can edit this profile.')
+        return redirect('home')
+
+    dealership = request.user.dealership
+
+    if request.method == 'POST':
+        dealership_form = DealershipRegistrationForm(request.POST, request.FILES, instance=dealership)
+        if dealership_form.is_valid():
+            dealership = dealership_form.save(commit=False)
+            if not dealership.company_name or dealership.company_name.strip() == '':
+                dealership.company_name = request.user.username
+            dealership.save()
+            messages.success(request, 'Your dealership profile has been updated successfully.')
+            return redirect('dealership_dashboard')
+    else:
+        dealership_form = DealershipRegistrationForm(instance=dealership)
+
+    return render(request, 'edit_dealership.html', {
+        'dealership_form': dealership_form,
+        'dealership': dealership,
+    })
+
+
+@login_required(login_url='login')
 def dealership_dashboard(request):
     """Dealership dashboard"""
     # Check if user is a dealership
@@ -356,7 +415,19 @@ def dealership_dashboard(request):
     
     cars = dealership.cars.all()
     reviews = dealership.reviews.all()
-    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    # Get aggregate average (None if no reviews)
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+    # Determine display rating: use computed average if present, otherwise keep stored dealership.rating
+    display_avg = float(avg_rating) if avg_rating is not None else float(dealership.rating or 0)
+    # Persist computed average rating only when there are actual reviews
+    try:
+        if avg_rating is not None:
+            normalized = round(float(avg_rating), 1)
+            if dealership.rating != normalized:
+                dealership.rating = normalized
+                dealership.save(update_fields=['rating'])
+    except Exception:
+        logger.exception('Failed to persist dealership rating for %s', getattr(dealership, 'id', 'unknown'))
     
     if request.method == 'POST' and request.POST.get('form_type') == 'response_time_settings':
         response_time_badge_enabled = request.POST.get('response_time_badge_enabled') == 'on'
@@ -382,7 +453,7 @@ def dealership_dashboard(request):
         'dealership': dealership,
         'cars': cars,
         'reviews': reviews,
-        'avg_rating': avg_rating,
+        'avg_rating': display_avg,
         'enquiries': enquiries,
         'total_cars': cars.count(),
         'total_enquiries': enquiries.count(),
@@ -897,20 +968,60 @@ def pricing_subscribe(request, plan):
 
     contact_person = request.user.get_full_name() or request.user.username
     subscription_type = plan
+    # If a specific car is provided (per-car plan), validate ownership
+    car_id = request.POST.get('car_id')
     message = 'Subscription request created from pricing page quick link.'
+    if subscription_type == 'per_car' and car_id:
+        try:
+            car = Car.objects.get(id=car_id, dealership=dealership)
+            message = f'Per-car subscription requested for car: {car.id} - {car.title}'
+        except Car.DoesNotExist:
+            messages.error(request, 'Selected car not found or does not belong to your dealership.')
+            return redirect('pricing_choose_car')
+    sr_kwargs = {
+        'company_name': dealership.company_name,
+        'contact_person': contact_person,
+        'email': dealership.email,
+        'phone': dealership.phone_number,
+        'subscription_type': subscription_type,
+        'message': message,
+        'dealership': dealership,
+    }
 
-    SubscriptionRequest.objects.create(
-        company_name=dealership.company_name,
-        contact_person=contact_person,
-        email=dealership.email,
-        phone=dealership.phone_number,
-        subscription_type=subscription_type,
-        message=message,
-        dealership=dealership
-    )
+    if subscription_type == 'per_car' and car_id and 'car' in locals():
+        sr_kwargs['car'] = car
+
+    SubscriptionRequest.objects.create(**sr_kwargs)
 
     messages.success(request, 'Your subscription request has been received and will be reviewed. We will get back to you within 24 hours.')
     return redirect('pricing')
+
+
+@login_required(login_url='login')
+def pricing_choose_car(request):
+    """Show dealership-owned cars for selecting a car for per-car subscription."""
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Only dealership accounts can request subscription plans.')
+        return redirect('dealership-register')
+
+    cars = Car.objects.filter(dealership=dealership).order_by('-created_at')
+
+    if request.method == 'POST':
+        car_id = request.POST.get('car_id')
+        if not car_id:
+            messages.error(request, 'Please select a car to continue.')
+            return redirect('pricing_choose_car')
+
+        # Redirect to pricing_subscribe which will validate ownership again
+        return redirect('pricing_subscribe', plan='per_car')
+
+    context = {
+        'dealership': dealership,
+        'cars': cars,
+    }
+    return render(request, 'pricing_choose_car.html', context)
 
 
 def subscription_request(request):
@@ -1616,7 +1727,7 @@ def apply_saved_search(request, search_id):
         params.append(f'features={search.features}')
     
     query_string = '&'.join(params)
-    return redirect(f"{'car_list'}?{query_string}" if query_string else 'car_list')
+    return redirect(f'/cars/?{query_string}')
 
 
 @login_required(login_url='login')
@@ -1629,10 +1740,6 @@ def delete_saved_search(request, search_id):
     except SavedSearch.DoesNotExist:
         messages.error(request, 'Search not found.')
     
-    return redirect('saved_searches')
-
-# Update car_list view is now integrated in the main car_list function above
-
 
 # ========== FEATURE #6: CAR COMPARISON TOOL ==========
 

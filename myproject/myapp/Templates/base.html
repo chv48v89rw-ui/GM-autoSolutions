@@ -131,6 +131,85 @@
             color: var(--primary-white) !important;
         }
 
+        /* Social brand buttons */
+        .btn-social {
+            font-weight: 600;
+            display:inline-flex;
+            align-items:center;
+            gap:0.35rem;
+            border-radius:6px;
+            white-space: nowrap;
+        }
+
+        .btn-social .btn-text {
+            display: inline-block;
+        }
+
+        .btn-instagram {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .btn-facebook {
+            background-color: #1877F2;
+            border-color: #1877F2;
+            color: #fff !important;
+        }
+
+        .btn-twitter {
+            background-color: #1DA1F2;
+            border-color: #1DA1F2;
+            color: #fff !important;
+        }
+
+        .btn-youtube {
+            background-color: #FF0000;
+            border-color: #FF0000;
+            color: #fff !important;
+        }
+
+        .btn-linkedin {
+            background-color: #0A66C2;
+            border-color: #0A66C2;
+            color: #fff !important;
+        }
+
+        .btn-tiktok {
+            background: linear-gradient(135deg,#69C9D0 0%, #EE1D52 100%);
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .btn-website {
+            background-color: var(--accent-teal);
+            border-color: var(--accent-teal);
+            color: #fff !important;
+        }
+
+        .btn-social:focus, .btn-social:hover {
+            filter: brightness(0.95);
+            transform: translateY(-1px);
+        }
+
+        /* Compact rating + responsive social behavior */
+        .dealership-rating { display:inline-flex; align-items:center; gap:0.4rem; }
+        .dealership-rating .stars { font-size: 1rem; }
+        .dealership-rating .rating-number { font-size: 0.9rem; color: var(--text-light); }
+
+        @media (max-width: 576px) {
+            /* hide text labels on social buttons and keep icons only */
+            .btn-social { padding: 0.35rem 0.45rem; min-width: 40px; justify-content: center; }
+            .btn-social .btn-text { display: none; }
+            .btn-social i { font-size: 1rem; }
+
+            /* make visit website smaller and not full width */
+            .btn-website { padding: 0.4rem 0.6rem; font-size: 0.9rem; }
+
+            /* slightly reduce star size */
+            .dealership-rating .stars { font-size: 0.95rem; }
+        }
+
         /* Cards */
         .card {
             border: 1px solid var(--border-color);

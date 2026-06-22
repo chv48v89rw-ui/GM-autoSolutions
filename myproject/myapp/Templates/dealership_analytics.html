@@ -65,15 +65,20 @@
                 <div class="card-body">
                     {% if most_viewed_car %}
                         <div class="d-flex align-items-center mb-3">
-                            {% if most_viewed_car.main_image %}
-                                <img src="{{ most_viewed_car.main_image.url }}" alt="{{ most_viewed_car.title }}"
-                                     class="rounded me-3" style="width: 80px; height: 60px; object-fit: cover;">
-                            {% else %}
-                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
-                                     style="width: 80px; height: 60px;">
-                                    <i class="fas fa-car text-muted"></i>
-                                </div>
-                            {% endif %}
+                            <div style="position: relative;">
+                                {% if most_viewed_car.main_image %}
+                                    <img src="{{ most_viewed_car.main_image.url }}" alt="{{ most_viewed_car.title }}"
+                                         class="rounded me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
+                                         style="width: 80px; height: 60px;">
+                                        <i class="fas fa-car text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                {% if most_viewed_car.is_top_pick %}
+                                    <span class="badge bg-warning text-dark position-absolute top-0 start-0" style="font-size: 0.6rem;">⭐</span>
+                                {% endif %}
+                            </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">{{ most_viewed_car.title }}</h6>
                                 <p class="text-muted small mb-0">{{ most_viewed_car.year }} • {{ most_viewed_car.make }} {{ most_viewed_car.model }}</p>
@@ -158,15 +163,20 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    {% if car_data.car.main_image %}
-                                                        <img src="{{ car_data.car.main_image.url }}" alt="{{ car_data.car.title }}"
-                                                             class="rounded me-2" style="width: 50px; height: 40px; object-fit: cover;">
-                                                    {% else %}
-                                                        <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center"
-                                                             style="width: 50px; height: 40px;">
-                                                            <i class="fas fa-car text-muted"></i>
-                                                        </div>
-                                                    {% endif %}
+                                                    <div style="position: relative;">
+                                                        {% if car_data.car.main_image %}
+                                                            <img src="{{ car_data.car.main_image.url }}" alt="{{ car_data.car.title }}"
+                                                                 class="rounded me-2" style="width: 50px; height: 40px; object-fit: cover;">
+                                                        {% else %}
+                                                            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center"
+                                                                 style="width: 50px; height: 40px;">
+                                                                <i class="fas fa-car text-muted"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if car_data.car.is_top_pick %}
+                                                            <span class="badge bg-warning text-dark position-absolute top-0 start-0" style="font-size: 0.6rem;">⭐</span>
+                                                        {% endif %}
+                                                    </div>
                                                     <div>
                                                         <strong>{{ car_data.car.title }}</strong><br>
                                                         <small class="text-muted">{{ car_data.car.year }} • {{ car_data.car.make }} {{ car_data.car.model }}</small>
@@ -228,28 +238,31 @@
                     <div class="card-body">
                         <div class="row">
                             {% for item in top_cars_30_days %}
-                                <div class="col-md-6 col-lg-4 mb-3">
-                                    <div class="card h-100 border-success">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-2">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center justify-content-between p-2 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div style="position: relative; width:60px; height:45px; margin-right:0.75rem;">
                                                 {% if item.car.main_image %}
                                                     <img src="{{ item.car.main_image.url }}" alt="{{ item.car.title }}"
-                                                         class="rounded me-2" style="width: 60px; height: 45px; object-fit: cover;">
+                                                         class="rounded" style="width:60px; height:45px; object-fit: cover;">
                                                 {% else %}
-                                                    <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center"
-                                                         style="width: 60px; height: 45px;">
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                                         style="width:60px; height:45px;">
                                                         <i class="fas fa-car text-muted"></i>
                                                     </div>
                                                 {% endif %}
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0">{{ item.car.title }}</h6>
-                                                    <small class="text-muted">{{ item.car.year }} • {{ item.car.make }}</small>
-                                                </div>
+                                                {% if item.car.is_top_pick %}
+                                                    <span class="badge bg-warning text-dark position-absolute top-0 start-0" style="font-size: 0.6rem;">⭐</span>
+                                                {% endif %}
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="badge bg-success">{{ item.views }} views</span>
-                                                <a href="/car/{{ item.car.id }}/" class="btn btn-sm btn-outline-success">View</a>
+                                            <div>
+                                                <h6 class="mb-0">{{ item.car.title }}</h6>
+                                                <small class="text-muted">{{ item.car.year }} • {{ item.car.make }}</small>
                                             </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-success">{{ item.views }} views</span>
+                                            <div class="mt-2"><a href="/car/{{ item.car.id }}/" class="btn btn-sm btn-outline-success">View</a></div>
                                         </div>
                                     </div>
                                 </div>

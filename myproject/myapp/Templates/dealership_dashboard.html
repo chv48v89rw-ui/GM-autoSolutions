@@ -63,6 +63,10 @@
                     {% endif %}
 
                     <h5>{{ dealership.company_name }}</h5>
+                    {% if dealership.is_verified %}
+                        <span class="badge bg-success text-white small ms-1">Verified</span>
+                    {% endif %}
+                    <p class="text-muted small mb-2">Joined: {{ dealership.created_at|date:"M d, Y" }}</p>
                     
                     {% if dealership.is_approved %}
                         <span class="badge bg-success mb-2">✅ Approved Dealership</span>
@@ -83,7 +87,7 @@
 
                     <p class="text-muted small">{{ dealership.location }}</p>
 
-                    <a href="/edit-dealership/" class="btn btn-primary btn-sm w-100">Edit Profile</a>
+                    <a href="{% url 'edit_dealership' %}" class="btn btn-primary btn-sm w-100">Edit Profile</a>
                 </div>
             </div>
         </div>
@@ -113,7 +117,7 @@
                             {% if dealership.website %}
                                 <p>
                                     <strong>Website:</strong><br>
-                                    <a href="{{ dealership.website }}" target="_blank">{{ dealership.website }}</a>
+                                    <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
                                 </p>
                             {% endif %}
                         </div>

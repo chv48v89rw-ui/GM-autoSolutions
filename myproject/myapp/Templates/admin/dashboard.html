@@ -61,7 +61,7 @@
                             <div class="border-bottom pb-3 mb-3">
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <h6>{{ dealership.company_name }}</h6>
+                                        <h6>{{ dealership.company_name }} {% include 'includes/dealership_rating.html' with dealership=dealership %}</h6>
                                         <p class="text-muted mb-1">
                                             <i class="fas fa-user"></i> {{ dealership.user.username }}<br>
                                             <i class="fas fa-envelope"></i> {{ dealership.email }}<br>

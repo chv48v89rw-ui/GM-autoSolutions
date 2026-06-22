@@ -13,7 +13,11 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h2>{{ dealership.company_name }}</h2>
-                            <p class="text-muted mb-3">{{ dealership.location }}</p>
+                            {% if dealership.is_verified %}
+                                <span class="badge bg-success mb-2">Verified Dealership</span>
+                            {% endif %}
+                            <p class="text-muted mb-2">{{ dealership.location }}</p>
+                            <p class="text-muted small mb-3">Joined: {{ dealership.created_at|date:"M d, Y" }}</p>
 
                             <div class="stars mb-3">
                                 {% for i in "12345" %}
@@ -43,10 +47,13 @@
                                 </p>
                                 {% if dealership.website %}
                                     <p>
-                                        <strong>🌐 Website:</strong>
-                                        <a href="{{ dealership.website }}" target="_blank" onclick="trackClick('website')">{{ dealership.website }}</a>
+                                        <strong>🌐 Website:</strong><br>
+                                        <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-2">
+                                            Visit Website
+                                        </a>
                                     </p>
                                 {% endif %}
+                                
                             </div>
                         </div>
                         <div class="col-md-4 text-center">
@@ -66,7 +73,7 @@
 
         <!-- Contact Card -->
         <div class="col-lg-4 col-md-12">
-            <div class="card sticky-top" style="top: 20px;">
+            <div class="card">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">Quick Contact</h5>
                 </div>
@@ -90,6 +97,52 @@
                         <a href="{% url 'login' %}?next=/dealership/{{ dealership.id }}/contact/" class="btn btn-secondary">
                             💬 Login to Contact
                         </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Socials</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Connect with this dealership:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if dealership.website %}
+                            <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" class="btn btn-website btn-sm btn-social" onclick="trackClick('website')" title="Website">
+                                <i class="fas fa-globe"></i><span class="btn-text d-none d-sm-inline ms-1">Website</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.instagram_url %}
+                            <a href="{{ dealership.instagram_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-sm btn-social" title="Instagram">
+                                <i class="fab fa-instagram"></i><span class="btn-text d-none d-sm-inline ms-1">Instagram</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.facebook_url %}
+                            <a href="{{ dealership.facebook_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-facebook btn-sm btn-social" title="Facebook">
+                                <i class="fab fa-facebook-f"></i><span class="btn-text d-none d-sm-inline ms-1">Facebook</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.twitter_url %}
+                            <a href="{{ dealership.twitter_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-twitter btn-sm btn-social" title="Twitter">
+                                <i class="fab fa-twitter"></i><span class="btn-text d-none d-sm-inline ms-1">Twitter</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.youtube_url %}
+                            <a href="{{ dealership.youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-youtube btn-sm btn-social" title="YouTube">
+                                <i class="fab fa-youtube"></i><span class="btn-text d-none d-sm-inline ms-1">YouTube</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.linkedin_url %}
+                            <a href="{{ dealership.linkedin_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-linkedin btn-sm btn-social" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i><span class="btn-text d-none d-sm-inline ms-1">LinkedIn</span>
+                            </a>
+                        {% endif %}
+                        {% if dealership.tiktok_url %}
+                            <a href="{{ dealership.tiktok_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-tiktok btn-sm btn-social" title="TikTok">
+                                <i class="fab fa-tiktok"></i><span class="btn-text d-none d-sm-inline ms-1">TikTok</span>
+                            </a>
                         {% endif %}
                     </div>
                 </div>
@@ -173,6 +226,9 @@
                                     <span class="text-muted">No Image</span>
                                 </div>
                             {% endif %}
+                            {% if car.is_top_pick %}
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
+                            {% endif %}
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2">
                                 {{ car.get_condition_display }}
                             </span>
@@ -201,7 +257,8 @@
                                     <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100">Enquire</a>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 js-add-comparison" data-car-id="{{ car.id }}">
+                            <small class="text-muted">Added: {{ car.created_at|date:"M d, Y" }}</small>
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 js-add-comparison mt-2" data-car-id="{{ car.id }}">
                                 📊 Compare
                             </button>
                         </div>
@@ -295,15 +352,29 @@
 
     function openWhatsapp(number, defaultText) {
         try {
-            // sanitize number: remove non-digits and leading +
-            var sanitized = String(number).replace(/[^0-9]/g, '');
-            if (!sanitized) return;
+            var DEFAULT_CC = '254'; // fallback country code
+            var raw = String(number || '');
+            var sanitized = raw.replace(/[^0-9]/g, '');
+
+            if (!sanitized) {
+                alert('WhatsApp number not available for this dealership.');
+                return;
+            }
+
+            // If number looks too short, try to prepend default country code
+            if (sanitized.length < 9) {
+                sanitized = DEFAULT_CC + sanitized.replace(/^0+/, '');
+            }
+
             var text = defaultText || '';
             var url = 'https://wa.me/' + sanitized + '?text=' + encodeURIComponent(text);
+
+            console.log('Opening WhatsApp URL:', url, 'sanitized:', sanitized, 'raw:', raw);
             trackClick('whatsapp');
             window.open(url, '_blank');
         } catch (e) {
             console.error('WhatsApp open failed', e);
+            alert('Unable to open WhatsApp link. See console for details.');
         }
     }
 

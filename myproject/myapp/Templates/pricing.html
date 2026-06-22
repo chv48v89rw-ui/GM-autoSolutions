@@ -137,12 +137,9 @@
                                         <li>✅ 30-day featured period</li>
                                         <li>✅ One-time payment</li>
                                     </ul>
-                                    <form method="post" class="mt-auto" action="{% url 'pricing_subscribe' 'per_car' %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-info w-100">
-                                            Choose Per Car
-                                        </button>
-                                    </form>
+                                    <div class="mt-auto">
+                                        <a href="{% url 'pricing_choose_car' %}" class="btn btn-info w-100">Choose Per Car</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

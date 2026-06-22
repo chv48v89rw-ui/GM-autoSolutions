@@ -40,6 +40,12 @@ class Dealership(models.Model):
     description = models.TextField()
     logo = models.ImageField(upload_to='dealership_logos/', null=True, blank=True)
     website = models.URLField(blank=True)
+    instagram_url = models.URLField(blank=True)
+    facebook_url = models.URLField(blank=True)
+    twitter_url = models.URLField(blank=True)
+    youtube_url = models.URLField(blank=True)
+    linkedin_url = models.URLField(blank=True)
+    tiktok_url = models.URLField(blank=True)
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
     location = models.CharField(max_length=255)  # City/Area in Kenya
@@ -50,6 +56,7 @@ class Dealership(models.Model):
     business_certificate = models.FileField(upload_to='dealership_certificates/', null=True, blank=False)
     is_approved = models.BooleanField(default=False)  # Dealership must be approved to be active
     is_premium = models.BooleanField(default=False)  # Premium dealerships appear as top picks on the home page
+    is_verified = models.BooleanField(default=False)  # Admin-controlled verified badge for trusted dealerships
     RESPONSE_TIME_CHOICES = [
         ('10_min', '10 min'),
         ('1_hr', '1 hr'),
@@ -73,6 +80,22 @@ class Dealership(models.Model):
         if self.response_time_badge_enabled and self.response_time_badge_choice:
             return dict(self.RESPONSE_TIME_CHOICES).get(self.response_time_badge_choice, '')
         return ''
+
+    @property
+    def years_on_site(self):
+        if not self.created_at:
+            return 0
+        now = timezone.now()
+        years = now.year - self.created_at.year
+        anniversary = self.created_at.replace(year=now.year)
+        if now < anniversary:
+            years -= 1
+        return max(years, 0)
+
+    @property
+    def years_on_site_display(self):
+        years = self.years_on_site
+        return 'Less than 1 year' if years < 1 else f'{years} year' + ('s' if years != 1 else '')
 
     def __str__(self):
         return self.company_name
@@ -170,6 +193,7 @@ class Car(models.Model):
     is_sold = models.BooleanField(default=False)  # Mark car as sold
     is_approved = models.BooleanField(default=False)  # Must be approved by admin to appear
     is_premium = models.BooleanField(default=False)  # Premium cars appear in best cars section on home page
+    is_top_pick = models.BooleanField(default=False)  # Top pick cars appear prominently on home page
     submitted_for_review = models.BooleanField(default=False)  # Dealership submitted for admin review
     submitted_at = models.DateTimeField(null=True, blank=True)  # When car was submitted for review
     
@@ -178,7 +202,7 @@ class Car(models.Model):
     
     class Meta:
         ordering = ['-created_at']
-    
+
     def __str__(self):
         variant_text = f" {self.variant}" if self.variant else ""
         return f"{self.year} {self.make} {self.model}{variant_text}"
@@ -369,6 +393,7 @@ class SubscriptionRequest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_notes = models.TextField(blank=True)
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, null=True, blank=True, related_name='subscription_requests')
+    car = models.ForeignKey('Car', on_delete=models.CASCADE, null=True, blank=True, related_name='subscription_requests')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

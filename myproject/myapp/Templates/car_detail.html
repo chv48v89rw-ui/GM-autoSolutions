@@ -55,6 +55,7 @@
                             <p><strong>🎯 Mileage:</strong> {{ car.mileage }} km</p>
                             <p><strong>👥 Seats:</strong> {{ car.seats }}</p>
                             <p><strong>📅 Year:</strong> {{ car.year }}</p>
+                            <p><strong>🗓️ Added:</strong> {{ car.created_at|date:"M d, Y" }}</p>
                             {% if car.body_type %}<p><strong>🚗 Body Type:</strong> {{ car.get_body_type_display }}</p>{% endif %}
                             {% if car.previous_owners %}<p><strong>👤 Previous Owners:</strong> {{ car.get_previous_owners_display }}</p>{% endif %}
                         </div>
@@ -220,7 +221,7 @@
                             {% for similar_car in similar_cars %}
                                 <div class="col-md-6">
                                     <div class="card h-100 shadow-sm">
-                                        <div style="height: 180px; overflow: hidden;">
+                                        <div style="height: 180px; overflow: hidden; position: relative;">
                                             {% if similar_car.main_image %}
                                                 <img src="{{ similar_car.main_image.url }}" class="card-img-top" alt="{{ similar_car.title }}"
                                                      style="width: 100%; height: 100%; object-fit: cover;">
@@ -229,14 +230,25 @@
                                                     <span class="text-muted">No Image</span>
                                                 </div>
                                             {% endif %}
+                                            {% if similar_car.is_top_pick %}
+                                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2" style="font-size: 0.75rem;">⭐ Top Pick</span>
+                                            {% endif %}
                                             <span class="badge bg-primary position-absolute top-0 end-0 m-2" style="font-size: 0.75rem;">
                                                 {{ similar_car.get_condition_display }}
                                             </span>
                                         </div>
                                         <div class="card-body">
-                                            <h6 class="card-title">{{ similar_car.year }} {{ similar_car.make }} {{ similar_car.model }}</h6>
+                                                                    <h6 class="card-title">{{ similar_car.year }} {{ similar_car.make }} {{ similar_car.model }}</h6>
                                             <p class="card-text text-accent fw-bold">KES {{ similar_car.price|floatformat:0|intcomma }}</p>
-                                            <small class="text-muted d-block mb-2">{{ similar_car.dealership.company_name }}</small>
+                                            <small class="text-muted d-block mb-2">
+                                                {{ similar_car.dealership.company_name }}
+                                                {% include 'includes/dealership_rating.html' with dealership=similar_car.dealership %}
+                                                {% if similar_car.dealership.is_verified %}
+                                                    <span class="badge bg-success text-white small ms-1">Verified</span>
+                                                {% endif %}
+                                                <br>
+                                                <small class="text-muted">Joined: {{ similar_car.dealership.created_at|date:"M d, Y" }}</small>
+                                            </small>
                                             <ul style="list-style: none; padding: 0; font-size: 0.85rem;">
                                                 <li>⛽ {{ similar_car.get_fuel_type_display }}</li>
                                                 <li>🎯 {{ similar_car.mileage }} km</li>
@@ -309,7 +321,7 @@ document.querySelectorAll('.js-add-comparison').forEach(button => {
         <!-- Sidebar: Dealership Info -->
         <div class="col-lg-4 col-md-12">
             <!-- Dealership Card -->
-            <div class="card mb-4 sticky-top" style="top: 20px;">
+            <div class="card mb-4">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">Dealership</h5>
                 </div>
@@ -323,7 +335,17 @@ document.querySelectorAll('.js-add-comparison').forEach(button => {
                         </div>
                     {% endif %}
 
-                    <h6>{{ dealership.company_name }}</h6>
+                    <h6>
+                        {{ dealership.company_name }}
+                        {% include 'includes/dealership_rating.html' with dealership=dealership %}
+                        {% if dealership.is_verified %}
+                            <span class="badge bg-success text-white ms-2"><i class="fas fa-check-circle"></i> Verified</span>
+                        {% endif %}
+                    </h6>
+                    {% if dealership.is_verified %}
+                        <span class="badge bg-success mb-2">Verified Dealership</span>
+                    {% endif %}
+                    <p class="text-muted small mb-2">Joined: {{ dealership.created_at|date:"M d, Y" }}</p>
 
                     <div class="stars mb-2">
                         {% for i in "12345" %}
@@ -357,7 +379,7 @@ document.querySelectorAll('.js-add-comparison').forEach(button => {
                     {% if dealership.website %}
                         <p>
                             <strong>🌐</strong><br>
-                            <a href="{{ dealership.website }}" target="_blank">Visit Website</a>
+                            <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
                         </p>
                     {% endif %}
 

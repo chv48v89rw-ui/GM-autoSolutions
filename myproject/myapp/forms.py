@@ -423,6 +423,25 @@ class UserProfileForm(forms.ModelForm):
 
 
 
+class BuyerUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'First name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Last name'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email address'
+            }),
+        }
+
 
 class DealershipRegistrationForm(forms.ModelForm):
     company_name = forms.CharField(
@@ -436,7 +455,7 @@ class DealershipRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Dealership
-        fields = ('company_name', 'description', 'logo', 'website', 'email', 
+        fields = ('company_name', 'description', 'logo', 'website', 'instagram_url', 'facebook_url', 'twitter_url', 'youtube_url', 'linkedin_url', 'tiktok_url', 'email', 
                  'phone_number', 'location', 'area_code', 'address')
         widgets = {
             'description': forms.Textarea(attrs={
@@ -448,6 +467,30 @@ class DealershipRegistrationForm(forms.ModelForm):
             'website': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Website URL (optional)'
+            }),
+            'instagram_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Instagram URL (optional)'
+            }),
+            'facebook_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Facebook URL (optional)'
+            }),
+            'twitter_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Twitter URL (optional)'
+            }),
+            'youtube_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'YouTube URL (optional)'
+            }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'LinkedIn URL (optional)'
+            }),
+            'tiktok_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'TikTok URL (optional)'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
