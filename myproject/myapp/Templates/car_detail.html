@@ -48,6 +48,10 @@
                             <p><strong>⛽ Fuel Type:</strong> {{ car.get_fuel_type_display }}</p>
                             <p><strong>⚙️ Transmission:</strong> {{ car.get_transmission_display }}</p>
                             <p><strong>🎨 Color:</strong> {{ car.color }}</p>
+                            {% if car.exterior_color %}<p><strong>🟦 Exterior Color:</strong> {{ car.exterior_color }}</p>{% endif %}
+                            {% if car.interior_color %}<p><strong>🟤 Interior Color:</strong> {{ car.interior_color }}</p>{% endif %}
+                            {% if car.seat_material %}<p><strong>🪑 Seat Material:</strong> {{ car.seat_material }}</p>{% endif %}
+                            {% if car.interior_trim %}<p><strong>🧩 Interior Trim:</strong> {{ car.interior_trim }}</p>{% endif %}
                             {% if car.engine_size %}<p><strong>🔧 Engine Size:</strong> {{ car.get_engine_size_display }}</p>{% endif %}
                             {% if car.doors %}<p><strong>🚪 Doors:</strong> {{ car.get_doors_display }}</p>{% endif %}
                         </div>
@@ -318,8 +322,114 @@ document.querySelectorAll('.js-add-comparison').forEach(button => {
 });
 </script>
 
-        <!-- Sidebar: Dealership Info -->
+        <!-- Sidebar: Filters + Dealership Info -->
         <div class="col-lg-4 col-md-12">
+            <!-- Filter Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Search More Cars</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'car_list' %}">
+                        <div class="mb-3">
+                            <label class="form-label">Make</label>
+                            {{ filter_form.make }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Model</label>
+                            {{ filter_form.model }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Variant</label>
+                            {{ filter_form.variant }}
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Year From</label>
+                                {{ filter_form.year_from }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Year To</label>
+                                {{ filter_form.year_to }}
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Price From</label>
+                                {{ filter_form.price_from }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Price To</label>
+                                {{ filter_form.price_to }}
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Mileage From</label>
+                                {{ filter_form.mileage_from }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Mileage To</label>
+                                {{ filter_form.mileage_to }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fuel Type</label>
+                            {{ filter_form.fuel_type }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Transmission</label>
+                            {{ filter_form.transmission }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Condition</label>
+                            {{ filter_form.condition }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Engine Size</label>
+                            {{ filter_form.engine_size }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Doors</label>
+                            {{ filter_form.doors }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Body Type</label>
+                            {{ filter_form.body_type }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Exterior Color</label>
+                            {{ filter_form.exterior_color }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Interior Color</label>
+                            {{ filter_form.interior_color }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Previous Owners</label>
+                            {{ filter_form.previous_owners }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Seats</label>
+                            {{ filter_form.seats }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Seat Material</label>
+                            {{ filter_form.seat_material }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Interior Trim</label>
+                            {{ filter_form.interior_trim }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Features</label>
+                            {{ filter_form.features }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Search Cars</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Dealership Card -->
             <div class="card mb-4">
                 <div class="card-header bg-light">

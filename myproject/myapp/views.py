@@ -1157,6 +1157,8 @@ def car_detail(request, car_id):
         Q(price__gte=car.price - price_range, price__lte=car.price + price_range)
     ).select_related('dealership')[:6]
 
+    filter_form = CarSearchForm(request.GET or None)
+
     context = {
         'car': car,
         'reviews': reviews,
@@ -1165,6 +1167,7 @@ def car_detail(request, car_id):
         'dealership_reviews': dealership_reviews,
         'dealership_rating': dealership_rating,
         'form': form,
+        'filter_form': filter_form,
         'gallery_images': gallery_images,
         'is_favorited': is_favorited,
         'car_features': car_features,
