@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Browse Cars - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div id="flash-message-container"></div>
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h1 class="section-title">Browse All Cars</h1>
+        </div>
+    </div>
+
+    <div class="row d-lg-none mb-4">
+        <div class="col-12">
+            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilters" aria-expanded="false" aria-controls="mobileFilters">
+                Filters
+            </button>
+            <div class="collapse mt-3" id="mobileFilters">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="filterFormMobile">
+                            <div class="mb-3">
+                                <label class="form-label">Make</label>
+                                {{ form.make }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Model</label>
+                                {{ form.model }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Variant</label>
+                                {{ form.variant }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Year From</label>
+                                {{ form.year_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Year To</label>
+                                {{ form.year_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Price From (KES)</label>
+                                {{ form.price_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Price To (KES)</label>
+                                {{ form.price_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mileage From (km)</label>
+                                {{ form.mileage_from }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mileage To (km)</label>
+                                {{ form.mileage_to }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Fuel Type</label>
+                                {{ form.fuel_type }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Transmission</label>
+                                {{ form.transmission }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Condition</label>
+                                {{ form.condition }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Engine Size</label>
+                                {{ form.engine_size }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Number of Doors</label>
+                                {{ form.doors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Body Type</label>
+                                {{ form.body_type }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Exterior Color</label>
+                                {{ form.exterior_color }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Interior Color</label>
+                                {{ form.interior_color }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Previous Owners</label>
+                                {{ form.previous_owners }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Seats</label>
+                                {{ form.seats }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Seat Material</label>
+                                {{ form.seat_material }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Interior Trim</label>
+                                {{ form.interior_trim }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Features</label>
+                                {{ form.features }}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4 d-none d-lg-block">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="mb-3">
+                            <label class="form-label">Make</label>
+                            {{ form.make }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Model</label>
+                            {{ form.model }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Variant</label>
+                            {{ form.variant }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Year From</label>
+                            {{ form.year_from }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Year To</label>
+                            {{ form.year_to }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Price From (KES)</label>
+                            {{ form.price_from }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Price To (KES)</label>
+                            {{ form.price_to }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mileage From (km)</label>
+                            {{ form.mileage_from }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mileage To (km)</label>
+                            {{ form.mileage_to }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fuel Type</label>
+                            {{ form.fuel_type }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Transmission</label>
+                            {{ form.transmission }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Condition</label>
+                            {{ form.condition }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Engine Size</label>
+                            {{ form.engine_size }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Number of Doors</label>
+                            {{ form.doors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Body Type</label>
+                            {{ form.body_type }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Exterior Color</label>
+                            {{ form.exterior_color }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Interior Color</label>
+                            {{ form.interior_color }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Previous Owners</label>
+                            {{ form.previous_owners }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Minimum Seats</label>
+                            {{ form.seats }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Seat Material</label>
+                            {{ form.seat_material }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Interior Trim</label>
+                            {{ form.interior_trim }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Features</label>
+                            {{ form.features }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cars Listing -->
+        <div class="col-lg-9 col-md-8">
+            {% if cars %}
+                <div class="alert alert-info">
+                    Found <strong>{{ cars|length }}</strong> cars matching your criteria
+                </div>
+
+                <div class="row g-4">
+                    {% for car in cars %}
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card h-100">
+                                <!-- Car Image -->
+                                <div style="height: 250px; overflow: hidden; position: relative;">
+                                    {% if car.main_image %}
+                                        <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}"
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 100%; height: 100%;">
+                                            <span class="text-muted">No Image</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if car.is_top_pick %}
+                                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
+                                    {% endif %}
+                                    <span class="badge bg-primary position-absolute top-0 end-0 m-2">
+                                        {{ car.get_condition_display }}
+                                    </span>
+                                </div>
+
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
+                                    <p class="card-text text-accent fw-bold fs-5">
+                                        KES {{ car.price|floatformat:0|intcomma }}
+                                    </p>
+
+                                    <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
+                                        <li>⛽ {{ car.get_fuel_type_display }}</li>
+                                        <li>⚙️ {{ car.get_transmission_display }}</li>
+                                        <li>🎯 {{ car.mileage }} km</li>
+                                        <li>🎨 {{ car.color }}</li>
+                                        <li>👥 {{ car.seats }} Seats</li>
+                                    </ul>
+
+                                    <hr>
+
+                                    <div class="d-flex align-items-start justify-content-between mb-3 flex-column flex-sm-row gap-2">
+                                        <div>
+                                            <small class="text-muted">
+                                                <strong>{{ car.dealership.company_name }}</strong>
+                                                {% include 'includes/dealership_rating.html' with dealership=car.dealership %}
+                                                {% if car.dealership.is_verified %}
+                                                    <span class="badge bg-success text-white small ms-1">Verified</span>
+                                                {% endif %}
+                                                {% if car.dealership.is_premium and not car.dealership.is_verified %}
+                                                    <span class="badge bg-warning text-dark small ms-1">Premium</span>
+                                                {% endif %}
+                                                {% if car.dealership.website %}
+                                                    <br>
+                                                    <a href="{{ car.dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
+                                                {% endif %}
+                                                <br>
+                                                <small>Joined: {{ car.dealership.created_at|date:"M d, Y" }}</small>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer bg-light">
+                                    <div class="row g-1 mb-2">
+                                        <div class="col-6">
+                                            <a href="/car/{{ car.id }}/" class="btn btn-primary btn-sm w-100">View Details</a>
+                                        </div>
+                                        <div class="col-6">
+                                            {% if user.is_authenticated %}
+                                                {% if car.is_favorited %}
+                                                    <a href="/car/{{ car.id }}/unfavorite/" class="btn btn-outline-danger btn-sm w-100">
+                                                        ❤️ Saved
+                                                    </a>
+                                                {% else %}
+                                                    <a href="/car/{{ car.id }}/favorite/" class="btn btn-danger btn-sm w-100">
+                                                        🤍 Save
+                                                    </a>
+                                                {% endif %}
+                                            {% else %}
+                                                <a href="/login/" class="btn btn-outline-secondary btn-sm w-100">
+                                                    🔒 Login
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm w-100 js-add-comparison" data-car-id="{{ car.id }}">
+                                            📊 Compare
+                                        </button>
+                                        <a href="/car/{{ car.id }}/enquire/" class="btn btn-outline-primary btn-sm w-100">Enquire</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <h5>No cars found</h5>
+                    <p>Try adjusting your filters or browse all available cars.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+#flash-message-container {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+#flash-message-container .alert {
+    margin: 0 auto;
+    max-width: 600px;
+}
+</style>
+
+<script>
+function showMessage(message, type = 'success', containerId = 'flash-message-container') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.innerHTML = '';
+    container.appendChild(alert);
+}
+
+function addToComparison(carId) {
+    fetch(`/comparison/add/${carId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Car added to comparison. Visit the Compare page to view your selected cars.', 'success');
+            } else if (data.error) {
+                showMessage(data.error, 'warning');
+            }
+        })
+        .catch(() => showMessage('Unable to add car to comparison.', 'danger'));
+}
+
+document.querySelectorAll('.js-add-comparison').forEach(button => {
+    button.addEventListener('click', () => addToComparison(button.dataset.carId));
+});
+</script>
+{% endblock %}

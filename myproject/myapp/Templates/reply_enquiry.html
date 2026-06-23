@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Reply to Enquiry - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Reply to Enquiry</h3>
+                    <p class="text-muted mb-0 mt-2">Respond directly to {{ enquiry.buyer_name }}.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h5>Buyer Details</h5>
+                        <p class="mb-1"><strong>Name:</strong> {{ enquiry.buyer_name }}</p>
+                        <p class="mb-1"><strong>Email:</strong> {{ enquiry.buyer_email }}</p>
+                        <p class="mb-1"><strong>Phone:</strong> {{ enquiry.buyer_phone }}</p>
+                        <p class="mb-1"><strong>Date:</strong> {{ enquiry.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Inquiry</h5>
+                        <p>{{ enquiry.message|linebreaks }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Listing</h5>
+                        {% if enquiry.car %}
+                            <p><a href="/car/{{ enquiry.car.id }}/">{{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}</a></p>
+                        {% else %}
+                            <p class="text-muted">
+                                General message for
+                                {% if enquiry.dealership %}
+                                    {{ enquiry.dealership.company_name }}{% if enquiry.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}
+                                    <br><small class="text-muted">Joined: {{ enquiry.dealership.created_at|date:"M d, Y" }}</small>
+                                {% elif enquiry.car %}
+                                    {{ enquiry.car.dealership.company_name }}{% if enquiry.car.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}
+                                    <br><small class="text-muted">Joined: {{ enquiry.car.dealership.created_at|date:"M d, Y" }}</small>
+                                {% else %}
+                                    the dealership
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            {{ form.response.label_tag }}
+                            {{ form.response }}
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">Save Reply</button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/dashboard/dealership/" class="btn btn-outline-secondary w-100">Back to Dashboard</a>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if enquiry.dealership_response %}
+                        <hr class="my-4">
+                        <div class="mb-4">
+                            <h5>Saved Reply</h5>
+                            <p>{{ enquiry.dealership_response|linebreaks }}</p>
+                            <a href="mailto:{{ enquiry.buyer_email }}?subject={{ 'Response to your enquiry'|urlencode }}&body={{ enquiry.dealership_response|urlencode }}" class="btn btn-outline-primary">
+                                ✉️ Open Email Client to Send
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

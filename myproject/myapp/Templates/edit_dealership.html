@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Dealership Profile - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Edit Dealership Profile</h3>
+                    <p class="text-muted mb-0 mt-2">Update your company details, contact info, socials, and location.</p>
+                </div>
+                <div class="card-body p-5">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Company Name</label>
+                            {{ dealership_form.company_name }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ dealership_form.description }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Website</label>
+                                {{ dealership_form.website }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Instagram URL</label>
+                                {{ dealership_form.instagram_url }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Facebook URL</label>
+                                {{ dealership_form.facebook_url }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Twitter URL</label>
+                                {{ dealership_form.twitter_url }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">YouTube URL</label>
+                                {{ dealership_form.youtube_url }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">LinkedIn URL</label>
+                                {{ dealership_form.linkedin_url }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">TikTok URL</label>
+                                {{ dealership_form.tiktok_url }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Logo</label>
+                                {{ dealership_form.logo }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                {{ dealership_form.email }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number</label>
+                                {{ dealership_form.phone_number }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location</label>
+                                {{ dealership_form.location }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Area Code</label>
+                                {{ dealership_form.area_code }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            {{ dealership_form.address }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Save Dealership Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

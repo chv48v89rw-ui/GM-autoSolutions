@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 mb-0">Admin Dashboard</h1>
+                <div class="text-muted">
+                    <i class="fas fa-shield-alt"></i> Superuser Access
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ pending_count }}</h3>
+                    <p class="mb-0">Pending Dealerships</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ approved_count }}</h3>
+                    <p class="mb-0">Approved Dealerships</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ pending_count|add:approved_count }}</h3>
+                    <p class="mb-0">Total Dealerships</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Dealerships -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock"></i> Pending Dealership Approvals
+                        {% if pending_count > 0 %}
+                            <span class="badge bg-danger ms-2">{{ pending_count }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_dealerships %}
+                        {% for dealership in pending_dealerships %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6>{{ dealership.company_name }} {% include 'includes/dealership_rating.html' with dealership=dealership %}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="fas fa-user"></i> {{ dealership.user.username }}<br>
+                                            <i class="fas fa-envelope"></i> {{ dealership.email }}<br>
+                                            <i class="fas fa-phone"></i> {{ dealership.phone_number }}<br>
+                                            <i class="fas fa-map-marker-alt"></i> {{ dealership.location }}
+                                        </p>
+                                        <small class="text-muted">
+                                            Registered: {{ dealership.created_at|date:"M d, Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="btn-group-vertical" role="group">
+                                            <a href="{% url 'approve_dealership' dealership.id %}" 
+                                               class="btn btn-success btn-sm mb-2"
+                                               data-confirm-message="Approve {{ dealership.company_name|escape }}?">
+                                                <i class="fas fa-check"></i> Approve
+                                            </a>
+                                            <a href="{% url 'reject_dealership' dealership.id %}" 
+                                               class="btn btn-danger btn-sm"
+                                               data-confirm-message="Reject {{ dealership.company_name|escape }}? This will delete their account.">
+                                                <i class="fas fa-times"></i> Reject
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="text-muted mb-0">No pending dealership approvals</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Approved Dealerships -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Approved Dealerships
+                        <span class="badge bg-light text-success ms-2">{{ approved_count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if approved_dealerships %}
+                        {% for dealership in approved_dealerships %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6>{{ dealership.company_name }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="fas fa-user"></i> {{ dealership.user.username }}<br>
+                                            <i class="fas fa-envelope"></i> {{ dealership.email }}<br>
+                                            <i class="fas fa-phone"></i> {{ dealership.phone_number }}<br>
+                                            <i class="fas fa-map-marker-alt"></i> {{ dealership.location }}
+                                        </p>
+                                        <small class="text-muted">
+                                            Approved: {{ dealership.updated_at|date:"M d, Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Active
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-car text-muted fa-3x mb-3"></i>
+                            <p class="text-muted mb-0">No approved dealerships yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="/admin/" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-cog"></i> Django Admin
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100 mb-2">
+                                <i class="fas fa-home"></i> View Site
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'car_list' %}" class="btn btn-outline-info w-100 mb-2">
+                                <i class="fas fa-car"></i> All Cars
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Management Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-flag"></i> Reports Management
+                        <span class="badge bg-danger ms-2">{{ pending_count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reports %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Report Type</th>
+                                        <th>Reported By</th>
+                                        <th>Reported Item</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in reports %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-{{ report.status|default:'secondary' }}">
+                                                    {{ report.get_report_type_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ report.reporter.username }}</td>
+                                            <td>
+                                                {% if report.car %}
+                                                    <a href="/car/{{ report.car.id }}/">Car: {{ report.car.title }}</a>
+                                                {% elif report.dealership %}
+                                                    <a href="/dealership/{{ report.dealership.id }}/">Dealership: {{ report.dealership.company_name }}</a>
+                                                {% elif report.reported_user %}
+                                                    User: {{ report.reported_user.username }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if report.status == 'pending' %}bg-warning{% elif report.status == 'under_review' %}bg-info{% elif report.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {{ report.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ report.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    {% if report.status == 'pending' %}
+                                                        <a href="#" class="btn btn-sm btn-success js-update-report-status" data-report-id="{{ report.id }}" data-status="under_review">
+                                                            <i class="fas fa-eye"></i> Review
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if report.status == 'under_review' %}
+                                                        <a href="#" class="btn btn-sm btn-primary js-update-report-status" data-report-id="{{ report.id }}" data-status="resolved">
+                                                            <i class="fas fa-check"></i> Resolve
+                                                        </a>
+                                                    {% endif %}
+                                                    <a href="#" class="btn btn-sm btn-outline-primary js-view-report-details" data-report-id="{{ report.id }}">
+                                                            <i class="fas fa-info-circle"></i> Details
+                                                        </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="text-muted">No reports submitted yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Requests Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hand-holding-usd"></i> Subscription Requests
+                        <span class="badge bg-warning ms-2">New Feature</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Subscription Requests:</strong> Users can now request subscriptions through the pricing page. 
+                        Contact them at <a href="mailto:autogmsolutions@gmail.com">autogmsolutions@gmail.com</a> to complete subscriptions.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <th>Contact Person</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Plan Requested</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-inbox"></i> No subscription requests yet
+                                        <br>
+                                        <small>Requests will appear here when users submit them through the pricing page</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+function updateReportStatus(reportId, newStatus) {
+    fetch(`/admin/update-report/${reportId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            'status': newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating report status.');
+    });
+}
+
+function viewReportDetails(reportId) {
+    // You can implement a modal or redirect to a details page
+    alert(`Report ID: ${reportId}\n\nThis would typically open a modal with full report details.\n\nFor now, you can check the database directly for report ${reportId}.`);
+}
+
+document.querySelectorAll('[data-confirm-message]').forEach(link => {
+    link.addEventListener('click', event => {
+        if (!confirm(link.dataset.confirmMessage)) {
+            event.preventDefault();
+        }
+    });
+});
+
+document.querySelectorAll('.js-update-report-status').forEach(link => {
+    link.addEventListener('click', event => {
+        event.preventDefault();
+        updateReportStatus(link.dataset.reportId, link.dataset.status);
+    });
+});
+
+document.querySelectorAll('.js-view-report-details').forEach(link => {
+    link.addEventListener('click', event => {
+        event.preventDefault();
+        viewReportDetails(link.dataset.reportId);
+    });
+});
+</script>

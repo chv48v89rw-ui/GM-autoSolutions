@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Enquire About {{ car.year }} {{ car.make }} {{ car.model }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Send Enquiry</h3>
+                    <p class="text-muted mb-0 mt-2">{{ car.year }} {{ car.make }} {{ car.model }}</p>
+                </div>
+                <div class="card-body p-5">
+                    {% if car.dealership.response_time_badge_enabled and car.dealership.response_time_badge_choice %}
+                        <div class="alert alert-info mb-4">
+                            <strong>Estimated response time:</strong> {{ car.dealership.response_time_badge_label }}
+                        </div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Name</label>
+                            {{ form.buyer_name }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Email</label>
+                            {{ form.buyer_email }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Phone Number</label>
+                            {{ form.buyer_phone }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Message</label>
+                            {{ form.message }}
+                            <small class="form-text text-muted">Tell the dealership more about what you're looking for</small>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">Send Enquiry</button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/car/{{ car.id }}/" class="btn btn-outline-secondary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Direct Contact -->
+                    <h6>Direct Contact</h6>
+                    <p class="text-muted mb-3">Or contact the dealership directly:</p>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <a href="tel:{{ car.dealership.phone_number }}" class="btn btn-outline-primary w-100">
+                                📞 {{ car.dealership.phone_number }}
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="mailto:{{ car.dealership.email }}" class="btn btn-outline-primary w-100">
+                                ✉️ {{ car.dealership.email }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
