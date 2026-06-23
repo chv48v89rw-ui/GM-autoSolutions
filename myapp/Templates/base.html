@@ -1,0 +1,1007 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GM autoSolutions - Kenya's #1 Car Marketplace{% endblock %}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'images/site.webmanifest' %}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles for 60/30/10 Color Scheme -->
+    <style>
+        :root {
+            --primary-white: #ffffff;
+            --primary-black: #1a1a1a;
+            --accent-teal: #1abc9c;
+            --dark-gray: #2d3436;
+            --light-gray: #f5f6fa;
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            background-color: var(--primary-white);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation Styling */
+        .navbar {
+            background-color: var(--primary-white) !important;
+            border-bottom: 3px solid var(--accent-teal);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-black) !important;
+            letter-spacing: 1px;
+        }
+
+        .navbar-brand span {
+            color: var(--accent-teal);
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            margin: 0 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-teal) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent-teal);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--accent-teal) !important;
+            border-color: var(--accent-teal) !important;
+            color: var(--primary-white) !important;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #16a085 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-black) !important;
+            border-color: var(--primary-black) !important;
+            color: var(--primary-white) !important;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dark-gray) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 26, 26, 0.3);
+        }
+
+        .btn-outline-primary {
+            color: var(--accent-teal) !important;
+            border-color: var(--accent-teal) !important;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--accent-teal) !important;
+            color: var(--primary-white) !important;
+        }
+
+        /* Social brand buttons */
+        .btn-social {
+            font-weight: 600;
+            display:inline-flex;
+            align-items:center;
+            gap:0.35rem;
+            border-radius:6px;
+            white-space: nowrap;
+        }
+
+        .btn-social .btn-text {
+            display: inline-block;
+        }
+
+        .btn-instagram {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .btn-facebook {
+            background-color: #1877F2;
+            border-color: #1877F2;
+            color: #fff !important;
+        }
+
+        .btn-twitter {
+            background-color: #1DA1F2;
+            border-color: #1DA1F2;
+            color: #fff !important;
+        }
+
+        .btn-youtube {
+            background-color: #FF0000;
+            border-color: #FF0000;
+            color: #fff !important;
+        }
+
+        .btn-linkedin {
+            background-color: #0A66C2;
+            border-color: #0A66C2;
+            color: #fff !important;
+        }
+
+        .btn-tiktok {
+            background: linear-gradient(135deg,#69C9D0 0%, #EE1D52 100%);
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .btn-website {
+            background-color: var(--accent-teal);
+            border-color: var(--accent-teal);
+            color: #fff !important;
+        }
+
+        .btn-social:focus, .btn-social:hover {
+            filter: brightness(0.95);
+            transform: translateY(-1px);
+        }
+
+        /* Compact rating + responsive social behavior */
+        .dealership-rating { display:inline-flex; align-items:center; gap:0.4rem; }
+        .dealership-rating .stars { font-size: 1rem; }
+        .dealership-rating .rating-number { font-size: 0.9rem; color: var(--text-light); }
+
+        @media (max-width: 576px) {
+            /* hide text labels on social buttons and keep icons only */
+            .btn-social { padding: 0.35rem 0.45rem; min-width: 40px; justify-content: center; }
+            .btn-social .btn-text { display: none; }
+            .btn-social i { font-size: 1rem; }
+
+            /* make visit website smaller and not full width */
+            .btn-website { padding: 0.4rem 0.6rem; font-size: 0.9rem; }
+
+            /* slightly reduce star size */
+            .dealership-rating .stars { font-size: 0.95rem; }
+        }
+
+        /* Cards */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.2);
+            border-color: var(--accent-teal);
+        }
+
+        .card-header {
+            background-color: var(--light-gray) !important;
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 600;
+            color: var(--primary-black);
+        }
+
+        /* Forms */
+        .form-control, .form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+            outline: none;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-black) 0%, var(--dark-gray) 100%);
+            color: var(--primary-white);
+            padding: 5rem 0;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-section .accent-text {
+            color: var(--accent-teal);
+        }
+
+        .hero-section p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        /* Section Styling */
+        .section-title {
+            color: var(--primary-black);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--accent-teal);
+            display: inline-block;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-black);
+            color: var(--primary-white);
+            padding: 3rem 0;
+            margin-top: 5rem;
+            border-top: 3px solid var(--accent-teal);
+        }
+
+        footer h5 {
+            color: var(--accent-teal);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        footer a {
+            color: var(--primary-white);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--accent-teal);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+            padding-top: 2rem;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        /* Alert Messages */
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #1abc9c;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-color: #f5222d;
+            color: #721c24;
+        }
+
+        /* Badges */
+        .badge-primary {
+            background-color: var(--accent-teal) !important;
+        }
+
+        .badge-secondary {
+            background-color: var(--dark-gray) !important;
+        }
+
+        /* Features Section */
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 10px;
+            background-color: var(--light-gray);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background-color: var(--primary-white);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--accent-teal);
+            margin-bottom: 1rem;
+        }
+
+        /* Rating Stars */
+        .stars {
+            color: #ffc107;
+            font-size: 1.1rem;
+        }
+
+        /* Pagination */
+        .pagination .page-link {
+            color: var(--accent-teal);
+            border-color: var(--border-color);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--accent-teal);
+            color: var(--primary-white);
+            border-color: var(--accent-teal);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--accent-teal);
+            border-color: var(--accent-teal);
+        }
+
+        /* Utility Classes */
+        .text-accent {
+            color: var(--accent-teal);
+        }
+
+        .bg-light-accent {
+            background-color: rgba(26, 188, 156, 0.1);
+        }
+
+        .border-accent {
+            border-color: var(--accent-teal) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2rem;
+                padding: 1rem;
+            }
+
+            .hero-section p {
+                font-size: 1rem;
+            }
+
+            .hero-section {
+                padding: 3rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar {
+                padding: 0.5rem 0;
+            }
+
+            .nav-link {
+                margin: 0.25rem 0;
+                font-size: 0.9rem;
+                padding: 0.5rem 0 !important;
+            }
+
+            /* Form improvements for mobile */
+            .form-control, .form-select {
+                font-size: 16px;
+                padding: 0.75rem;
+                min-height: 44px;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+            }
+
+            /* Button sizing for mobile touch */
+            .btn {
+                min-height: 44px;
+                font-size: 0.95rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .btn-sm {
+                min-height: 36px;
+                padding: 0.4rem 0.75rem;
+            }
+
+            /* Card improvements */
+            .card {
+                margin-bottom: 1rem;
+                border-radius: 8px;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .card-header {
+                padding: 1rem;
+            }
+
+            /* Row/Column spacing */
+            .row {
+                margin-right: -0.75rem;
+                margin-left: -0.75rem;
+            }
+
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-6,
+            .col-lg-6, .col-lg-8, .col-lg-10, .col-lg-12 {
+                padding-right: 0.75rem;
+                padding-left: 0.75rem;
+            }
+
+            /* Container padding */
+            .container {
+                padding: 0 1rem;
+            }
+
+            /* Typography adjustments */
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.1rem; }
+            h5 { font-size: 1rem; }
+
+            /* Feature card adjustments */
+            .feature-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .feature-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            /* Footer adjustments */
+            footer {
+                padding: 2rem 0;
+            }
+
+            footer h5 {
+                margin-bottom: 1rem;
+                font-size: 1rem;
+            }
+
+            /* Alert padding */
+            .alert {
+                padding: 1rem;
+                margin-bottom: 1rem;
+                font-size: 0.95rem;
+            }
+
+            /* Badge sizing */
+            .badge {
+                font-size: 0.85rem;
+                padding: 0.35rem 0.6rem;
+            }
+
+            /* Table responsive */
+            .table-responsive {
+                margin-bottom: 1rem;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            /* Modal improvements */
+            .modal-content {
+                border-radius: 8px;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            /* Dropdown menu optimization */
+            .dropdown-menu {
+                border-radius: 6px;
+                font-size: 0.95rem;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-section h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .hero-section p {
+                font-size: 0.9rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-section {
+                padding: 2rem 0.5rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1rem;
+                letter-spacing: 0;
+            }
+
+            .nav-link {
+                font-size: 0.85rem;
+                padding: 0.4rem 0 !important;
+            }
+
+            /* Stack columns on extra small screens */
+            .row-cols-1 > .col,
+            .row-cols-md-2 > .col {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-6,
+            .col-lg-6, .col-lg-8, .col-lg-10, .col-lg-12 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Search form optimization */
+            .form-control, .form-select {
+                font-size: 16px;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Typography for small screens */
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+            h3 { font-size: 1.1rem; }
+            h4 { font-size: 1rem; }
+
+            /* Full width buttons on mobile */
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            .btn-group {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                flex: 1;
+                border-radius: 6px;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Card improvements */
+            .card-body {
+                padding: 0.75rem;
+            }
+
+            .card-header {
+                padding: 0.75rem;
+            }
+
+            /* Container padding */
+            .container {
+                padding: 0 0.5rem;
+            }
+
+            /* Image responsiveness */
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            /* Better spacing for lists */
+            ul, ol {
+                padding-left: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+
+            li {
+                margin-bottom: 0.25rem;
+            }
+
+            /* Table text size */
+            .table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.5rem !important;
+            }
+
+            /* Better spacing in footer */
+            footer {
+                padding: 1.5rem 0;
+            }
+
+            footer h5 {
+                font-size: 0.95rem;
+                margin-bottom: 0.75rem;
+            }
+
+            footer p, footer a {
+                font-size: 0.9rem;
+            }
+
+            /* Alert and badge sizing */
+            .alert {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .badge {
+                font-size: 0.8rem;
+            }
+        }
+
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Loading spinner */
+        .spinner-border-accent {
+            border-color: rgba(26, 188, 156, 0.25);
+            border-right-color: var(--accent-teal);
+        }
+        .quick-links a {
+            color: #212529;        /* dark grey instead of blue */
+            text-decoration: none; /* removes underline */
+        }
+
+        .quick-links a:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+
+        footer {
+            padding: 50px 0;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 991px) {
+            footer {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .sticky-filter-bar {
+                position: sticky;
+                top: 0;
+                z-index: 1030;
+                background-color: #ffffff;
+                padding: 0.75rem 0;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            }
+
+            .sticky-filter-bar .btn {
+                min-height: 48px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">GM auto<span>Solutions</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cars/">Browse Cars</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/comparison/">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dealerships/">Dealerships</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'chat_page' %}">Smart GM</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% if user.profile and user.profile.user_type == 'dealership' %}/dashboard/dealership/{% else %}/dashboard/buyer/{% endif %}">Dashboard</a>
+                        </li>
+                        {% if user.profile and user.profile.user_type == 'dealership' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard/dealership/analytics/">Analytics</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item d-flex mt-3 justify-content-center">
+                            <a class="nav-link btn btn-secondary px-4" href="/logout/">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login/">Login</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="registerDropdown" role="button" data-bs-toggle="dropdown">
+                                Register
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="registerDropdown">
+                                <li><a class="dropdown-item" href="/register/">As Buyer</a></li>
+                                <li><a class="dropdown-item" href="/dealership-register/">As Dealership</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <div class="row">
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>About GM autoSolutions</h5>
+        <p>Kenya's leading online car marketplace connecting buyers and dealerships.</p>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 quick-links">
+            <h5>Quick Links</h5>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/terms/">Terms & Conditions</a></li>
+                <li><a href="/privacy/">Privacy Policy</a></li>
+
+            {% if user.profile and user.profile.user_type == 'dealership' or user.profile.user_type == 'buyer' %}
+                
+                <li><a href="/cars/">Browse Cars</a></li>
+                <li><a href="/dealerships/">Find Dealerships</a></li>
+                <li><a href="/report/">Report an Issue</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% if user.profile and user.profile.user_type == 'dealership' %}
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>For Dealerships</h5>
+        <ul class="list-unstyled">
+            <li><a href="/dealership-register/">Register Your Business</a></li>
+            <li><a href="/dashboard/dealership/">Manage Listings</a></li>
+            <li><a href="/pricing/">Pricing Plans</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+        <h5>Contact Info</h5>
+        <p>📞 +254 710926895</p>
+        <p>📍 Nairobi, Kenya</p>
+        <p><strong>For Issues:</strong><br>
+        <a href="mailto:autogmsolutions@gmail.com">autogmsolutions@gmail.com</a></p>
+    </div>
+</div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GM autoSolutions. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script id="car_hierarchy_data" type="application/json">{{ car_hierarchy_json|default:'{}'|safe }}</script>
+    <script>
+        const CAR_HIERARCHY = JSON.parse(document.getElementById('car_hierarchy_data').textContent || '{}');
+
+        function buildOptions(options, selectedValue, placeholder) {
+            const fragment = document.createDocumentFragment();
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = placeholder;
+            fragment.appendChild(emptyOption);
+
+            if (selectedValue && options.indexOf(selectedValue) === -1) {
+                const currentOption = document.createElement('option');
+                currentOption.value = selectedValue;
+                currentOption.textContent = selectedValue;
+                currentOption.selected = true;
+                fragment.appendChild(currentOption);
+            }
+
+            options.forEach(value => {
+                if (!value) return;
+                if (value === selectedValue) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    option.selected = true;
+                    fragment.appendChild(option);
+                } else {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    fragment.appendChild(option);
+                }
+            });
+
+            return fragment;
+        }
+
+        function updateCarDropdowns(form) {
+            const makeSelect = form.querySelector('select[name="make"]');
+            const modelSelect = form.querySelector('select[name="model"]');
+            const variantSelect = form.querySelector('select[name="variant"]');
+            if (!makeSelect || !modelSelect || !variantSelect) return;
+
+            const getModelPlaceholder = (hasMake) => hasMake ? '-- Select Model --' : '-- Select Make First --';
+            const getVariantPlaceholder = (hasMake, hasModel) => {
+                if (!hasMake) return '-- Select Make First --';
+                if (!hasModel) return '-- Select Model First --';
+                return '-- Select Variant --';
+            };
+
+            const getModelNames = (makeValue) => {
+                if (!makeValue) return [];
+                const makeMap = CAR_HIERARCHY[makeValue] || {};
+                return Object.keys(makeMap).sort();
+            };
+
+            const getVariantNames = (makeValue, modelValue) => {
+                if (!makeValue || !modelValue) return [];
+                const variants = CAR_HIERARCHY[makeValue]?.[modelValue] || [];
+                return Array.from(new Set(variants)).sort();
+            };
+
+            const refreshModelOptions = () => {
+                const selectedMake = makeSelect.value;
+                const selectedModel = modelSelect.value;
+                const modelNames = getModelNames(selectedMake);
+                const options = buildOptions(modelNames, selectedModel, getModelPlaceholder(!!selectedMake));
+                modelSelect.innerHTML = '';
+                modelSelect.appendChild(options);
+                modelSelect.disabled = !selectedMake;
+                if (selectedModel && modelNames.indexOf(selectedModel) !== -1) {
+                    modelSelect.value = selectedModel;
+                }
+                refreshVariantOptions();
+            };
+
+            const refreshVariantOptions = () => {
+                const selectedMake = makeSelect.value;
+                const selectedModel = modelSelect.value;
+                const selectedVariant = variantSelect.value;
+                const variantNames = getVariantNames(selectedMake, selectedModel);
+                const options = buildOptions(variantNames, selectedVariant, getVariantPlaceholder(!!selectedMake, !!selectedModel));
+                variantSelect.innerHTML = '';
+                variantSelect.appendChild(options);
+                variantSelect.disabled = !selectedMake || !selectedModel;
+                if (selectedVariant && variantNames.indexOf(selectedVariant) !== -1) {
+                    variantSelect.value = selectedVariant;
+                }
+            };
+
+            makeSelect.addEventListener('change', () => {
+                modelSelect.value = '';
+                variantSelect.value = '';
+                refreshModelOptions();
+            });
+            modelSelect.addEventListener('change', () => {
+                variantSelect.value = '';
+                refreshVariantOptions();
+            });
+
+            refreshModelOptions();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form').forEach(form => updateCarDropdowns(form));
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

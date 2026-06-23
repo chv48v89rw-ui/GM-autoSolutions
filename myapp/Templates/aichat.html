@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Chat - GM autoSolutions{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .ai-chat-shell {
+        min-height: calc(100vh - 110px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 0;
+    }
+
+    .ai-chat-card {
+        width: 100%;
+        max-width: 900px;
+        border: 1px solid #d9e8e7;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    .ai-chat-header {
+        background: linear-gradient(135deg, #1abc9c, #16a085);
+        color: white;
+        padding: 1.5rem 2rem;
+    }
+
+    .chat-window {
+        background: #f6fbfa;
+        padding: 1.75rem;
+        max-height: 560px;
+        overflow-y: auto;
+    }
+
+    .chat-message {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: flex-start;
+    }
+
+    .chat-bubble {
+        background: white;
+        border: 1px solid #e5f1ef;
+        border-radius: 18px;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .chat-message.user .chat-bubble {
+        background: #e8f9f5;
+    }
+
+    .chat-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: white;
+        background-color: #1abc9c;
+        flex-shrink: 0;
+        font-size: 12px;
+    }
+
+    .chat-footer {
+        padding: 1.5rem 2rem;
+        background: #ffffff;
+        border-top: 1px solid #e8f2f0;
+    }
+
+    .chat-input-group {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+    }
+
+    .chat-input {
+        width: 100%;
+        border-radius: 18px;
+        border: 1px solid #d9e8e7;
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+        min-height: 56px;
+        resize: none;
+    }
+
+    .chat-status {
+        color: #4d7d73;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+    }
+
+    .thinking-bubble {
+        opacity: 0.7;
+        font-style: italic;
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container ai-chat-shell">
+    <div class="ai-chat-card">
+
+```
+    <div class="ai-chat-header">
+        <div>
+            <h1>GM Smart Match</h1>
+            <p>Your AI assistant for finding the perfect car</p>
+        </div>
+    </div>
+
+    <div class="alert alert-info rounded-4 mx-3 mt-3">
+        Please note: AI chat is currently limited to 20 messages for all users.
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+
+        <div class="chat-message ai">
+            <div class="chat-avatar">AI</div>
+            <div class="chat-bubble">
+                👋 Hello! Ask me about cars, budgets, financing options, or recommendations.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="chat-footer">
+        <form id="chatForm">
+            <div class="chat-input-group">
+                <textarea
+                    id="messageInput"
+                    class="chat-input"
+                    rows="2"
+                    placeholder="Type your question..."></textarea>
+
+                <button type="submit" class="btn btn-primary">
+                    Send
+                </button>
+            </div>
+
+            <div class="chat-status" id="chatStatus">
+                Ready
+            </div>
+        </form>
+    </div>
+
+</div>
+```
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+const chatWindow = document.getElementById('chatWindow');
+const messageInput = document.getElementById('messageInput');
+const chatForm = document.getElementById('chatForm');
+const chatStatus = document.getElementById('chatStatus');
+
+function addMessage(content, sender) {
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `chat-message ${sender}`;
+
+    const formatted = content
+        .replace(/\n/g, "<br>")
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    wrapper.innerHTML = `
+        <div class="chat-avatar">
+            ${sender === 'user' ? 'You' : 'AI'}
+        </div>
+        <div class="chat-bubble">
+            ${formatted}
+        </div>
+    `;
+
+    chatWindow.appendChild(wrapper);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    return wrapper;
+}
+
+async function sendMessage(message) {
+
+    chatStatus.textContent = "Thinking...";
+
+    const thinking = addMessage(
+        "🤖 GM Smart Match is thinking...",
+        "ai"
+    );
+
+    try {
+
+        const response = await fetch('/api/ai-chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+
+        thinking.remove();
+
+        if (response.status === 200 && data.reply) {
+
+            addMessage(data.reply, 'ai');
+            chatStatus.textContent = "Ready";
+            return;
+        }
+
+        if (response.status === 429) {
+
+            addMessage(
+                "⚠️ Daily AI limit reached. Please try again later.",
+                'ai'
+            );
+
+            chatStatus.textContent = "Limit Reached";
+            return;
+        }
+
+        if (response.status === 503) {
+
+            addMessage(
+                "🔌 The AI server is currently unavailable. Please try again later.",
+                'ai'
+            );
+
+            chatStatus.textContent = "Server Unavailable";
+            return;
+        }
+
+        if (response.status === 504) {
+
+            addMessage(
+                "⏳ The AI took too long to respond. Please try again.",
+                'ai'
+            );
+
+            chatStatus.textContent = "Timeout";
+            return;
+        }
+
+        addMessage(
+            data.error || "❌ Something went wrong.",
+            'ai'
+        );
+
+        chatStatus.textContent = "Error";
+
+    } catch (error) {
+
+        thinking.remove();
+
+        addMessage(
+            "🌐 No internet connection or server unreachable.",
+            'ai'
+        );
+
+        chatStatus.textContent = "Offline";
+    }
+}
+
+chatForm.addEventListener('submit', async function(e) {
+
+    e.preventDefault();
+
+    const message = messageInput.value.trim();
+
+    if (!message) return;
+
+    addMessage(message, 'user');
+
+    messageInput.value = '';
+
+    await sendMessage(message);
+});
+
+</script>
+
+{% endblock %}

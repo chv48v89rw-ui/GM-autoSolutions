@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Dealership - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Register Your Dealership</h3>
+                    <p class="text-muted mb-0 mt-2">Reach thousands of car buyers across Kenya</p>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <h5 class="mb-4 text-accent">Account Information</h5>
+
+                        <!-- User Form Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username</label>
+                                {{ user_form.username }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                {{ user_form.email }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="dealership-password" class="form-control" placeholder="Enter password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="dealership-password-toggle" title="Show/Hide password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted d-block mt-1">Minimum 8 characters, must include a number or symbol</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="password_confirm" id="dealership-password-confirm" class="form-control" placeholder="Confirm password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="dealership-password-confirm-toggle" title="Show/Hide password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            // Toggle dealership password visibility
+                            document.getElementById('dealership-password-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('dealership-password');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+
+                            // Toggle dealership confirm password visibility
+                            document.getElementById('dealership-password-confirm-toggle').addEventListener('click', function() {
+                                const passwordInput = document.getElementById('dealership-password-confirm');
+                                const toggleBtn = this;
+                                
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                                } else {
+                                    passwordInput.type = 'password';
+                                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                                }
+                            });
+                        </script>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-4 text-accent">Dealership Information</h5>
+
+                        <!-- Dealership Form Fields -->
+                        <div class="mb-3">
+                            <label class="form-label">Company Name (Optional)</label>
+                            {{ dealership_form.company_name }}
+                            <small class="form-text text-muted">Leave blank to use your username as the company name</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ dealership_form.description }}
+                            <small class="form-text text-muted">Tell buyers about your dealership</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number</label>
+                                {{ dealership_form.phone_number }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                {{ dealership_form.email }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location (City/Area)</label>
+                                {{ dealership_form.location }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Website (Optional)</label>
+                                {{ dealership_form.website }}
+                            </div>
+                        </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Instagram URL</label>
+                            {{ dealership_form.instagram_url }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Facebook URL</label>
+                            {{ dealership_form.facebook_url }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Twitter URL</label>
+                            {{ dealership_form.twitter_url }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">YouTube URL</label>
+                            {{ dealership_form.youtube_url }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">LinkedIn URL</label>
+                            {{ dealership_form.linkedin_url }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">TikTok URL</label>
+                            {{ dealership_form.tiktok_url }}
+                        </div>
+                    </div>
+                                {{ dealership_form.logo }}
+                                <small class="form-text text-muted">Upload your dealership logo</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Full Street Address</label>
+                            {{ dealership_form.address }}
+                            <small class="form-text text-muted">Complete street address for accurate map positioning (e.g., Moi Avenue, Nairobi)</small>
+                        </div>
+
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Location Tips:</strong> Providing a complete street address with area code ensures precise map positioning for customers.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Latitude (Optional)</label>
+                                {{ dealership_form.latitude }}
+                                <small class="form-text text-muted">Will be auto-generated from address if left blank</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Longitude (Optional)</label>
+                                {{ dealership_form.longitude }}
+                                <small class="form-text text-muted">Will be auto-generated from address if left blank</small>
+                            </div>
+                        </div>
+
+                        <!-- Error Messages -->
+                        {% if user_form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in user_form.non_field_errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Register Dealership</button>
+                    </form>
+
+                    <hr>
+
+                    <p class="text-center mb-0">
+                        Already have an account? <a href="/login/" class="text-accent fw-bold">Login here</a>
+                    </p>
+
+                    <p class="text-center mt-3 mb-0">
+                        Are you a buyer? <a href="/register/" class="text-accent fw-bold">Register as buyer</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
