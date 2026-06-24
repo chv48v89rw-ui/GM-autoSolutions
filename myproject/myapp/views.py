@@ -794,6 +794,11 @@ def privacy(request):
     return render(request, 'privacy.html')
 
 
+def chat_page(request):
+    """Render the AI chat page."""
+    return render(request, 'aichat.html')
+
+
 @login_required(login_url='login')
 def report_car(request, car_id):
     """Report a car listing"""
