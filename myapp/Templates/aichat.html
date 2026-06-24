@@ -102,6 +102,53 @@
         opacity: 0.7;
         font-style: italic;
     }
+
+    @media (max-width: 767.98px) {
+        .ai-chat-shell {
+            padding: 1rem 0;
+            min-height: auto;
+            align-items: flex-start;
+        }
+
+        .ai-chat-card {
+            margin: 0 0.75rem;
+            border-radius: 18px;
+        }
+
+        .ai-chat-header,
+        .chat-footer {
+            padding: 1rem 1rem;
+        }
+
+        .chat-window {
+            padding: 1rem;
+            max-height: calc(100vh - 260px);
+        }
+
+        .chat-message {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chat-avatar {
+            width: 34px;
+            height: 34px;
+            font-size: 11px;
+        }
+
+        .chat-input-group {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-input,
+        .chat-input-group .btn {
+            width: 100%;
+        }
+
+        .chat-input {
+            min-height: 50px;
+        }
+    }
 </style>
 
 {% endblock %}
@@ -110,8 +157,6 @@
 
 <div class="container ai-chat-shell">
     <div class="ai-chat-card">
-
-```
     <div class="ai-chat-header">
         <div>
             <h1>GM Smart Match</h1>
@@ -155,28 +200,6 @@
     </div>
 
 </div>
-```
-
-</div>
-{% endblock %}
-
-{% block extra_js %}
-
-<script>
-
-const chatWindow = document.getElementById('chatWindow');
-const messageInput = document.getElementById('messageInput');
-const chatForm = document.getElementById('chatForm');
-const chatStatus = document.getElementById('chatStatus');
-
-function addMessage(content, sender) {
-
-    const wrapper = document.createElement('div');
-    wrapper.className = `chat-message ${sender}`;
-
-    const formatted = content
-        .replace(/\n/g, "<br>")
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
     wrapper.innerHTML = `
         <div class="chat-avatar">
