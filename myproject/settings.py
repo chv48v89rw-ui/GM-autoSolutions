@@ -9,11 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-try:
-    from dotenv import load_dotenv, find_dotenv
-except ImportError:
-    load_dotenv = lambda *args, **kwargs: None
-    find_dotenv = lambda: None
+
 import os
 from pathlib import Path
 import dj_database_url
@@ -163,7 +159,7 @@ LOGIN_URL = 'login'
 #     EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 #     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 #     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
-#     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'REDACTED_EMAIL_HOST_PASSWORD')
+#     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'izeywyexyxgvpycj')
 
 # DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'autogmsolutions@gmail.com')
 # Email Configuration - temporary fix for Render
@@ -179,11 +175,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'autogmsolutions@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
-
-
-load_dotenv(find_dotenv())
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+EMAIL_HOST_USER = 'autogmsolutions@gmail.com'
+EMAIL_HOST_PASSWORD = 'izeywyexyxgvpycj'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
