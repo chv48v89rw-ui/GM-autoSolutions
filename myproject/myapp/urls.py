@@ -82,5 +82,6 @@ urlpatterns = [
 
     # AI Chat Assistant
     path('aichat/', views.chat_page, name='aichat'),
+    path('chat/', views.chat_page, name='chat_page'),
 ]
 

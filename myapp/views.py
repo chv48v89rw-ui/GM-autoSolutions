@@ -35,7 +35,9 @@ from .utils import geocode_address, haversine_distance
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .services.openai_service import ask_chatgpt
+# `ask_chatgpt` is imported locally inside the view to avoid import-time
+# failures when the OpenAI client or dependencies aren't available
+# (e.g. during certain deploy/build checks).
 
 
 # Email verification removed: send_verification_email no longer used
@@ -1895,6 +1897,12 @@ def send_notification(user, notification_type, title, message, car=None, dealers
 
 @csrf_exempt
 def ai_chat(request):
+    # Import the AI service here so Django's import-time checks won't fail
+    # if the OpenAI client or network-dependent packages are missing.
+    try:
+        from .services.openai_service import ask_chatgpt
+    except Exception:
+        return JsonResponse({"error": "AI service unavailable."}, status=503)
     if request.method == "POST":
         data = json.loads(request.body)
         message = data.get("message", "")
