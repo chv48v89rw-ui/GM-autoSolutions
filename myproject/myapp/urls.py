@@ -81,5 +81,6 @@ urlpatterns = [
     path('notifications/preferences/', views.notification_preferences, name='notification_preferences'),
 
     # AI Chat Assistant
+    path('aichat/', views.chat_page, name='aichat'),
 ]
 
