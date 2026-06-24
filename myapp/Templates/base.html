@@ -785,6 +785,9 @@
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'chat_page' %}">Smart GM</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/cars/">Browse Cars</a>
                     </li>
                     <li class="nav-item">
@@ -793,9 +796,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/dealerships/">Dealerships</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'chat_page' %}">Smart GM</a>
-                    </li>
+                    
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% if user.profile and user.profile.user_type == 'dealership' %}/dashboard/dealership/{% else %}/dashboard/buyer/{% endif %}">Dashboard</a>
