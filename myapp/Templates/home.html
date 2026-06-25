@@ -3,12 +3,10 @@
 
 {% block extra_css %}
 <style>
-    @media (min-width: 992px) {
-        #homeFiltersCollapse {
-            display: block !important;
-            visibility: visible !important;
-            height: auto !important;
-        }
+    .form-select {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
 {% endblock %}
@@ -30,13 +28,13 @@
                 <form method="get" action="/cars/" class="card p-4" style="background-color: rgba(255,255,255,0.95);">
                     <h5 class="text-dark mb-4">Search for Your Perfect Car</h5>
                     <div class="row g-3 align-items-end">
-                        <div class="col-6 col-sm-6 col-md-3">
+                        <div class="col-6 col-sm-6 col-md-2">
                             {{ form.make }}
                         </div>
                         <div class="col-6 col-sm-6 col-md-3">
                             {{ form.model }}
                         </div>
-                        <div class="col-6 col-sm-6 col-md-2">
+                        <div class="col-6 col-sm-6 col-md-3">
                             {{ form.variant }}
                         </div>
                         <div class="col-6 col-sm-6 col-md-2">
@@ -52,10 +50,10 @@
                         </div>
                     </div>
 
-                    <div class="row d-lg-none sticky-filter-bar mt-3">
+                    <div class="row sticky-filter-bar mt-3">
                         <div class="col-12">
                             <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#homeFiltersCollapse" aria-expanded="false" aria-controls="homeFiltersCollapse">
-                               More Filters
+                               View More Filters
                             </button>
                         </div>
                     </div>
@@ -75,22 +73,22 @@
                                 {{ form.mileage_to }}
                             </div>
 
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.fuel_type }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.transmission }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.condition }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.engine_size }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.doors }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.body_type }}
                             </div>
                             <div class="col-6 col-sm-6 col-md-3">
@@ -99,16 +97,16 @@
                             <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.seats }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.exterior_color }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.interior_color }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.seat_material }}
                             </div>
-                            <div class="col-6 col-sm-6 col-md-2">
+                            <div class="col-6 col-sm-6 col-md-3">
                                 {{ form.interior_trim }}
                             </div>
                         </div>
