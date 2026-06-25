@@ -1895,6 +1895,7 @@ def send_notification(user, notification_type, title, message, car=None, dealers
     notification.save()
     return notification
 
+@login_required(login_url='login')
 @csrf_exempt
 def ai_chat(request):
     # Import the AI service here so Django's import-time checks won't fail
@@ -1906,6 +1907,11 @@ def ai_chat(request):
     if request.method == "POST":
         data = json.loads(request.body)
         message = data.get("message", "")
+        # allow caller to specify desired max tokens (optional)
+        try:
+            max_output_tokens = int(data.get('max_output_tokens', 75))
+        except Exception:
+            max_output_tokens = 75
         current_date = timezone.localdate()
 
         if request.user.is_authenticated:
@@ -1926,10 +1932,23 @@ def ai_chat(request):
                 date=current_date,
             )
 
-        if usage.messages_used >= 5:
+        # determine daily limit per user role
+        if request.user.is_authenticated:
+            try:
+                profile = request.user.profile
+                if getattr(profile, 'user_type', '') == 'dealership':
+                    daily_limit = 100
+                else:
+                    daily_limit = 20
+            except Exception:
+                daily_limit = 20
+        else:
+            daily_limit = 5
+
+        if usage.messages_used >= daily_limit:
             return JsonResponse(
                 {
-                    "reply": "You have reached your daily limit of 5 messages. Try again tomorrow."
+                    "reply": f"You have reached your daily limit of {daily_limit} messages. Try again tomorrow."
                 },
                 status=429,
             )
@@ -1937,7 +1956,10 @@ def ai_chat(request):
         # temporary simple history (you can improve later with DB/session)
         history = request.session.get("chat_history", [])
 
-        reply = ask_chatgpt(message, history)
+        try:
+            reply = ask_chatgpt(message, history, max_output_tokens=max_output_tokens)
+        except Exception:
+            return JsonResponse({"error": "AI service temporarily unavailable."}, status=503)
 
         usage.messages_used += 1
         usage.save()
@@ -1952,5 +1974,32 @@ def ai_chat(request):
 
 
 
+@login_required(login_url='login')
 def chat_page(request):
-    return render(request, "aichat.html")
+    # Compute daily limits and remaining messages to show in the UI
+    current_date = timezone.localdate()
+
+    if request.user.is_authenticated:
+        try:
+            profile = request.user.profile
+            if getattr(profile, 'user_type', '') == 'dealership':
+                daily_limit = 100
+            else:
+                daily_limit = 20
+        except Exception:
+            daily_limit = 20
+
+        usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
+    else:
+        daily_limit = 5
+        ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
+        if ip_address:
+            ip_address = ip_address.split(",")[0].strip()
+        else:
+            ip_address = request.META.get("REMOTE_ADDR")
+
+        usage, _ = ChatUsage.objects.get_or_create(user=None, ip_address=ip_address, date=current_date)
+
+    remaining = max(0, daily_limit - usage.messages_used)
+
+    return render(request, "aichat.html", {"remaining": remaining, "daily_limit": daily_limit})

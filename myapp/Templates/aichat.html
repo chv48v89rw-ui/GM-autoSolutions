@@ -151,16 +151,22 @@
     }
 </style>
 
+
 {% endblock %}
 
 {% block content %}
 
-<div class="container ai-chat-shell">
+<div class="container ai-chat-shell" data-remaining="{{ remaining }}" data-limit="{{ daily_limit }}">
     <div class="ai-chat-card">
     <div class="ai-chat-header">
-        <div>
-            <h1>GM Smart Match</h1>
-            <p>Your AI assistant for finding the perfect car</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>GM Smart Match</h1>
+                <p>Your AI assistant for finding the perfect car</p>
+            </div>
+            <div>
+                <span id="remainingLabel" class="badge bg-light text-dark">Remaining: {{ remaining }} / {{ daily_limit }}</span>
+            </div>
         </div>
     </div>
 
@@ -200,120 +206,123 @@
     </div>
 
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatWindow = document.getElementById('chatWindow');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const chatStatus = document.getElementById('chatStatus');
 
-    wrapper.innerHTML = `
-        <div class="chat-avatar">
-            ${sender === 'user' ? 'You' : 'AI'}
-        </div>
-        <div class="chat-bubble">
-            ${formatted}
-        </div>
-    `;
+    function addMessage(text, sender) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chat-message ' + sender;
 
-    chatWindow.appendChild(wrapper);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+        const avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        avatar.textContent = sender === 'user' ? 'You' : 'AI';
 
-    return wrapper;
-}
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.innerHTML = text;
 
-async function sendMessage(message) {
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
 
-    chatStatus.textContent = "Thinking...";
-
-    const thinking = addMessage(
-        "🤖 GM Smart Match is thinking...",
-        "ai"
-    );
-
-    try {
-
-        const response = await fetch('/api/ai-chat/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ message })
-        });
-
-        const data = await response.json();
-
-        thinking.remove();
-
-        if (response.status === 200 && data.reply) {
-
-            addMessage(data.reply, 'ai');
-            chatStatus.textContent = "Ready";
-            return;
-        }
-
-        if (response.status === 429) {
-
-            addMessage(
-                "⚠️ Daily AI limit reached. Please try again later.",
-                'ai'
-            );
-
-            chatStatus.textContent = "Limit Reached";
-            return;
-        }
-
-        if (response.status === 503) {
-
-            addMessage(
-                "🔌 The AI server is currently unavailable. Please try again later.",
-                'ai'
-            );
-
-            chatStatus.textContent = "Server Unavailable";
-            return;
-        }
-
-        if (response.status === 504) {
-
-            addMessage(
-                "⏳ The AI took too long to respond. Please try again.",
-                'ai'
-            );
-
-            chatStatus.textContent = "Timeout";
-            return;
-        }
-
-        addMessage(
-            data.error || "❌ Something went wrong.",
-            'ai'
-        );
-
-        chatStatus.textContent = "Error";
-
-    } catch (error) {
-
-        thinking.remove();
-
-        addMessage(
-            "🌐 No internet connection or server unreachable.",
-            'ai'
-        );
-
-        chatStatus.textContent = "Offline";
+        chatWindow.appendChild(wrapper);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        return wrapper;
     }
-}
 
-chatForm.addEventListener('submit', async function(e) {
+    async function sendMessage(message) {
+        chatStatus.textContent = 'Thinking...';
 
-    e.preventDefault();
+        const thinking = addMessage('🤖 GM Smart Match is thinking...', 'ai');
 
-    const message = messageInput.value.trim();
+        try {
+            const response = await fetch('/api/ai-chat/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
 
-    if (!message) return;
+            const data = await response.json();
 
-    addMessage(message, 'user');
+            thinking.remove();
 
-    messageInput.value = '';
+            if (response.status === 200 && data.reply) {
+                addMessage(data.reply, 'ai');
+                chatStatus.textContent = 'Ready';
+                return;
+            }
 
-    await sendMessage(message);
+            if (response.status === 429) {
+                addMessage('⚠️ Daily AI limit reached. Please try again later.', 'ai');
+                chatStatus.textContent = 'Limit Reached';
+                return;
+            }
+
+            if (response.status === 503) {
+                addMessage('🔌 The AI server is currently unavailable. Please try again later.', 'ai');
+                chatStatus.textContent = 'Server Unavailable';
+                return;
+            }
+
+            if (response.status === 504) {
+                addMessage('⏳ The AI took too long to respond. Please try again.', 'ai');
+                chatStatus.textContent = 'Timeout';
+                return;
+            }
+
+            addMessage(data.error || '❌ Something went wrong.', 'ai');
+            chatStatus.textContent = 'Error';
+
+        } catch (error) {
+            thinking.remove();
+            addMessage('🌐 No internet connection or server unreachable.', 'ai');
+            chatStatus.textContent = 'Offline';
+        }
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+        addMessage(message, 'user');
+        messageInput.value = '';
+        await sendMessage(message);
+    });
+    
+    // remaining messages UI handling
+    const container = document.querySelector('.ai-chat-shell');
+    let remaining = parseInt(container?.dataset?.remaining || '0', 10);
+    const dailyLimit = parseInt(container?.dataset?.limit || '0', 10);
+    const remainingLabel = document.getElementById('remainingLabel');
+
+    function updateRemainingLabel() {
+        if (remainingLabel) remainingLabel.textContent = `Remaining: ${remaining} / ${dailyLimit}`;
+    }
+
+    // decrement after successful response
+    const _origSendMessage = sendMessage;
+    sendMessage = async function(message) {
+        const result = await _origSendMessage(message);
+        // only decrement when the last request succeeded (status 200 handled inside)
+        // assume a successful addMessage call means a reply arrived
+        // reduce remaining by 1 unless it's already 0
+        if (remaining > 0) {
+            remaining = Math.max(0, remaining - 1);
+            updateRemainingLabel();
+        }
+        return result;
+    };
+
+    updateRemainingLabel();
 });
+
+
 
 </script>
 
+
 {% endblock %}
+

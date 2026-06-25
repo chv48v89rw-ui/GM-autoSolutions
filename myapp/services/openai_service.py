@@ -12,7 +12,14 @@ def get_openai_client():
     return OpenAI(api_key=api_key)
 
 
-def ask_chatgpt(message, history=None):
+def ask_chatgpt(message, history=None, max_output_tokens=75):
+    """Send a chat request to the OpenAI client.
+
+    - `message`: user message string
+    - `history`: list of prior messages (dicts with role/content)
+    - `max_output_tokens`: integer token cap for the response
+    Returns a string reply or an error message.
+    """
     client = get_openai_client()
     if history is None:
         history = []
@@ -34,19 +41,18 @@ def ask_chatgpt(message, history=None):
 
     messages.append({"role": "user", "content": message})
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages
-    )
-
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=messages
+            messages=messages,
+            # new SDK may accept `max_output_tokens` as the response cap
+            max_output_tokens=int(max_output_tokens)
         )
-        return response.choices[0].message.content
+
+        # Safely get text
+        return getattr(response.choices[0].message, 'content', '') or response.choices[0].message.content
     except Exception:
-        return "AI is temporarily unavailable. Try again later."
+        return "AI is temporarily unavailable. Try again Tomorrow."
     
 
 
