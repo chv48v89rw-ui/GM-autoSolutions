@@ -1939,9 +1939,9 @@ def ai_chat(request):
                 if getattr(profile, 'user_type', '') == 'dealership':
                     daily_limit = 100
                 else:
-                    daily_limit = 20
+                    daily_limit = 10
             except Exception:
-                daily_limit = 20
+                daily_limit = 10
         else:
             daily_limit = 5
 
@@ -1985,9 +1985,9 @@ def chat_page(request):
             if getattr(profile, 'user_type', '') == 'dealership':
                 daily_limit = 100
             else:
-                daily_limit = 20
+                daily_limit = 10
         except Exception:
-            daily_limit = 20
+            daily_limit = 10
 
         usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
     else:
