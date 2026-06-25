@@ -5,6 +5,16 @@
 
 {% block content %}
 <div class="container py-5">
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <!-- Dealership Header -->
     <div class="row mb-5">
         <div class="col-lg-8 col-md-12">
@@ -278,34 +288,54 @@
                 </div>
                 <div class="card-body">
                     {% if user.is_authenticated %}
+                        {% if pending_review %}
+                            <div class="alert alert-info mb-4">
+                                Your review has been submitted and is awaiting admin approval.
+                            </div>
+                        {% endif %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger mb-4">
+                                Please fix the errors below before submitting your review.
+                            </div>
+                        {% endif %}
+
                         <h6 class="mb-4">Leave a Review</h6>
-                        <form method="post" class="mb-4">
+                        <form method="post" action="" class="mb-4">
                             {% csrf_token %}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger mb-3">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
                             <div class="mb-3">
                                 <label class="form-label">Rating</label>
-                                <div>
-                                    {% for value, label in form.rating.field.choices %}
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="rating" id="rating{{ value }}" value="{{ value }}">
-                                            <label class="form-check-label" for="rating{{ value }}">
-                                                {{ value }} {% for i in "12345" %}{% if forloop.counter <= value %}★{% endif %}{% endfor %}
-                                            </label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
+                                {{ form.rating }}
+                                {% if form.rating.errors %}
+                                    <div class="text-danger mt-2">{{ form.rating.errors|striptags }}</div>
+                                {% endif %}
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Your Review</label>
                                 {{ form.comment }}
+                                {% if form.comment.errors %}
+                                    <div class="text-danger mt-2">{{ form.comment.errors|striptags }}</div>
+                                {% endif %}
                             </div>
                             <button type="submit" class="btn btn-primary">Post Review</button>
                         </form>
                         <hr>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Please <a href="/login/">login</a> to leave a review for this dealership.
+                        </div>
                     {% endif %}
 
-                    {% if dealership_reviews %}
-                        <h6 class="mb-4">Recent Reviews</h6>
-                        {% for review in dealership_reviews|slice:":10" %}
+                    <!-- Existing Reviews -->
+                    {% if reviews %}
+                        <h6>Recent Reviews</h6>
+                        {% for review in reviews|slice:":5" %}
                             <div class="border-bottom pb-3 mb-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <strong>{{ review.buyer.first_name }} {{ review.buyer.last_name }}</strong>
@@ -326,7 +356,17 @@
                     {% else %}
                         <p class="text-muted">No reviews yet. Be the first to review this dealership!</p>
                     {% endif %}
+
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+            {% endfor %}
+        </div>
+    {% endif %}
             </div>
         </div>
     </div>

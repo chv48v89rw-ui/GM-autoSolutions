@@ -677,7 +677,13 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ('rating', 'comment')
         widgets = {
-            'rating': forms.RadioSelect(choices=[(i, i) for i in range(1, 6)]),
+            'rating': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '5',
+                'step': '0.1',
+                'placeholder': '0.0 - 5.0'
+            }),
             'comment': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Write your review',
@@ -691,7 +697,13 @@ class DealershipReviewForm(forms.ModelForm):
         model = DealershipReview
         fields = ('rating', 'comment')
         widgets = {
-            'rating': forms.RadioSelect(choices=[(i, i) for i in range(1, 6)]),
+            'rating': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '5',
+                'step': '0.1',
+                'placeholder': '0.0 - 5.0'
+            }),
             'comment': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Write your review',

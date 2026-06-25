@@ -65,6 +65,10 @@ urlpatterns = [
     path('admin/approve-dealership/<int:dealership_id>/', views.approve_dealership, name='approve_dealership'),
     path('admin/reject-dealership/<int:dealership_id>/', views.reject_dealership, name='reject_dealership'),
     path('admin/update-report/<int:report_id>/', views.update_report_status, name='update_report_status'),
+    path('admin/approve-car-review/<int:review_id>/', views.approve_car_review, name='approve_car_review'),
+    path('admin/reject-car-review/<int:review_id>/', views.reject_car_review, name='reject_car_review'),
+    path('admin/approve-dealership-review/<int:review_id>/', views.approve_dealership_review, name='approve_dealership_review'),
+    path('admin/reject-dealership-review/<int:review_id>/', views.reject_dealership_review, name='reject_dealership_review'),
     
     # Feature #5: Advanced Search & Filters
     path('saved-searches/', views.saved_searches, name='saved_searches'),

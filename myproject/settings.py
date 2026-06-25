@@ -145,6 +145,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # For local development, set GOOGLE_MAPS_API_KEY in your environment.
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'YOUR_GOOGLE_MAPS_API_KEY_HERE')
 
+# OpenAI API Key for AI Chat Assistant
+# For local development, set OPENAI_API_KEY in your environment.
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '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')
+
 # Login URL for @login_required decorator
 LOGIN_URL = 'login'
 

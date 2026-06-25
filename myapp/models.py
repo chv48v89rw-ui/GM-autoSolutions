@@ -246,7 +246,7 @@ class CarImage(models.Model):
 class Review(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='reviews')
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
     comment = models.TextField()
     is_approved = models.BooleanField(default=False)  # Admin approval required
     created_at = models.DateTimeField(auto_now_add=True)
@@ -258,7 +258,7 @@ class Review(models.Model):
 class DealershipReview(models.Model):
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, related_name='reviews')
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
     comment = models.TextField()
     is_approved = models.BooleanField(default=False)  # Admin approval required
     created_at = models.DateTimeField(auto_now_add=True)

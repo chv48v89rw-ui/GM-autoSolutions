@@ -1121,6 +1121,10 @@ def car_detail(request, car_id):
     reviews = car.reviews.filter(is_approved=True)
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
+    pending_review = None
+    if request.user.is_authenticated:
+        pending_review = car.reviews.filter(buyer=request.user, is_approved=False).order_by('-created_at').first()
+
     dealership = car.dealership
     dealership_reviews = dealership.reviews.filter(is_approved=True)
     dealership_rating = dealership_reviews.aggregate(Avg('rating'))['rating__avg'] or 0
@@ -1132,7 +1136,7 @@ def car_detail(request, car_id):
             review.car = car
             review.buyer = request.user
             review.save()
-            messages.success(request, 'Review submitted successfully! It will be visible to other users once approved by our admin team.')
+            messages.success(request, 'Thank you! Your review has been submitted and will be visible once approved by our admin team.')
             return redirect('car_detail', car_id=car.id)
     else:
         form = ReviewForm() if request.user.is_authenticated else None
@@ -1173,6 +1177,7 @@ def car_detail(request, car_id):
     context = {
         'car': car,
         'reviews': reviews,
+        'pending_review': pending_review,
         'avg_rating': avg_rating,
         'dealership': dealership,
         'dealership_reviews': dealership_reviews,
@@ -1200,6 +1205,10 @@ def dealership_detail(request, dealership_id):
     reviews = dealership.reviews.filter(is_approved=True)
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
+    pending_review = None
+    if request.user.is_authenticated:
+        pending_review = dealership.reviews.filter(buyer=request.user, is_approved=False).order_by('-created_at').first()
+
     form = None
     if request.user.is_authenticated:
         form = DealershipReviewForm(request.POST or None)
@@ -1208,7 +1217,7 @@ def dealership_detail(request, dealership_id):
             review.dealership = dealership
             review.buyer = request.user
             review.save()
-            messages.success(request, 'Review submitted successfully! It will be visible to other users once approved by our admin team.')
+            messages.success(request, 'Thank you! Your review has been submitted and will be visible once approved by our admin team.')
             return redirect('dealership_detail', dealership_id=dealership.id)
 
     def _compute_whatsapp_number(dealership):
@@ -1246,6 +1255,7 @@ def dealership_detail(request, dealership_id):
         'dealership': dealership,
         'cars': cars,
         'reviews': reviews,
+        'pending_review': pending_review,
         'avg_rating': avg_rating,
         'dealership_reviews': reviews,
         'dealership_rating': avg_rating,
@@ -1585,7 +1595,14 @@ def admin_dashboard(request):
     
     # Car submissions for review
     pending_cars = Car.objects.filter(submitted_for_review=True, is_approved=False).order_by('-submitted_at')
-    
+
+    # Reviews data
+    from .models import Review, DealershipReview
+    pending_car_reviews = Review.objects.filter(is_approved=False).order_by('-created_at')
+    pending_dealership_reviews = DealershipReview.objects.filter(is_approved=False).order_by('-created_at')
+    all_car_reviews = Review.objects.all().order_by('-created_at')
+    all_dealership_reviews = DealershipReview.objects.all().order_by('-created_at')
+
     # Analytics
     total_dealerships = Dealership.objects.count()
     total_cars = Car.objects.count()
@@ -1611,6 +1628,13 @@ def admin_dashboard(request):
         'pending_subscriptions_count': pending_subscriptions.count(),
         'pending_cars': pending_cars,
         'pending_car_count': pending_car_count,
+        # Reviews
+        'pending_car_reviews': pending_car_reviews,
+        'pending_dealership_reviews': pending_dealership_reviews,
+        'all_car_reviews': all_car_reviews,
+        'all_dealership_reviews': all_dealership_reviews,
+        'pending_car_reviews_count': pending_car_reviews.count(),
+        'pending_dealership_reviews_count': pending_dealership_reviews.count(),
         # Analytics
         'total_dealerships': total_dealerships,
         'total_cars': total_cars,
@@ -1753,7 +1777,82 @@ def delete_saved_search(request, search_id):
         messages.success(request, 'Search deleted.')
     except SavedSearch.DoesNotExist:
         messages.error(request, 'Search not found.')
-    
+    return redirect('saved_searches')
+
+
+@login_required(login_url='login')
+def approve_car_review(request, review_id):
+    """Approve a car review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = Review.objects.get(id=review_id)
+        review.is_approved = True
+        review.save()
+
+        # Update dealership rating
+        dealership = review.car.dealership
+        reviews = dealership.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        dealership.rating = round(avg_rating, 1)
+        dealership.save()
+
+        return JsonResponse({'success': True})
+    except Review.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def reject_car_review(request, review_id):
+    """Reject/delete a car review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = Review.objects.get(id=review_id)
+        review.delete()
+        return JsonResponse({'success': True})
+    except Review.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def approve_dealership_review(request, review_id):
+    """Approve a dealership review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = DealershipReview.objects.get(id=review_id)
+        review.is_approved = True
+        review.save()
+
+        # Update dealership rating
+        dealership = review.dealership
+        reviews = dealership.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        dealership.rating = round(avg_rating, 1)
+        dealership.save()
+
+        return JsonResponse({'success': True})
+    except DealershipReview.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def reject_dealership_review(request, review_id):
+    """Reject/delete a dealership review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = DealershipReview.objects.get(id=review_id)
+        review.delete()
+        return JsonResponse({'success': True})
+    except DealershipReview.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
 
 # ========== FEATURE #6: CAR COMPARISON TOOL ==========
 
