@@ -1937,7 +1937,7 @@ def ai_chat(request):
             try:
                 profile = request.user.profile
                 if getattr(profile, 'user_type', '') == 'dealership':
-                    daily_limit = 100
+                    daily_limit = 50
                 else:
                     daily_limit = 10
             except Exception:
@@ -1976,29 +1976,24 @@ def ai_chat(request):
 
 @login_required(login_url='login')
 def chat_page(request):
+    # Check if user is logged in
+    if not request.user.is_authenticated:
+        messages.warning(request, "YOU MUST BE LOGGED IN TO USE THE AI CHAT")
+        return redirect('login')
+    
     # Compute daily limits and remaining messages to show in the UI
     current_date = timezone.localdate()
 
-    if request.user.is_authenticated:
-        try:
-            profile = request.user.profile
-            if getattr(profile, 'user_type', '') == 'dealership':
-                daily_limit = 100
-            else:
-                daily_limit = 10
-        except Exception:
-            daily_limit = 10
-
-        usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
-    else:
-        daily_limit = 5
-        ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
-        if ip_address:
-            ip_address = ip_address.split(",")[0].strip()
+    try:
+        profile = request.user.profile
+        if getattr(profile, 'user_type', '') == 'dealership':
+            daily_limit = 50
         else:
-            ip_address = request.META.get("REMOTE_ADDR")
+            daily_limit = 10
+    except Exception:
+        daily_limit = 10
 
-        usage, _ = ChatUsage.objects.get_or_create(user=None, ip_address=ip_address, date=current_date)
+    usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
 
     remaining = max(0, daily_limit - usage.messages_used)
 
