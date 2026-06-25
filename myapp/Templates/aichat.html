@@ -255,6 +255,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            if (response.status === 401) {
+                addMessage('🔐 ' + (data.error || 'YOU MUST BE LOGGED IN TO USE THE AI CHAT'), 'ai');
+                chatStatus.textContent = 'Login Required';
+                setTimeout(() => {
+                    window.location.href = '/login/';
+                }, 2000);
+                return;
+            }
+
             if (response.status === 429) {
                 addMessage('⚠️ Daily AI limit reached. Please try again later.', 'ai');
                 chatStatus.textContent = 'Limit Reached';

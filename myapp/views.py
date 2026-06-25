@@ -1894,10 +1894,13 @@ def send_notification(user, notification_type, title, message, car=None, dealers
     
     notification.save()
     return notification
-
 @login_required(login_url='login')
 @csrf_exempt
 def ai_chat(request):
+    # Require login to send chat messages
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "YOU MUST BE LOGGED IN TO USE THE AI CHAT"}, status=401)
+    
     # Import the AI service here so Django's import-time checks won't fail
     # if the OpenAI client or network-dependent packages are missing.
     try:
@@ -1976,24 +1979,29 @@ def ai_chat(request):
 
 @login_required(login_url='login')
 def chat_page(request):
-    # Check if user is logged in
-    if not request.user.is_authenticated:
-        messages.warning(request, "YOU MUST BE LOGGED IN TO USE THE AI CHAT")
-        return redirect('login')
-    
     # Compute daily limits and remaining messages to show in the UI
     current_date = timezone.localdate()
 
-    try:
-        profile = request.user.profile
-        if getattr(profile, 'user_type', '') == 'dealership':
-            daily_limit = 50
-        else:
+    if request.user.is_authenticated:
+        try:
+            profile = request.user.profile
+            if getattr(profile, 'user_type', '') == 'dealership':
+                daily_limit = 50
+            else:
+                daily_limit = 10
+        except Exception:
             daily_limit = 10
-    except Exception:
-        daily_limit = 10
 
-    usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
+        usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
+    else:
+        daily_limit = 5
+        ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
+        if ip_address:
+            ip_address = ip_address.split(",")[0].strip()
+        else:
+            ip_address = request.META.get("REMOTE_ADDR")
+
+        usage, _ = ChatUsage.objects.get_or_create(user=None, ip_address=ip_address, date=current_date)
 
     remaining = max(0, daily_limit - usage.messages_used)
 
