@@ -1894,7 +1894,7 @@ def send_notification(user, notification_type, title, message, car=None, dealers
     
     notification.save()
     return notification
-@login_required(login_url='login')
+
 @csrf_exempt
 def ai_chat(request):
     # Require login to send chat messages
@@ -1977,7 +1977,7 @@ def ai_chat(request):
 
 
 
-@login_required(login_url='login')
+
 def chat_page(request):
     # Compute daily limits and remaining messages to show in the UI
     current_date = timezone.localdate()
