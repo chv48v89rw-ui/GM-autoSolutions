@@ -2059,7 +2059,7 @@ def ai_chat(request):
         history = request.session.get("chat_history", [])
 
         try:
-            reply = ask_chatgpt(message, history, max_output_tokens=max_output_tokens)
+            reply = ask_chatgpt(message, history, max_output_tokens=max_output_tokens, include_car_data=True)
         except Exception:
             return JsonResponse({"error": "AI service temporarily unavailable."}, status=503)
 
@@ -2105,3 +2105,8 @@ def chat_page(request):
     remaining = max(0, daily_limit - usage.messages_used)
 
     return render(request, "aichat.html", {"remaining": remaining, "daily_limit": daily_limit})
+
+
+def ai_instructions(request):
+    """AI instructions page"""
+    return render(request, "ai_instructions.html")

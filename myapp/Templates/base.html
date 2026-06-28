@@ -848,12 +848,12 @@
     <!-- Footer -->
     <div class="row">
     <div class="col-12 col-md-6 col-lg-3 mb-4">
-        <h5>About GM autoSolutions</h5>
+        <h5 class="text-decoration-underline">About GM autoSolutions</h5>
         <p>Kenya's leading online car marketplace connecting buyers and dealerships.</p>
     </div>
 
     <div class="col-12 col-md-6 col-lg-3 mb-4 quick-links">
-            <h5>Quick Links</h5>
+            <h5 class="text-decoration-underline">Quick Links</h5>
             <ul>
                 <li><a href="/">Home</a></li>
                 <li><a href="/terms/">Terms & Conditions</a></li>
@@ -869,9 +869,9 @@
     </div>
 
     {% if user.profile and user.profile.user_type == 'dealership' %}
-    <div class="col-12 col-md-6 col-lg-3 mb-4">
-        <h5>For Dealerships</h5>
-        <ul class="list-unstyled">
+    <div class="col-12 col-md-6 col-lg-3 mb-4 quick-links">
+        <h5 class="text-decoration-underline">For Dealerships</h5>
+        <ul>
             <li><a href="/dealership-register/">Register Your Business</a></li>
             <li><a href="/dashboard/dealership/">Manage Listings</a></li>
             <li><a href="/pricing/">Pricing Plans</a></li>
@@ -880,7 +880,7 @@
     {% endif %}
 
     <div class="col-12 col-md-6 col-lg-3 mb-4">
-        <h5>Contact Info</h5>
+        <h5 class="text-decoration-underline">Contact Info</h5>
         <p>📞 +254 710926895</p>
         <p>📍 Nairobi, Kenya</p>
         <p><strong>For Issues:</strong><br>

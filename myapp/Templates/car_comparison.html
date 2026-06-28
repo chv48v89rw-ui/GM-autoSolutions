@@ -108,9 +108,57 @@
                         {% endfor %}
                     </tr>
                     <tr>
+                        <td><strong>Variant</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.variant|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Number of Doors</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.doors|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Exterior Color</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.exterior_color|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Interior Color</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.interior_color|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Previous Owners</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.previous_owners|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
                         <td><strong>Seats</strong></td>
                         {% for car in cars %}
                             <td>{{ car.seats }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Seat Material</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.get_seat_material_display|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Interior Trim</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.interior_trim|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Features</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.features|default:"-" }}</td>
                         {% endfor %}
                     </tr>
                     <tr>

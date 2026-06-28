@@ -8,8 +8,9 @@
     .ai-chat-shell {
         min-height: calc(100vh - 110px);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         padding: 3rem 0;
     }
 
@@ -157,6 +158,15 @@
 {% block content %}
 
 <div class="container ai-chat-shell" data-remaining="{{ remaining }}" data-limit="{{ daily_limit }}">
+    
+    <!-- AI Instructions Section - Separate Box -->
+    <div class="card mb-4" style="border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); width: 100%; max-width: 900px;">
+        <div class="card-body" style="background: linear-gradient(135deg, #f0f9f7, #e8f5f3); border-radius: 16px; padding: 1.5rem;">
+            <p style="margin: 0 0 1rem 0; font-size: 0.95rem; color: #16a085; line-height: 1.5;">🤖 Welcome to the AI Car Assistant! Before you start, read our quick guide to learn how the AI searches our vehicle database, how to ask better questions, and how to make the most of your 10 daily messages.</p>
+            <a href="{% url 'ai_instructions' %}" class="btn w-100" style="font-size: 1rem; padding: 0.75rem; background: linear-gradient(135deg, #1abc9c, #16a085); border: none; color: white;">Full Guide →</a>
+        </div>
+    </div>
+
     <div class="ai-chat-card">
     <div class="ai-chat-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -179,7 +189,7 @@
         <div class="chat-message ai">
             <div class="chat-avatar">AI</div>
             <div class="chat-bubble">
-                👋 Hello! Ask me about cars, budgets, financing options, or recommendations.
+                👋 Ask me anything about the cars on this site. I can help you find vehicles based on your budget, make, model, year, fuel type, transmission, seating capacity, or features. I'll only recommend cars that are currently listed here.
             </div>
         </div>
 
