@@ -19,7 +19,8 @@ CAR_HIERARCHY = {
         'Harrier': ['Elegance', 'Premium', 'Progress', 'Hybrid'],
         'RAV4': ['J', 'G', 'Adventure', 'Limited', '4WD'],
         'Vanguard': ['240S', '350S'],
-        'Land Cruiser': ['Prado', '70 Series', '200 Series', '300 Series', 'V8'],
+        'Land Cruiser': ['70 Series', '80 Series', '100 Series', '200 Series', '300 Series'],
+        'Land Cruiser Prado': ['TX', 'TX-L', 'TZ', 'TZ-G', 'VX'],
         'Hilux': ['Single Cab', 'Extra Cab', 'Double Cab', '2WD', '4WD', 'Revo'],
         'Probox': ['DX', 'GL'],
         'Succeed': ['UL', 'UL-X'],
@@ -29,6 +30,39 @@ CAR_HIERARCHY = {
         'Alphard': ['240S', '350S', 'Executive Lounge'],
         'Vellfire': ['2.4Z', '3.5Z', 'Executive Lounge'],
         'Hiace': ['Commuter', 'DX', 'GL'],
+        'Camry': ['GL', 'Grande', 'Hybrid'],
+    'Auris': ['150X', 'RS'],
+    'Prius': ['S', 'G', 'A'],
+    'Prius Alpha': ['S', 'G'],
+    'Corolla Cross': ['G', 'Hybrid'],
+    'C-HR': ['G', 'Hybrid'],
+    'Raize': ['X', 'G', 'Z'],
+    'Rush': ['X', 'G'],
+    'Sienta': ['X', 'G', 'Hybrid'],
+    'Wish': ['X', 'S'],
+    'Belta': ['X', 'G'],
+    'bB': ['S', 'Z'],
+    'Blade': ['Master'],
+    'Porte': ['F', 'G'],
+    'Spade': ['F', 'G'],
+    'Raum': ['C', 'G'],
+    'Ractis': ['X', 'G'],
+    'FJ Cruiser': ['Base'],
+    'Kluger': ['Grande', 'GX'],
+    'Highlander': ['XLE', 'Limited'],
+    'Tacoma': ['SR', 'SR5', 'TRD Sport'],
+    'Tundra': ['SR5', 'Limited'],
+    'Sequoia': ['SR5', 'Limited'],
+    'LiteAce': ['DX'],
+    'TownAce': ['DX'],
+    'Dyna': ['Truck'],
+    'ToyoAce': ['Truck'],
+    'Coaster': ['Standard', 'High Roof'],
+    'Granvia': ['Premium'],
+    'bZ4X': ['FWD', 'AWD'],
+    'GR86': ['SZ', 'RZ'],
+    'GR Corolla': ['Core', 'Circuit'],
+    'GR Yaris': ['RZ'],
     },
 
     'Honda': {
@@ -43,276 +77,797 @@ CAR_HIERARCHY = {
         'Stepwgn': ['Spada', 'Air'],
         'Freed': ['G', 'Hybrid'],
         'Odyssey': ['Absolute', 'Hybrid'],
-    },
+        'City': ['S', 'V', 'RS'],
+        'Airwave': ['M', 'L'],
+        'Stream': ['RSZ', 'X'],
+        'Shuttle': ['G', 'Hybrid'],
+        'Grace': ['LX', 'Hybrid'],
+        'CR-Z': ['Alpha', 'Hybrid'],
+        'Element': ['EX'],
+        'Life': ['C', 'Diva'],
+        'N-Box': ['G', 'Custom'],
+        'N-One': ['Premium', 'RS'],
+        'N-WGN': ['G', 'Custom'],
+        'Mobilio': ['Spike', 'X'],
+        'Edix': ['20X'],
+        'Crossroad': ['18L', '20X'],
+        'Pilot': ['EX-L', 'Touring'],
+        'Ridgeline': ['Sport', 'RTL'],
+        'ZR-V': ['Sport', 'e:HEV'],
+        'e': ['Advance'],
+        },
 
     'BMW': {
-        '1 Series': ['116i', '118i'],
-        '3 Series': ['318i', '320i', '330i', 'M Sport'],
-        '5 Series': ['520i', '530i', '540i', 'M Sport'],
-        '7 Series': ['730i', '740i'],
-        'X1': ['sDrive18i', 'xDrive20i'],
-        'X3': ['xDrive20i', 'xDrive30i'],
-        'X5': ['xDrive30d', 'xDrive40i'],
-        'X6': ['xDrive40i', 'M50i'],
-        'M Models': ['M2', 'M3', 'M4', 'M5'],
-    },
+    '1 Series': ['116i', '118i', '120i', 'M135i'],
+    '2 Series': ['218i', '220i', 'M240i'],
+    '3 Series': ['318i', '320i', '330i', '340i', 'M Sport'],
+    '4 Series': ['420i', '430i', '440i', 'M Sport'],
+    '5 Series': ['520i', '530i', '540i', 'M550i', 'M Sport'],
+    '6 Series': ['630i', '640i'],
+    '7 Series': ['730i', '740i', '750i', '760Li'],
+    '8 Series': ['840i', '850i'],
+
+    'X1': ['sDrive18i', 'xDrive20i', 'xDrive25i'],
+    'X2': ['sDrive18i', 'xDrive20i'],
+    'X3': ['xDrive20i', 'xDrive30i', 'M40i'],
+    'X4': ['xDrive20i', 'xDrive30i', 'M40i'],
+    'X5': ['xDrive30d', 'xDrive40i', 'xDrive45e'],
+    'X6': ['xDrive40i', 'M50i'],
+    'X7': ['xDrive40i', 'M60i'],
+
+    'Z4': ['sDrive20i', 'M40i'],
+
+    'i Series': ['i3', 'i4', 'i5', 'i7', 'iX'],
+
+    'M Models': ['M2', 'M3', 'M4', 'M5', 'M8', 'XM']
+},
 
     'Mercedes-Benz': {
-        'A-Class': ['A180', 'A200'],
-        'C-Class': ['C180', 'C200', 'C220d', 'C300'],
-        'E-Class': ['E200', 'E250', 'E300'],
-        'S-Class': ['S350', 'S450', 'S500', 'Maybach', 'S680'],
-        'GLA': ['GLA180', 'GLA200'],
-        'GLB': ['GLB200'],
-        'GLC': ['GLC200', 'GLC300'],
-        'GLE': ['GLE350', 'GLE400'],
-        'GLS': ['GLS350', 'GLS450'],
-        'G-Class': ['G350d', 'G63 AMG'],
-        'CLA': ['CLA180', 'CLA200'],
-        'CLS': ['CLS350'],
-        'Vito': ['111 CDI'],
-        'Sprinter': ['313 CDI'],
-    },
+    'A-Class': ['A180', 'A200', 'A250', 'A35 AMG', 'A45 AMG'],
+    'B-Class': ['B180', 'B200'],
 
-    'Audi': {
-        'A1': ['Sportback'],
-        'A3': ['30 TFSI', '35 TFSI'],
-        'A4': ['30 TFSI', '40 TFSI'],
-        'A5': ['40 TFSI'],
-        'A6': ['40 TFSI', '45 TFSI'],
-        'Q2': ['30 TFSI'],
-        'Q3': ['35 TFSI'],
-        'Q5': ['40 TFSI', '45 TDI'],
-        'Q7': ['45 TFSI', '50 TDI'],
-        'Q8': ['55 TFSI'],
-    },
+    'C-Class': ['C180', 'C200', 'C220d', 'C250', 'C300', 'C43 AMG', 'C63 AMG'],
+    'E-Class': ['E200', 'E250', 'E300', 'E350', 'E400', 'E53 AMG', 'E63 AMG'],
+
+    'S-Class': ['S350', 'S400', 'S450', 'S500', 'S560', 'S580', 'S680', 'Maybach'],
+
+    'CLA': ['CLA180', 'CLA200', 'CLA250', 'CLA35 AMG', 'CLA45 AMG'],
+    'CLS': ['CLS220d', 'CLS350', 'CLS400'],
+
+    'GLA': ['GLA180', 'GLA200', 'GLA250', 'GLA35 AMG'],
+    'GLB': ['GLB180', 'GLB200', 'GLB250'],
+    'GLC': ['GLC200', 'GLC220d', 'GLC300', 'GLC43 AMG', 'GLC63 AMG'],
+    'GLE': ['GLE250d', 'GLE300d', 'GLE350', 'GLE400', 'GLE450', 'GLE53 AMG', 'GLE63 AMG'],
+    'GLS': ['GLS350d', 'GLS400d', 'GLS450', 'GLS580', 'Maybach GLS'],
+
+    'G-Class': ['G350d', 'G400d', 'G63 AMG'],
+
+    'SL': ['SL400', 'SL500', 'SL55 AMG', 'SL63 AMG'],
+    'SLC': ['SLC180', 'SLC200'],
+    'SLK': ['SLK200', 'SLK350'],
+
+    'EQ Series': ['EQA 250', 'EQB 300', 'EQC 400', 'EQE 350', 'EQS 450', 'EQS 580'],
+
+    'AMG GT': ['AMG GT 43', 'AMG GT 53', 'AMG GT 63'],
+
+    'Vito': ['111 CDI', '114 CDI', '119 CDI'],
+    'V-Class': ['V220d', 'V250d'],
+
+    'Sprinter': ['311 CDI', '313 CDI', '316 CDI', '319 CDI']
+},
+
+   'Audi': {
+    'A1': ['Sportback'],
+    'A3': ['30 TFSI', '35 TFSI', '40 TFSI', 'S3', 'RS3'],
+    'A4': ['30 TFSI', '35 TFSI', '40 TFSI', 'S4'],
+    'A5': ['40 TFSI', '45 TFSI', 'S5'],
+    'A6': ['35 TFSI', '40 TFSI', '45 TFSI', '50 TDI', 'S6'],
+    'A7': ['45 TFSI', '50 TDI', '55 TFSI', 'S7'],
+    'A8': ['55 TFSI', '60 TFSI', 'L'],
+
+    'Q2': ['30 TFSI', '35 TFSI'],
+    'Q3': ['35 TFSI', '40 TFSI', '45 TFSI', 'RS Q3'],
+    'Q5': ['40 TFSI', '45 TDI', '50 TDI', 'SQ5'],
+    'Q7': ['45 TFSI', '50 TDI', '55 TFSI', 'SQ7'],
+    'Q8': ['55 TFSI', '60 TFSI', 'SQ8', 'RS Q8'],
+
+    'TT': ['40 TFSI', '45 TFSI', 'TTS', 'TT RS'],
+
+    'e-tron': ['50 Quattro', '55 Quattro', 'GT'],
+
+    'RS Models': ['RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'RS Q8']
+},
 
     'Lexus': {
-        'IS': ['250', '300h F Sport'],
-        'ES': ['250', '300h'],
-        'GS': ['350'],
-        'LS': ['460', '600h'],
-        'NX': ['200t', '300h', '350h'],
-        'RX': ['270', '350', '450h'],
-        'LX': ['570', '600'],
-        'GX': ['460'],
-    },
+    'IS': ['250', '300', '300h', '350', 'F Sport'],
+    'ES': ['250', '300h', '350', '250h'],
+    'GS': ['250', '300', '350', '450h'],
+    'LS': ['460', '500h', '600h', 'LS 500'],
 
-    'Volkswagen': {
-        'Golf': ['TSI', 'GTI', 'R'],
-        'Polo': ['TSI', 'GTI'],
-        'Passat': ['TSI', 'TDI'],
-        'Tiguan': ['TSI', '4Motion'],
-        'Touareg': ['V6 TDI'],
-        'Amarok': ['TDI'],
-        'Jetta': ['TSI'],
-    },
+    'NX': ['200t', '300h', '350h', '250', '350'],
+    'RX': ['270', '350', '450h', '200t', '300', '350h'],
+
+    'UX': ['200', '250h'],
+    'CT': ['200h'],
+
+    'GX': ['460', '470', '550'],
+    'LX': ['450d', '570', '600'],
+
+    'RC': ['300', '350', '300h', 'F Sport', 'RC F'],
+    'LC': ['500', '500h', 'LC 500'],
+    'LM': ['350', '500h'],  # luxury van (very important for Kenya elites)
+
+    'HS': ['250h'],
+},
+
+   'Volkswagen': {
+    'Golf': ['TSI', 'TDI', 'GTI', 'R', 'GTE'],
+    'Polo': ['TSI', 'GTI', 'Comfortline'],
+    'Passat': ['TSI', 'TDI', 'R-Line'],
+    'Jetta': ['TSI', 'GLI'],
+
+    'Tiguan': ['TSI', 'TDI', '4Motion', 'R-Line'],
+    'Touareg': ['V6 TDI', 'V6 TSI', 'R-Line'],
+
+    'Amarok': ['TDI', 'V6 TDI', 'Aventura'],
+
+    # Common in Kenya imports
+    'Touran': ['TSI', 'TDI'],
+    'Sharan': ['TSI', 'TDI'],
+    'Caddy': ['Van', 'Life', 'Cargo'],
+
+    'Transporter': ['T5', 'T6', 'T6.1'],
+    'Caravelle': ['T5', 'T6'],
+
+    'Multivan': ['Comfortline', 'Highline'],
+
+    # Compact SUVs (very important for modern Kenya imports)
+    'T-Cross': ['TSI'],
+    'T-Roc': ['TSI', 'R'],
+    'Taigo': ['TSI'],
+
+    # EV line (starting to appear in Kenya)
+    'ID.3': ['Pro', 'Pro S'],
+    'ID.4': ['Pure', 'Pro', 'GTX'],
+    'ID.5': ['Pro', 'GTX'],
+
+    # Performance
+    'Arteon': ['TSI', 'R-Line'],
+},
 
     'Ford': {
-        'Ranger': ['2.2 TDCi', '3.2 TDCi', 'Wildtrak'],
-        'Everest': ['Trend', 'Titanium'],
-        'Focus': ['S', 'SE'],
-        'Kuga': ['EcoBoost'],
-        'Explorer': ['Limited'],
-        'Mustang': ['GT V8'],
-    },
+    'Ranger': ['2.2 TDCi', '3.2 TDCi', '2.0 Bi-Turbo', 'Wildtrak', 'XLT', 'XL'],
+    'Everest': ['Trend', 'Titanium', 'Limited', 'Platinum'],
+
+    'Focus': ['S', 'SE', 'Titanium', 'ST'],
+    'Fiesta': ['S', 'SE', 'ST'],
+    'Mondeo': ['Trend', 'Titanium'],
+
+    'Kuga': ['EcoBoost', 'Titanium'],
+
+    'Explorer': ['XLT', 'Limited', 'ST'],
+
+    'Mustang': ['GT V8', 'EcoBoost', 'Mach 1'],
+
+    # Very important for Kenya (commercial + imports)
+    'Transit': ['Van', 'Bus', 'Custom'],
+    'Tourneo': ['Connect', 'Custom'],
+
+    'Edge': ['Titanium', 'Sport'],
+
+    'EcoSport': ['Trend', 'Titanium'],
+
+    'F-150': ['XL', 'XLT', 'Lariat', 'Raptor'],
+
+    'Bronco': ['Base', 'Big Bend', 'Wildtrak', 'Raptor'],
+},
 
     'Chevrolet': {
-        'Cruze': ['LS', 'LT'],
-        'Captiva': ['LS', 'LT'],
-        'Trailblazer': ['LT'],
-        'Malibu': ['LT'],
-    },
+    'Spark': ['LS', 'LT'],
+    'Aveo': ['LS', 'LT'],
+    'Cruze': ['LS', 'LT', 'Premier'],
+    'Sonic': ['LS', 'LT'],
+    'Optra': ['LS', 'LT'],
+
+    'Malibu': ['LS', 'LT', 'Premier'],
+    'Impala': ['LT', 'Premier'],
+
+    'Captiva': ['LS', 'LT'],
+    'Trailblazer': ['LT', 'LTZ'],
+
+    'Equinox': ['LS', 'LT'],
+    'Traverse': ['LS', 'LT'],
+
+    'Colorado': ['LT', 'Z71', 'High Country'],
+
+    'Tahoe': ['LT', 'LTZ'],
+    'Suburban': ['LT', 'Premier'],
+},
 
     'Hyundai': {
-        'i10': ['Base'],
-        'i20': ['Base'],
-        'Accent': ['GLS'],
-        'Elantra': ['SE', 'SEL'],
-        'Sonata': ['SE', 'SEL'],
-        'Tucson': ['GLS', 'Limited'],
-        'Santa Fe': ['Sport', 'Limited'],
-        'Kona': ['Base'],
-        'Palisade': ['Calligraphy'],
-    },
+    'i10': ['Base', 'Grand'],
+    'i20': ['Base', 'Active'],
+    'i30': ['Base', 'N Line'],
+
+    'Accent': ['GLS', 'Sport'],
+    'Elantra': ['SE', 'SEL', 'Limited'],
+    'Sonata': ['SE', 'SEL', 'Hybrid'],
+
+    'i40': ['Sedan', 'Tourer'],
+
+    'Tucson': ['GLS', 'Limited', 'N Line'],
+    'Santa Fe': ['Sport', 'Limited', 'Calligraphy'],
+
+    'Kona': ['Base', 'Electric', 'N Line'],
+    'Creta': ['Base', 'SX'],
+    'Venue': ['Base', 'SX'],
+
+    'Palisade': ['SEL', 'Limited', 'Calligraphy'],
+
+    'ix35': ['GLS', 'Limited'],
+    'ix20': ['GLS'],
+
+    'Staria': ['Van', 'Tourer'],
+    'H-1': ['Van', 'Bus'],
+
+    'Ioniq': ['Hybrid', 'Electric'],
+    'Ioniq 5': ['Standard', 'Long Range', 'AWD'],
+    'Ioniq 6': ['Standard', 'Long Range'],
+
+    'Porter': ['Truck'],
+    'Mighty': ['Truck'],
+},
 
     'Kia': {
-        'Picanto': ['Base'],
-        'Rio': ['Base'],
-        'Cerato': ['S', 'EX'],
-        'Sportage': ['LX', 'EX', 'GT-Line'],
-        'Sorento': ['LX', 'EX'],
-        'Seltos': ['EX'],
-    },
+    'Picanto': ['Base', 'EX', 'GT-Line'],
+    'Morning': ['Base', 'EX'],
 
-    'Nissan': {
-        'March': ['Base'],
-        'Note': ['e-Power', 'X'],
-        'Juke': ['Base'],
-        'Tiida': ['Latio'],
-        'X-Trail': ['20S', '20X', 'Hybrid', '4WD'],
-        'Qashqai': ['2WD', '4WD'],
-        'Patrol': ['Y61', 'Y62'],
-        'Navara': ['King Cab', 'Double Cab', '4WD'],
-        'Serena': ['Highway Star'],
-    },
+    'Rio': ['Base', 'EX', 'GT-Line'],
+
+    'Cerato': ['S', 'EX', 'GT', 'Forte'],
+
+    'Optima': ['EX', 'SX', 'Hybrid'],
+    'K5': ['LX', 'GT-Line'],
+
+    'Sportage': ['LX', 'EX', 'GT-Line'],
+    'Sorento': ['LX', 'EX', 'SX'],
+    'Seltos': ['EX', 'GT-Line'],
+
+    'Stonic': ['EX', 'GT-Line'],
+
+    'Carnival': ['LX', 'EX', 'SX'],
+    'Carens': ['LX', 'EX'],
+
+    'Niro': ['Hybrid', 'EV'],
+
+    'EV6': ['Light', 'Wind', 'GT'],
+    'EV9': ['Air', 'Earth', 'GT-Line'],
+},
+
+   'Nissan': {
+    'March': ['Base'],
+    'Micra': ['Base'],
+
+    'Note': ['e-Power', 'X', 'Medalist'],
+    'Tiida': ['Latio', 'Axis'],
+
+    'Juke': ['Base'],
+
+    'Bluebird Sylphy': ['G', 'X'],
+    'Sunny': ['EX', 'Super Saloon'],
+
+    'Latio': ['X', 'G'],
+
+    'X-Trail': ['20S', '20X', 'Hybrid', '4WD'],
+    'Qashqai': ['2WD', '4WD'],
+
+    'Kicks': ['X', 'e-Power'],
+    
+    'Murano': ['XV'],
+    'Pathfinder': ['SE', 'LE'],
+    'Terrano': ['2.0', '4WD'],
+
+    'Patrol': ['Y61', 'Y62'],
+
+    'Navara': ['King Cab', 'Double Cab', '4WD', 'PRO-4X'],
+
+    'Serena': ['Highway Star', 'S-Hybrid'],
+
+    'Elgrand': ['250 Highway Star', '350 Highway Star'],
+
+    'Caravan': ['DX', 'GX'],
+    'NV200': ['Vanette', 'DX'],
+
+    'Note Aura': ['e-Power'],
+    'Dayz': ['Highway Star'],
+
+    'Leaf': ['S', 'SV', 'SL'],
+},
 
     'Mazda': {
-        'Demio': ['13S', '15S'],
-        'Axela': ['15S', '20S'],
-        'Atenza': ['20S', '25S'],
-        'CX-3': ['20S'],
-        'CX-5': ['20S', '25S', '2.2D'],
-        'CX-9': ['25T'],
-        'BT-50': ['Double Cab'],
-    },
+    'Demio': ['13S', '15S', 'SKYACTIV'],
+    'Mazda2': ['15S', 'Hybrid'],
 
-    'Subaru': {
-        'Impreza': ['1.6i', '2.0i'],
-        'Legacy': ['2.5i'],
-        'Outback': ['2.5i'],
-        'Forester': ['2.0i', '2.0XT', 'Premium'],
-        'XV': ['1.6i', '2.0i'],
-        'WRX': ['STI', 'Turbo'],
-    },
+    'Axela': ['15S', '20S'],
+    'Mazda3': ['15S', '20S', 'Skyactiv-G'],
+
+    'Atenza': ['20S', '25S'],
+    'Mazda6': ['20S', '25S', 'Diesel'],
+
+    'CX-3': ['15S', '20S'],
+    'CX-30': ['20S', '25S', 'Skyactiv-X'],
+
+    'CX-5': ['20S', '25S', '2.2D', 'Skyactiv-G'],
+    'CX-50': ['2.5 S', 'Turbo'],
+
+    'CX-8': ['25S', '2.2D'],
+    'CX-9': ['25T', '2.5T'],
+
+    'CX-60': ['PHEV', 'Diesel'],
+    'CX-90': ['Turbo', 'PHEV'],
+
+    'BT-50': ['Single Cab', 'Double Cab', '3.2D'],
+
+    'Bongo': ['Van', 'Truck'],
+    'Scrum': ['Van'],
+    'Flair': ['XG', 'Hybrid'],
+    'Carol': ['GX'],
+},
+
+   'Subaru': {
+    'Impreza': ['1.6i', '2.0i', '2.0i-S'],
+    
+    'Legacy': ['2.0i', '2.5i', 'GT'],
+    'Legacy B4': ['2.0GT', '2.5GT'],
+
+    'Outback': ['2.5i', '3.6R', 'Premium'],
+
+    'Forester': ['2.0i', '2.0XT', '2.5i', 'Premium', 'Advance'],
+
+    'XV': ['1.6i', '2.0i', '2.0e-Boxer'],
+    'Crosstrek': ['2.0i', 'Hybrid'],
+
+    'WRX': ['STI', 'S4', 'Turbo'],
+
+    'Levorg': ['1.6GT', '2.0GT'],
+
+    'Exiga': ['2.0i', '2.5i'],
+
+    'BRZ': ['S', 'R'],
+
+    'Justy': ['1.0i'],
+
+    'Sambar': ['Truck', 'Van'],
+
+    'Pleo': ['L', 'RS'],
+
+    'Stella': ['Custom'],
+},
 
     'Volvo': {
-        'S60': ['T5', 'T6'],
-        'S90': ['T5', 'T6'],
-        'V40': ['T4'],
-        'XC40': ['T4', 'T5'],
-        'XC60': ['T5', 'T6'],
-        'XC90': ['T6'],
-    },
+    'S60': ['T4', 'T5', 'T6', 'Recharge'],
+    'S90': ['T5', 'T6', 'Recharge'],
 
-    'Land Rover': {
-        'Discovery': ['3', '4', '5'],
-        'Discovery Sport': ['S', 'SE', 'HSE'],
-        'Defender': ['90', '110', '130'],
-    },
+    'V40': ['T3', 'T4'],
 
-    'Range Rover': {
-        'Range Rover': ['Vogue', 'Autobiography', 'SV'],
-        'Range Rover Sport': ['HSE', 'SE', 'SVR'],
-        'Velar': ['S', 'SE', 'R-Dynamic'],
-        'Evoque': ['S', 'SE', 'HSE'],
-    }
-    ,
+    'V60': ['T4', 'T5', 'T6', 'Recharge'],
+
+    'XC40': ['T4', 'T5', 'Recharge', 'Pure Electric'],
+    'XC60': ['T5', 'T6', 'Recharge'],
+    'XC90': ['T5', 'T6', 'Recharge'],
+
+    'EX30': ['Single Motor', 'Twin Motor'],
+
+    'EX40': ['Single Motor', 'Twin Motor'],
+
+    'C40': ['Recharge'],
+
+    'S80': ['2.0', '2.5T'],
+},
+
+  'Land Rover / Range Rover': {
+    'Defender': ['90', '110', '130', 'X', 'SE', 'HSE'],
+
+    'Discovery': ['3', '4', '5', 'SE', 'HSE'],
+    'Discovery Sport': ['S', 'SE', 'HSE', 'R-Dynamic'],
+
+    'Range Rover': ['Vogue', 'Autobiography', 'HSE', 'SV', 'SV Autobiography'],
+
+    'Range Rover Sport': ['SE', 'HSE', 'HSE Dynamic', 'Autobiography', 'SVR'],
+
+    'Range Rover Velar': ['S', 'SE', 'R-Dynamic S', 'R-Dynamic SE', 'R-Dynamic HSE'],
+
+    'Range Rover Evoque': ['S', 'SE', 'HSE', 'R-Dynamic'],
+
+    'Freelander': ['2', 'HSE'],
+
+    'Classic Range Rover': ['3.0', '4.4 V8'],
+},
     'Suzuki': {
-        'Alto': ['Base'],
-        'Swift': ['GL', 'RS'],
-        'Baleno': ['GL'],
-        'Jimny': ['JL', 'GLX'],
-        'Vitara': ['GLX'],
-        'Escudo': ['XG', 'XL'],
-        'Wagon R': ['FX'],
-        'Every': ['Van', 'Join'],
-    },
+    'Alto': ['Base', 'VXL'],
+
+    'Swift': ['GL', 'GLX', 'RS'],
+
+    'Baleno': ['GL', 'GLX'],
+
+    'Celerio': ['Base', 'GL'],
+
+    'Dzire': ['GL', 'GLX'],
+
+    'Jimny': ['JL', 'JLX', 'GLX'],
+
+    'Vitara': ['GL', 'GLX'],
+
+    'Grand Vitara': ['JX', 'LX'],
+
+    'Escudo': ['XG', 'XL'],
+
+    'Wagon R': ['FX', 'FX-S'],
+
+    'Every': ['Van', 'Join', 'PA'],
+    
+    'Spacia': ['Hybrid X', 'Custom'],
+},
 
     'Mitsubishi': {
-        'Lancer': ['GLX', 'EX'],
-        'Outlander': ['24G', 'PHEV'],
-        'ASX': ['2WD', '4WD'],
-        'Pajero': ['Short Wheel Base', 'Long Wheel Base', 'Exceed'],
-        'Pajero Sport': ['Dakar'],
-        'Triton': ['Single Cab', 'Double Cab'],
-    },
+    'Lancer': ['GLX', 'EX', 'EVO X'],
+
+    'Outlander': ['24G', 'PHEV', '2.0', '2.4'],
+
+    'ASX': ['2WD', '4WD'],
+
+    'Pajero': ['Short Wheel Base', 'Long Wheel Base', 'Exceed', 'GLS'],
+
+    'Pajero Sport': ['Dakar', 'Exceed', 'GLS'],
+
+    'Triton': ['Single Cab', 'Double Cab', '4WD', 'Athlete'],
+
+    'RVR': ['2WD', '4WD'],
+
+    'Eclipse Cross': ['2.0', 'PHEV'],
+
+    'Delica D5': ['G', 'P'],
+},
 
     'Isuzu': {
-        'D-Max': ['Single Cab', 'Double Cab', '4WD'],
-        'MU-X': ['LS', 'LS-T'],
-        'N-Series': ['Truck'],
-    },
+    'D-Max': ['Single Cab', 'Extended Cab', 'Double Cab', '4WD', 'LS', 'LS-T'],
+
+    'MU-X': ['LS', 'LS-M', 'LS-T', 'Premium'],
+
+    'N-Series': ['NHR', 'NKR', 'NPR', 'NQR', 'Truck'],
+
+    'F-Series': ['FTR', 'FVR', 'FVZ'],
+
+    'Trooper': ['3.1D', '3.0D'],
+
+    'MU-7': ['3.0', '4x4'],
+},
 
     'Daihatsu': {
-        'Mira': ['L', 'X'],
-        'Move': ['L', 'Custom'],
-        'Tanto': ['L', 'Custom'],
-        'Terios': ['CX', 'TX'],
-        'Boon': ['CL'],
-        'Hijet': ['Cargo', 'Truck'],
-    },
+    'Mira': ['L', 'X', 'Custom'],
 
-    'Peugeot': {
-        '208': ['Active', 'Allure'],
-        '3008': ['Active', 'GT'],
-        '5008': ['Active', 'GT'],
-        '508': ['Allure'],
-    },
+    'Move': ['L', 'Custom', 'X', 'RS'],
 
+    'Tanto': ['L', 'Custom', 'RS'],
+
+    'Terios': ['CX', 'TX', '4WD'],
+
+    'Boon': ['CL', 'CX'],
+
+    'Hijet': ['Cargo', 'Truck', 'Van'],
+
+    'Atrai': ['RS', 'Custom'],
+
+    'Cast': ['Style', 'Activa', 'Sport'],
+
+    'Thor': ['Custom', 'Premium'],
+
+    'Wake': ['D', 'L', 'Custom'],
+
+    'Copen': ['Active Top', 'Robe'],
+},
+
+   'Peugeot': {
+    '108': ['Active', 'Allure'],
+
+    '208': ['Active', 'Allure', 'GT Line', 'e-208'],
+
+    '2008': ['Active', 'Allure', 'GT'],
+
+    '3008': ['Active', 'Allure', 'GT', 'Hybrid'],
+
+    '5008': ['Active', 'Allure', 'GT'],
+
+    '308': ['Active', 'Allure', 'GT Line'],
+
+    '508': ['Allure', 'GT', 'GT Line'],
+
+    'Partner': ['Van', 'Tepee'],
+
+    'Rifter': ['Active', 'Allure'],
+
+    'Expert': ['Van', 'Combi'],
+
+    'Boxer': ['Van', 'L2', 'L3'],
+
+    '3008 Hybrid': ['GT Hybrid'],
+},
     'Renault': {
-        'Duster': ['Expression', 'Dynamique'],
-        'Koleos': ['Zen', 'Intens'],
-        'Captur': ['Zen'],
-        'Megane': ['GT Line'],
-    },
+    'Clio': ['Expression', 'Dynamique'],
+
+    'Duster': ['Expression', 'Dynamique', '4WD'],
+
+    'Koleos': ['Zen', 'Intens', 'Initiale Paris'],
+
+    'Captur': ['Zen', 'Intens'],
+
+    'Megane': ['GT Line', 'RS'],
+
+    'Kadjar': ['Zen', 'Intens'],
+
+    'Arkana': ['RS Line'],
+
+    'Trafic': ['Van', 'Passenger'],
+
+    'Master': ['Van', 'L2H2'],
+
+    'Sandero': ['Stepway', 'Essential'],
+
+    'Logan': ['Expression'],
+},
 
     'Jeep': {
-        'Wrangler': ['Sport', 'Rubicon'],
-        'Grand Cherokee': ['Limited', 'Overland'],
-        'Compass': ['Longitude', 'Limited'],
-        'Cherokee': ['Limited'],
-    },
+    'Wrangler': ['Sport', 'Sahara', 'Rubicon', 'Unlimited'],
 
-    'Porsche': {
-        'Macan': ['Base', 'S', 'GTS'],
-        'Cayenne': ['Base', 'S', 'Turbo'],
-        'Panamera': ['4', '4S'],
-    },
+    'Grand Cherokee': ['Laredo', 'Limited', 'Overland', 'Summit', 'Trackhawk'],
 
-    'Mini': {
-        'Cooper': ['Base', 'S'],
-        'Countryman': ['Cooper', 'Cooper S'],
-        'Clubman': ['Cooper S'],
-    },
+    'Cherokee': ['Latitude', 'Limited', 'Trailhawk'],
+
+    'Compass': ['Longitude', 'Limited', 'Trailhawk'],
+
+    'Renegade': ['Sport', 'Limited', 'Trailhawk'],
+
+    'Gladiator': ['Sport', 'Rubicon'],
+},
+
+   'Porsche': {
+    'Macan': ['Base', 'T', 'S', 'GTS', 'Turbo'],
+
+    'Cayenne': ['Base', 'S', 'GTS', 'Turbo', 'Turbo GT'],
+
+    'Panamera': ['4', '4S', 'GTS', 'Turbo', 'Turbo S'],
+
+    '911': ['Carrera', 'Carrera S', 'Turbo', 'Turbo S', 'GT3'],
+
+    'Taycan': ['4S', 'Turbo', 'Turbo S', 'Cross Turismo'],
+
+    'Boxster': ['718', 'S'],
+
+    'Cayman': ['718', 'S'],
+},
+
+   'Mini': {
+    'Cooper': ['Base', 'S', 'JCW'],
+
+    'Countryman': ['Cooper', 'Cooper S', 'JCW'],
+
+    'Clubman': ['Cooper', 'Cooper S'],
+
+    'Paceman': ['Cooper S'],
+
+    'Convertible': ['Cooper', 'Cooper S'],
+
+    'Electric': ['Cooper SE'],
+},
 
     'Jaguar': {
-        'XE': ['Prestige', 'R-Sport'],
-        'XF': ['Prestige', 'Portfolio'],
-        'F-Pace': ['Prestige', 'R-Dynamic'],
-        'E-Pace': ['SE'],
-    },
+    'XE': ['Prestige', 'R-Sport', 'S'],
+
+    'XF': ['Prestige', 'Portfolio', 'R-Sport'],
+
+    'XJ': ['Luxury', 'Premium Luxury', 'Autobiography'],
+
+    'F-Pace': ['Prestige', 'R-Dynamic', 'S', 'SVR'],
+
+    'E-Pace': ['SE', 'R-Dynamic'],
+
+    'I-Pace': ['EV400', 'S', 'SE', 'HSE'],
+
+    'F-Type': ['Coupe', 'Convertible', 'R', 'SVR'],
+},
 
     'BYD': {
-        'Atto 3': ['Standard Range', 'Extended Range'],
-        'Dolphin': ['Comfort', 'Premium'],
-        'Seal': ['Premium', 'Performance'],
-    },
+    'Atto 3': ['Standard Range', 'Extended Range'],
+
+    'Dolphin': ['Active', 'Comfort', 'Premium'],
+
+    'Seal': ['Dynamic', 'Premium', 'Performance'],
+
+    'Han': ['EV', 'DM-i'],
+
+    'Tang': ['EV', 'DM-i'],
+
+    'Song Plus': ['DM-i', 'EV'],
+
+    'Seagull': ['Active', 'Free', 'Flying Edition'],
+},
 
     'Jetour': {
-        'X70 Plus': ['Comfort', 'Luxury'],
-        'Dashing': ['Comfort', 'Luxury'],
-        'X90 Plus': ['Luxury'],
-    },
+    'X70 Plus': ['Comfort', 'Luxury', 'Premium'],
+
+    'Dashing': ['Comfort', 'Luxury', 'Sport'],
+
+    'X90 Plus': ['Luxury', 'Flagship'],
+
+    'T2': ['Adventure', 'Off-road'],
+
+    'X50': ['Comfort', 'Luxury'],
+},
 
     'Chery': {
-        'Tiggo 4 Pro': ['Comfort', 'Luxury'],
-        'Tiggo 7 Pro': ['Luxury'],
-        'Tiggo 8 Pro': ['Executive'],
-    },
+    'Tiggo 4 Pro': ['Comfort', 'Luxury'],
+
+    'Tiggo 7 Pro': ['Comfort', 'Luxury', 'Premium'],
+
+    'Tiggo 8 Pro': ['Executive', 'Luxury', 'Max'],
+
+    'Arrizo 5': ['Comfort', 'Luxury'],
+
+    'Arrizo 8': ['Luxury', 'Flagship'],
+
+    'Tiggo 2 Pro': ['Comfort'],
+
+    'Tiggo 9': ['Luxury', 'Hybrid'],
+},
 
     'Haval': {
-        'Jolion': ['Premium', 'Luxury'],
-        'H6': ['Premium', 'Luxury'],
-    },
+    'Jolion': ['Premium', 'Luxury', 'Hybrid'],
+
+    'H6': ['Premium', 'Luxury', 'Hybrid'],
+
+    'H2': ['Luxury'],
+
+    'H9': ['Luxury', 'Off-road'],
+
+    'Big Dog': ['Adventure', 'Off-road'],
+
+    'Dargo': ['Luxury', 'Off-road'],
+},
 
     'GWM': {
-        'Poer': ['Commercial', 'Passenger'],
-        'Tank 300': ['Luxury'],
-    },
+    'Poer': ['Commercial', 'Passenger', '4WD'],
+
+    'Tank 300': ['Luxury', 'Off-road'],
+
+    'Tank 500': ['Luxury', 'Hybrid'],
+
+    'Wingle': ['Single Cab', 'Double Cab'],
+
+    'Haval H5': ['Diesel', '4WD'],
+},
 
     'Tesla': {
-        'Model 3': ['Standard Range', 'Long Range', 'Performance'],
-        'Model Y': ['Long Range', 'Performance'],
-        'Model S': ['Long Range', 'Plaid'],
-        'Model X': ['Long Range', 'Plaid'],
-    },
+    'Model 3': ['Standard Range', 'Long Range', 'Performance'],
+
+    'Model Y': ['Standard Range', 'Long Range', 'Performance'],
+
+    'Model S': ['Long Range', 'Plaid'],
+
+    'Model X': ['Long Range', 'Plaid'],
+
+    'Cybertruck': ['AWD', 'Cyberbeast'],
+
+    'Roadster': ['2.0'],
+},
 
     'MG': {
-        'ZS': ['Comfort', 'Luxury'],
-        'HS': ['Comfort', 'Luxury'],
-        'MG4': ['Standard', 'Luxury'],
-    }
+    'ZS': ['Comfort', 'Luxury', 'EV'],
+
+    'HS': ['Comfort', 'Luxury', 'Plug-in Hybrid'],
+
+    'MG4': ['Standard', 'Luxury', 'XPower'],
+
+    'MG5': ['Comfort', 'Luxury'],
+
+    'MG ZS EV': ['Standard Range', 'Long Range'],
+
+    'MG Cyberster': ['GT', 'Electric Roadster'],
+
+    'RX5': ['Luxury'],
+},
+
+    'Geely': {
+        'Coolray': ['Standard', 'Luxury', 'Sport'],
+        'Azkarra': ['Hybrid', 'AWD'],
+        'Emgrand': ['Comfort', 'Luxury'],
+        'Okavango': ['7-Seater', 'Luxury'],
+    },
+
+    'Changan': {
+        'CS15': ['Comfort'],
+        'CS35': ['Comfort', 'Plus'],
+        'CS55': ['Plus', 'Luxury'],
+        'CS75': ['Plus', 'Premium'],
+        'UNI-T': ['Luxury', 'Sport'],
+        'UNI-K': ['Luxury'],
+        'Alsvin': ['Comfort'],
+    },
+
+    'GAC': {
+        'GS3': ['Power', 'Luxury'],
+        'GS4': ['Luxury', 'Sport'],
+        'GS8': ['Luxury', '7-Seater'],
+        'GA4': ['Sedan', 'Luxury'],
+        'GN6': ['MPV', 'Luxury'],
+    },
+
+    'FAW': {
+        'Bestune T33': ['Luxury'],
+        'Bestune T55': ['Luxury'],
+        'Bestune T77': ['Luxury'],
+        'V2': ['Truck'],
+        'V5': ['Truck'],
+    },
+
+    'SsangYong': {
+        'Korando': ['2WD', '4WD', 'Diesel'],
+        'Rexton': ['Luxury', '7-Seater'],
+        'Tivoli': ['Base', 'Luxury'],
+        'Musso': ['Double Cab', '4WD'],
+    },
+
+    'Fiat': {
+        '500': ['Pop', 'Lounge'],
+        'Panda': ['Easy', 'Cross'],
+        'Tipo': ['Sedan', 'Hatchback'],
+        'Doblo': ['Cargo', 'Family'],
+        'Fullback': ['Pickup', '4WD'],
+    },
+
+    'Opel': {
+        'Astra': ['Edition', 'GS Line'],
+        'Corsa': ['Base', 'Elegance'],
+        'Insignia': ['Grand Sport'],
+        'Mokka': ['Elegance', 'GS Line'],
+    },
+
+    'RAM': {
+        '1500': ['Tradesman', 'Big Horn', 'Laramie', 'Rebel'],
+        '2500': ['Heavy Duty'],
+        '3500': ['Heavy Duty'],
+    },
+
+    'Dodge': {
+        'Charger': ['SXT', 'R/T', 'Scat Pack'],
+        'Challenger': ['SXT', 'R/T', 'Hellcat'],
+        'Durango': ['SXT', 'GT', 'SRT'],
+    },
+
+    'Cadillac': {
+        'Escalade': ['Luxury', 'Premium Luxury', 'Sport'],
+        'XT5': ['Luxury', 'Premium Luxury'],
+        'XT6': ['Luxury', 'Sport'],
+        'CT5': ['Luxury', 'Sport'],
+    },
+
+    'Hino': {
+        '300 Series': ['Light Duty Truck'],
+        '500 Series': ['Medium Duty Truck'],
+        '700 Series': ['Heavy Duty Truck'],
+    },
+
+    'Fuso': {
+        'Canter': ['Light Duty Truck'],
+        'Fighter': ['Medium Duty Truck'],
+        'Super Great': ['Heavy Duty Truck'],
+    },
+
+    'Lamborghini': {
+        'Huracan': ['EVO', 'Tecnica', 'Performante'],
+        'Urus': ['S', 'Performante'],
+        'Aventador': ['S', 'SVJ'],
+        'Revuelto': ['Hybrid V12'],
+    },
 }
 
 def get_combined_car_hierarchy():
