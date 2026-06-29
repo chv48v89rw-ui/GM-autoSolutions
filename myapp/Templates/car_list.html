@@ -334,10 +334,6 @@
                                                 {% if car.dealership.is_premium and not car.dealership.is_verified %}
                                                     <span class="badge bg-warning text-dark small ms-1">Premium</span>
                                                 {% endif %}
-                                                {% if car.dealership.website %}
-                                                    <br>
-                                                    <a href="{{ car.dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
-                                                {% endif %}
                                                 <br>
                                                 <small>Joined: {{ car.dealership.created_at|date:"M d, Y" }}</small>
                                             </small>
