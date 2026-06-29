@@ -85,8 +85,10 @@ def home(request):
             cars = cars.filter(transmission=form.cleaned_data['transmission'])
         if form.cleaned_data.get('condition'):
             cars = cars.filter(condition=form.cleaned_data['condition'])
-        if form.cleaned_data.get('engine_size'):
-            cars = cars.filter(engine_size=form.cleaned_data['engine_size'])
+        if form.cleaned_data.get('engine_size_from'):
+            cars = cars.filter(engine_size__gte=form.cleaned_data['engine_size_from'])
+        if form.cleaned_data.get('engine_size_to'):
+            cars = cars.filter(engine_size__lte=form.cleaned_data['engine_size_to'])
         if form.cleaned_data.get('doors'):
             cars = cars.filter(doors=form.cleaned_data['doors'])
         if form.cleaned_data.get('body_type'):
@@ -749,8 +751,10 @@ def car_list(request):
             cars = cars.filter(transmission=form.cleaned_data['transmission'])
         if form.cleaned_data.get('condition'):
             cars = cars.filter(condition=form.cleaned_data['condition'])
-        if form.cleaned_data.get('engine_size'):
-            cars = cars.filter(engine_size=form.cleaned_data['engine_size'])
+        if form.cleaned_data.get('engine_size_from'):
+            cars = cars.filter(engine_size__gte=form.cleaned_data['engine_size_from'])
+        if form.cleaned_data.get('engine_size_to'):
+            cars = cars.filter(engine_size__lte=form.cleaned_data['engine_size_to'])
         if form.cleaned_data.get('doors'):
             cars = cars.filter(doors=form.cleaned_data['doors'])
         if form.cleaned_data.get('body_type'):
@@ -1297,6 +1301,7 @@ def track_dealership_click(request, dealership_id):
         return JsonResponse({'success': True})
 
 
+@login_required(login_url='login')
 def enquire_car(request, car_id):
     """Submit an enquiry for a car"""
     car = get_object_or_404(Car, id=car_id)
@@ -2110,3 +2115,4 @@ def chat_page(request):
 def ai_instructions(request):
     """AI instructions page"""
     return render(request, "ai_instructions.html")
+

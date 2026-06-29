@@ -1077,11 +1077,17 @@ class CarSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    engine_size = forms.ChoiceField(
-        required=False,
-        choices=[('', '-- All Engine Sizes --')] + list(Car.ENGINE_SIZE_CHOICES),
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
+    ENGINE_SIZE_FROM_CHOICES = [('', '--- Engine Size from ---')] + list(Car.ENGINE_SIZE_CHOICES)
+
+    engine_size_from = forms.ChoiceField(required=False, choices=ENGINE_SIZE_FROM_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
+
+    ENGINE_SIZE_TO_CHOICES = [('', '--- Engine Size to ---')] + list(Car.ENGINE_SIZE_CHOICES)
+
+    engine_size_to = forms.ChoiceField(required=False, choices=ENGINE_SIZE_TO_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
  
     doors = forms.ChoiceField(
         required=False,
