@@ -289,16 +289,17 @@
                         <div class="col-lg-6 col-md-12">
                             <div class="card h-100">
                                 <!-- Car Image -->
-                                <div style="height: 250px; overflow: hidden; position: relative;">
-                                    {% if car.main_image %}
-                                        <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}"
-                                             style="width: 100%; height: 100%; object-fit: cover;">
-                                    {% else %}
-                                        <div class="bg-light d-flex align-items-center justify-content-center" 
-                                             style="width: 100%; height: 100%;">
-                                            <span class="text-muted">No Image</span>
-                                        </div>
-                                    {% endif %}
+                                <a href="{% url 'car_detail' car.id %}" style="text-decoration: none; color: inherit;">
+                                    <div style="height: 250px; overflow: hidden; position: relative;">
+                                        {% if car.main_image %}
+                                            <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}"
+                                                 style="width: 100%; height: 100%; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="width: 100%; height: 100%;">
+                                                <span class="text-muted">No Image</span>
+                                            </div>
+                                        {% endif %}
                                     {% if car.is_top_pick %}
                                         <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
                                     {% endif %}
@@ -306,6 +307,7 @@
                                         {{ car.get_condition_display }}
                                     </span>
                                 </div>
+                                </a>
 
                                 <div class="card-body">
                                     <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>

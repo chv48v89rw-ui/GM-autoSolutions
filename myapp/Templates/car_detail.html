@@ -18,18 +18,34 @@
     {% endif %}
     <div class="row">
         <div class="col-lg-8 col-md-12">
-            <!-- Image Gallery -->
+            <!-- Image Gallery Carousel -->
             <div class="card mb-4">
-                <div style="height: 400px; overflow: hidden; position: relative;">
-                    {% if gallery_images %}
-                        <img src="{{ gallery_images.0.url }}" class="img-fluid" alt="{{ car.title }}"
-                             style="width: 100%; height: 100%; object-fit: cover;" id="mainImage">
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; background-color: #f8f9fa;">
-                            <span class="text-muted">No Image Available</span>
-                        </div>
-                    {% endif %}
-                    <span class="badge bg-primary position-absolute top-0 end-0 m-3" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                <div id="carImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner" style="height: 400px;">
+                        {% if gallery_images %}
+                            {% for image in gallery_images %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ image.url }}" class="d-block w-100" alt="{{ car.title }}"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="carousel-item active">
+                                <div class="d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; background-color: #f8f9fa;">
+                                    <span class="text-muted">No Image Available</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carImageCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carImageCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                    <span class="badge bg-primary position-absolute top-0 end-0 m-3" style="font-size: 1rem; padding: 0.5rem 1rem; z-index: 10;">
                         {{ car.get_condition_display }}
                     </span>
                 </div>
@@ -39,8 +55,10 @@
                     <div class="row g-2">
                         {% for image in gallery_images %}
                             <div class="col-3">
-                                <img src="{{ image.url }}" class="img-thumbnail cursor-pointer" alt="Photo {{ forloop.counter }}"
-                                     onclick="changeMainImage(this.src)">
+                                <button type="button" class="btn p-0 border-0" data-bs-target="#carImageCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-label="Slide {{ forloop.counter }}">
+                                    <img src="{{ image.url }}" class="img-thumbnail" alt="Photo {{ forloop.counter }}"
+                                         style="width: 100%; height: 80px; object-fit: cover; cursor: pointer;">
+                                </button>
                             </div>
                         {% endfor %}
                     </div>
@@ -391,12 +409,12 @@
                 <div class="card-body">
                     <p class="small text-muted">Interested in this car? Contact the dealership directly:</p>
                     <div class="d-grid gap-2">
-                        <a href="tel:{{ dealership.phone_number }}" class="btn btn-outline-primary">
-                            📞 Call Now
-                        </a>
-                        <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary">
+                        <a href="mailto:{{ dealership.email }}" class="btn btn-outline-primary">
                             ✉️ Email
                         </a>
+                        <button type="button" class="btn btn-success" onclick="openWhatsapp('{{ dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} I am interested in your car: {{ car.title|escapejs }}')">
+                            💬 WhatsApp
+                        </button>
                         <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary">
                             💬 Send Message
                         </a>
@@ -455,109 +473,5 @@ function addToComparison(carId) {
 document.querySelectorAll('.js-add-comparison').forEach(button => {
     button.addEventListener('click', () => addToComparison(button.dataset.carId));
 });
-</script>
-
-        <!-- Sidebar: Dealership Info Only -->
-        <div class="col-lg-4 col-md-12">
-            <!-- Dealership Card -->
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Dealership</h5>
-                </div>
-                <div class="card-body text-center">
-                    {% if dealership.logo %}
-                        <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}"
-                             style="max-width: 80px; max-height: 80px; object-fit: contain; margin-bottom: 1rem;">
-                    {% else %}
-                        <div class="bg-light-accent p-3 rounded mb-3" style="width: 80px; height: 80px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-                            <span class="text-accent" style="font-size: 2.5rem;">🏢</span>
-                        </div>
-                    {% endif %}
-
-                    <h6>
-                        {{ dealership.company_name }}
-                        {% include 'includes/dealership_rating.html' with dealership=dealership %}
-                        {% if dealership.is_verified %}
-                            <span class="badge bg-success text-white ms-2"><i class="fas fa-check-circle"></i> Verified</span>
-                        {% endif %}
-                    </h6>
-                    {% if dealership.is_verified %}
-                        <span class="badge bg-success mb-2">Verified Dealership</span>
-                    {% endif %}
-                    <p class="text-muted small mb-2">Joined: {{ dealership.created_at|date:"M d, Y" }}</p>
-
-                    <div class="stars mb-2">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= dealership_rating %}
-                                ★
-                            {% else %}
-                                ☆
-                            {% endif %}
-                        {% endfor %}
-                        <br>
-                        <small class="text-muted">({{ dealership_rating|floatformat:1 }})</small>
-                    </div>
-
-                    <p class="text-muted small mb-3">{{ dealership.description|truncatewords:15 }}</p>
-
-                    <hr>
-
-                    <p>
-                        <strong>📞</strong><br>
-                        <a href="tel:{{ dealership.phone_number }}">{{ dealership.phone_number }}</a>
-                    </p>
-                    <p>
-                        <strong>📧</strong><br>
-                        <a href="mailto:{{ dealership.email }}">{{ dealership.email }}</a>
-                    </p>
-                    <p>
-                        <strong>📍</strong><br>
-                        {{ dealership.location }}
-                    </p>
-
-                    {% if dealership.website %}
-                        <p>
-                            <strong>🌐</strong><br>
-                            <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Dealership Website</a>
-                        </p>
-                    {% endif %}
-
-                    <a href="/dealership/{{ dealership.id }}/" class="btn btn-outline-primary w-100 mb-2">
-                        View All Cars
-                    </a>
-                    <a href="/dealership/{{ dealership.id }}/" class="btn btn-secondary w-100">
-                        View Dealership Profile
-                    </a>
-                </div>
-            </div>
-
-            <!-- Quick Contact Card -->
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Quick Contact</h5>
-                </div>
-                <div class="card-body">
-                    <p class="small text-muted">Interested in this car? Contact the dealership directly:</p>
-                    <div class="d-grid gap-2">
-                        <a href="tel:{{ dealership.phone_number }}" class="btn btn-outline-primary">
-                            📞 Call Now
-                        </a>
-                        <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary">
-                            ✉️ Email
-                        </a>
-                        <a href="/car/{{ car.id }}/enquire/" class="btn btn-primary">
-                            💬 Send Message
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function changeMainImage(src) {
-        document.getElementById('mainImage').src = src;
-    }
 </script>
 {% endblock %}

@@ -219,16 +219,18 @@
                 {% for car in top_pick_cars %}
                     <div class="col-lg-3 col-md-6">
                         <div class="card h-100 shadow-sm border-warning">
-                            <div style="height: 180px; overflow: hidden; position: relative;">
-                                {% if car.main_image %}
-                                    <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
-                                        <span class="text-muted">No Image</span>
-                                    </div>
-                                {% endif %}
-                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
-                            </div>
+                            <a href="{% url 'car_detail' car.id %}" style="text-decoration: none; color: inherit;">
+                                <div style="height: 180px; overflow: hidden; position: relative;">
+                                    {% if car.main_image %}
+                                        <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                            <span class="text-muted">No Image</span>
+                                        </div>
+                                    {% endif %}
+                                    <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Top Pick</span>
+                                </div>
+                            </a>
                             <div class="card-body">
                                 <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
                                 <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
@@ -283,15 +285,17 @@
                 {% for car in best_cars %}
                     <div class="col-lg-3 col-md-6">
                         <div class="card h-100 shadow-sm">
-                            <div style="height: 180px; overflow: hidden;">
-                                {% if car.main_image %}
-                                    <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
-                                        <span class="text-muted">No Image</span>
-                                    </div>
-                                {% endif %}
-                            </div>
+                            <a href="{% url 'car_detail' car.id %}" style="text-decoration: none; color: inherit;">
+                                <div style="height: 180px; overflow: hidden;">
+                                    {% if car.main_image %}
+                                        <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                            <span class="text-muted">No Image</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </a>
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
