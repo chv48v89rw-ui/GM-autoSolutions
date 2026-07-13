@@ -80,6 +80,9 @@
                             {% if car.interior_color %}<p><strong>🟤 Interior Color:</strong> {{ car.interior_color }}</p>{% endif %}
                             {% if car.seat_material %}<p><strong>🪑 Seat Material:</strong> {{ car.seat_material }}</p>{% endif %}
                             {% if car.interior_trim %}<p><strong>🧩 Interior Trim:</strong> {{ car.interior_trim }}</p>{% endif %}
+                            {% if car.number_of_keys %}<p><strong>🔑 Number of Keys:</strong> {{ car.number_of_keys }}</p>{% endif %}
+                            {% if car.fuel_economy_source %}<p><strong>⛽ Fuel Economy Source:</strong> {{ car.get_fuel_economy_source_display }}</p>{% endif %}
+                            {% if car.fuel_economy_combined %}<p><strong>⛽ Fuel Economy:</strong> {{ car.fuel_economy_combined }} km/L</p>{% endif %}
                             {% if car.engine_size %}<p><strong>🔧 Engine Size:</strong> {{ car.get_engine_size_display }}</p>{% endif %}
                             {% if car.doors %}<p><strong>🚪 Doors:</strong> {{ car.get_doors_display }}</p>{% endif %}
                         </div>

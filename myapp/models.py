@@ -216,6 +216,48 @@ class Car(models.Model):
         (3, '3+ Owners'),
     ]
     
+    VALUE_SOURCE_CHOICES = [
+        ('manufacturer', 'Manufacturer Value'),
+        ('dealer_measured', 'Dealer Measured Value'),
+        ('unknown', 'Unknown'),
+    ]
+    
+    FUEL_ECONOMY_SOURCE_CHOICES = [
+        ('manufacturer', 'Manufacturer Value'),
+        ('dealership', 'Dealership Value'),
+        ('unknown', 'Unknown'),
+    ]
+    
+    FUEL_ECONOMY_CHOICES = [
+        ('', 'Unknown'),
+        ('5', '5 km/L'),
+        ('6', '6 km/L'),
+        ('7', '7 km/L'),
+        ('8', '8 km/L'),
+        ('9', '9 km/L'),
+        ('10', '10 km/L'),
+        ('11', '11 km/L'),
+        ('12', '12 km/L'),
+        ('13', '13 km/L'),
+        ('14', '14 km/L'),
+        ('15', '15 km/L'),
+        ('16', '16 km/L'),
+        ('17', '17 km/L'),
+        ('18', '18 km/L'),
+        ('19', '19 km/L'),
+        ('20', '20 km/L'),
+        ('21', '21 km/L'),
+        ('22', '22 km/L'),
+        ('23', '23 km/L'),
+        ('24', '24 km/L'),
+        ('25', '25 km/L'),
+        ('26', '26 km/L'),
+        ('27', '27 km/L'),
+        ('28', '28 km/L'),
+        ('29', '29 km/L'),
+        ('30', '30 km/L'),
+    ]
+    
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, related_name='cars')
     title = models.CharField(max_length=255)
     make = models.CharField(max_length=100)  # Toyota, BMW, etc.
@@ -237,6 +279,10 @@ class Car(models.Model):
     doors = models.IntegerField(choices=DOORS_CHOICES, blank=True, null=True)
     body_type = models.CharField(max_length=20, choices=BODY_TYPE_CHOICES, blank=True)
     previous_owners = models.IntegerField(choices=OWNERS_CHOICES, blank=True, null=True)
+    number_of_keys = models.IntegerField(default=1, help_text="Number of keys available")
+    fuel_economy_source = models.CharField(max_length=30, choices=FUEL_ECONOMY_SOURCE_CHOICES, blank=True, null=True, help_text="Source of fuel economy data")
+    fuel_economy_combined = models.CharField(max_length=10, choices=FUEL_ECONOMY_CHOICES, blank=True, null=True, help_text="Combined fuel economy in km/L")
+    value_source = models.CharField(max_length=30, choices=VALUE_SOURCE_CHOICES, blank=True, null=True, help_text="Source of car valuation")
     description = models.TextField()
     
     # Images

@@ -1107,12 +1107,25 @@ class CarForm(forms.ModelForm):
         choices=[('', '-- Select Interior Trim --')],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    
+    fuel_economy_source = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Fuel Economy Source --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    fuel_economy_combined = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = Car
         fields = ('title', 'make', 'model', 'variant', 'year', 'price', 'mileage', 
                  'fuel_type', 'transmission', 'condition', 'color', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'seats',
-                 'engine_size', 'doors', 'body_type', 'previous_owners',
+                 'engine_size', 'doors', 'body_type', 'previous_owners', 'number_of_keys',
+                 'fuel_economy_source', 'fuel_economy_combined',
                  'description', 'main_image', 'features')
         widgets = {
             'title': forms.TextInput(attrs={
@@ -1852,6 +1865,46 @@ class CarSearchForm(forms.Form):
         'class': 'form-control',
         'placeholder': 'Features (e.g., ABS, AC, Power Steering)'
     }))
+
+    NUMBER_OF_KEYS_CHOICES = [
+        ('', '-- All Keys --'),
+        ('1', '1 Key'),
+        ('2', '2 Keys'),
+        ('3', '3 Keys'),
+        ('4', '4+ Keys'),
+    ]
+
+    number_of_keys = forms.ChoiceField(
+        required=False,
+        choices=NUMBER_OF_KEYS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    fuel_economy_source = forms.ChoiceField(
+        required=False,
+        choices=[('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + [
+        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
+    ]
+
+    FUEL_ECONOMY_TO_CHOICES = [('', '--- Fuel Economy to ---')] + [
+        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
+    ]
+
+    fuel_economy_from = forms.ChoiceField(
+        required=False,
+        choices=FUEL_ECONOMY_FROM_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    fuel_economy_to = forms.ChoiceField(
+        required=False,
+        choices=FUEL_ECONOMY_TO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
    
 
