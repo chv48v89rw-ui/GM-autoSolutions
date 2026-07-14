@@ -97,29 +97,214 @@ CAR_HIERARCHY = {
         'e': ['Advance'],
         },
 
-    'BMW': {
-    '1 Series': ['116i', '118i', '120i', 'M135i'],
-    '2 Series': ['218i', '220i', 'M240i'],
-    '3 Series': ['318i', '320i', '330i', '340i', 'M Sport'],
-    '4 Series': ['420i', '430i', '440i', 'M Sport'],
-    '5 Series': ['520i', '530i', '540i', 'M550i', 'M Sport'],
-    '6 Series': ['630i', '640i'],
-    '7 Series': ['730i', '740i', '750i', '760Li'],
-    '8 Series': ['840i', '850i'],
+   'BMW': {
+    '1 Series': [
+        '114i', '116d', '116i', '118d', '118i',
+        '120d', '120i', '123d', '125d',
+        '125i', '128ti', '130i',
+        '135i', 'M135i', 'M140i'
+    ],
 
-    'X1': ['sDrive18i', 'xDrive20i', 'xDrive25i'],
-    'X2': ['sDrive18i', 'xDrive20i'],
-    'X3': ['xDrive20i', 'xDrive30i', 'M40i'],
-    'X4': ['xDrive20i', 'xDrive30i', 'M40i'],
-    'X5': ['xDrive30d', 'xDrive40i', 'xDrive45e'],
-    'X6': ['xDrive40i', 'M50i'],
-    'X7': ['xDrive40i', 'M60i'],
+    '2 Series': [
+        '216d', '218d', '218i',
+        '220d', '220i',
+        '225d', '225e',
+        '228i', '230i',
+        'M235i', 'M240i'
+    ],
 
-    'Z4': ['sDrive20i', 'M40i'],
+    '3 Series': [
+        '316d', '316i',
+        '318d', '318i',
+        '320d', '320i',
+        '323i', '325d', '325i',
+        '328i', '330d', '330e', '330i',
+        '335d', '335i',
+        '340d', '340i',
+        'M340d', 'M340i',
+        'M Sport',
+        'M3', 'M3 Competition', 'M3 CS'
+    ],
 
-    'i Series': ['i3', 'i4', 'i5', 'i7', 'iX'],
+    '4 Series': [
+        '418d', '418i',
+        '420d', '420i',
+        '425d', '428i',
+        '430d', '430i',
+        '435d', '435i',
+        '440d', '440i',
+        'M440d', 'M440i',
+        'M Sport',
+        'M4', 'M4 Competition', 'M4 CSL'
+    ],
 
-    'M Models': ['M2', 'M3', 'M4', 'M5', 'M8', 'XM']
+    '5 Series': [
+        '518d', '520d', '520i',
+        '523i', '525d', '525i',
+        '528i', '530d', '530e', '530i',
+        '535d', '535i',
+        '540d', '540i',
+        '545e',
+        '550d', '550i',
+        'M550i',
+        'M Sport',
+        'M5', 'M5 Competition', 'M5 CS'
+    ],
+
+    '6 Series': [
+        '620d',
+        '630d', '630i',
+        '635d', '635i',
+        '640d', '640i',
+        '650i',
+        'M6'
+    ],
+
+    '7 Series': [
+        '725d', '728i',
+        '730d', '730i',
+        '735i',
+        '740d', '740e', '740i',
+        '745e',
+        '750d', '750i',
+        '760Li', '760i',
+        'M760Li'
+    ],
+
+    '8 Series': [
+        '840d', '840i',
+        '850i',
+        'M850i',
+        'M8', 'M8 Competition'
+    ],
+
+    'X1': [
+        'sDrive16d',
+        'sDrive18d', 'sDrive18i',
+        'sDrive20d', 'sDrive20i',
+        'xDrive18d',
+        'xDrive20d', 'xDrive20i',
+        'xDrive23i',
+        'xDrive25d', 'xDrive25e', 'xDrive25i',
+        'xDrive28i',
+        'xDrive30e'
+    ],
+
+    'X2': [
+        'sDrive18d', 'sDrive18i',
+        'sDrive20i',
+        'xDrive20d', 'xDrive20i',
+        'xDrive25e',
+        'M35i'
+    ],
+
+    'X3': [
+        'sDrive18d',
+        'xDrive20d', 'xDrive20i',
+        'xDrive30d', 'xDrive30e', 'xDrive30i',
+        'xDrive35d',
+        'M40d', 'M40i',
+        'X3 M', 'X3 M Competition'
+    ],
+
+    'X4': [
+        'xDrive20d', 'xDrive20i',
+        'xDrive30d', 'xDrive30i',
+        'M40d', 'M40i',
+        'X4 M', 'X4 M Competition'
+    ],
+
+    'X5': [
+        'xDrive25d',
+        'xDrive30d',
+        'xDrive35d',
+        'xDrive40d', 'xDrive40i',
+        'xDrive45e',
+        'xDrive50e',
+        'M50d', 'M50i',
+        'X5 M', 'X5 M Competition'
+    ],
+
+    'X6': [
+        'xDrive30d',
+        'xDrive35i',
+        'xDrive40d', 'xDrive40i',
+        'M50d', 'M50i',
+        'X6 M', 'X6 M Competition'
+    ],
+
+    'X7': [
+        'xDrive30d',
+        'xDrive40d', 'xDrive40i',
+        'xDrive50d',
+        'M50d',
+        'M60i',
+        'XB7 Alpina'
+    ],
+
+    'XM': [
+        'XM',
+        'XM Label',
+        'XM Label Red'
+    ],
+
+    'Z4': [
+        'sDrive18i',
+        'sDrive20i',
+        'sDrive23i',
+        'sDrive28i',
+        'sDrive30i',
+        'M40i'
+    ],
+
+    'i Series': [
+        'i3',
+        'i4 eDrive35',
+        'i4 eDrive40',
+        'i4 xDrive40',
+        'i4 M50',
+        'i5 eDrive40',
+        'i5 xDrive40',
+        'i5 M60',
+        'i7 eDrive50',
+        'i7 xDrive60',
+        'i7 M70',
+        'iX xDrive40',
+        'iX xDrive50',
+        'iX M60',
+        'iX1',
+        'iX2',
+        'iX3'
+    ],
+
+    'M Models': [
+        'M2',
+        'M2 Competition',
+        'M2 CS',
+        'M3',
+        'M3 Competition',
+        'M3 CS',
+        'M4',
+        'M4 Competition',
+        'M4 CSL',
+        'M5',
+        'M5 Competition',
+        'M5 CS',
+        'M6',
+        'M8',
+        'M8 Competition',
+        'X3 M',
+        'X3 M Competition',
+        'X4 M',
+        'X4 M Competition',
+        'X5 M',
+        'X5 M Competition',
+        'X6 M',
+        'X6 M Competition',
+        'XM',
+        'XM Label',
+        'XM Label Red'
+    ]
 },
   'Mercedes-Benz': {
     'A-Class': [
