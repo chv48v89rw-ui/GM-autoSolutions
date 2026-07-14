@@ -121,39 +121,64 @@ CAR_HIERARCHY = {
 
     'M Models': ['M2', 'M3', 'M4', 'M5', 'M8', 'XM']
 },
-'Mercedes-Benz': {
-    'A-Class': ['A160', 'A180', 'A200', 'A220', 'A250', 'A35 AMG', 'A45 AMG', 'A45 S AMG'],
-    'B-Class': ['B160', 'B180', 'B200', 'B220', 'B250'],
+  'Mercedes-Benz': {
+    'A-Class': [
+        'A140', 'A150', 'A160', 'A170', 'A180', 'A190', 'A200',
+        'A210 Evolution', 'A220', 'A250', 'A250e',
+        'A35 AMG', 'A45 AMG', 'A45 S AMG'
+    ],
+
+    'B-Class': [
+        'B150', 'B160', 'B170', 'B180', 'B200',
+        'B200 CDI', 'B220', 'B250', 'B250e'
+    ],
 
     'C-Class': [
-        'C160', 'C180', 'C200', 'C220d', 'C230', 'C240', 'C250',
-        'C280', 'C300', 'C320', 'C350', 'C400', 'C43 AMG',
+        'C160', 'C180', 'C180 Kompressor', 'C200',
+        'C200 Kompressor', 'C220d', 'C230',
+        'C230 Kompressor', 'C240', 'C250',
+        'C250 CGI', 'C250d', 'C280', 'C300',
+        'C300e', 'C320', 'C350', 'C350e',
+        'C400', 'C36 AMG', 'C43 AMG',
         'C55 AMG', 'C63 AMG', 'C63 S AMG'
     ],
 
     'E-Class': [
-        'E180', 'E200', 'E220d', 'E230', 'E240', 'E250',
-        'E270 CDI', 'E280', 'E300', 'E320', 'E350',
-        'E400', 'E430', 'E450', 'E500', 'E550',
-        'E53 AMG', 'E55 AMG', 'E63 AMG', 'E63 S AMG'
+        'E180', 'E200', 'E200 CGI', 'E220 CDI',
+        'E220d', 'E230', 'E240', 'E250',
+        'E250 CDI', 'E270 CDI', 'E280',
+        'E300', 'E300 BlueTEC', 'E300e',
+        'E320', 'E350', 'E350 CDI',
+        'E350e', 'E400', 'E430',
+        'E450', 'E500', 'E500E',
+        'E550', 'E43 AMG', 'E53 AMG',
+        'E55 AMG', 'E63 AMG', 'E63 S AMG'
     ],
 
     'S-Class': [
-        'S280', 'S300', 'S320', 'S350', 'S400', 'S420',
-        'S430', 'S450', 'S500', 'S550', 'S560',
-        'S580', 'S600', 'S650', 'S680',
+        'S250 CDI', 'S280', 'S300', 'S300h',
+        'S320', 'S350', 'S350 BlueTEC',
+        'S400', 'S400d', 'S420',
+        'S430', 'S450', 'S450h',
+        'S500', 'S500e', 'S550',
+        'S560', 'S580', 'S580e',
+        'S600', 'S650', 'S680',
+        'S63 AMG', 'S65 AMG',
         'Maybach S560', 'Maybach S580', 'Maybach S680'
     ],
 
     'CLA': [
-        'CLA180', 'CLA200', 'CLA220', 'CLA250',
+        'CLA180', 'CLA200', 'CLA220',
+        'CLA250', 'CLA250e',
         'CLA35 AMG', 'CLA45 AMG', 'CLA45 S AMG'
     ],
 
     'CLS': [
-        'CLS220d', 'CLS250', 'CLS300', 'CLS350',
-        'CLS400', 'CLS450', 'CLS500',
-        'CLS53 AMG', 'CLS55 AMG', 'CLS63 AMG'
+        'CLS220d', 'CLS250', 'CLS250 CDI',
+        'CLS300', 'CLS350', 'CLS350 CDI',
+        'CLS400', 'CLS400d', 'CLS450',
+        'CLS500', 'CLS53 AMG',
+        'CLS55 AMG', 'CLS63 AMG'
     ],
 
     'CLE': [
@@ -162,44 +187,62 @@ CAR_HIERARCHY = {
     ],
 
     'GLA': [
-        'GLA180', 'GLA200', 'GLA220', 'GLA250',
+        'GLA180', 'GLA180d', 'GLA200',
+        'GLA200d', 'GLA220', 'GLA220d',
+        'GLA250', 'GLA250e',
         'GLA35 AMG', 'GLA45 AMG'
     ],
 
     'GLB': [
-        'GLB180', 'GLB200', 'GLB220d',
-        'GLB250', 'GLB35 AMG'
+        'GLB180', 'GLB200', 'GLB200d',
+        'GLB220d', 'GLB250', 'GLB250e',
+        'GLB35 AMG'
     ],
 
     'GLC': [
-        'GLC200', 'GLC220d', 'GLC250',
-        'GLC300', 'GLC350e', 'GLC400',
+        'GLC200', 'GLC200d', 'GLC220',
+        'GLC220d', 'GLC250', 'GLC250d',
+        'GLC300', 'GLC300d', 'GLC300e',
+        'GLC350d', 'GLC350e',
+        'GLC400', 'GLC400d',
         'GLC43 AMG', 'GLC63 AMG', 'GLC63 S AMG'
     ],
 
     'GLE': [
         'GLE250d', 'GLE300d', 'GLE350',
-        'GLE350d', 'GLE400', 'GLE450',
-        'GLE500', 'GLE580',
-        'GLE53 AMG', 'GLE63 AMG', 'GLE63 S AMG'
+        'GLE350d', 'GLE350e',
+        'GLE400', 'GLE400d',
+        'GLE450', 'GLE500',
+        'GLE580', 'GLE53 AMG',
+        'GLE43 AMG',
+        'GLE63 AMG', 'GLE63 S AMG'
     ],
 
     'GLS': [
-        'GLS350d', 'GLS400d', 'GLS450',
-        'GLS500', 'GLS580',
+        'GLS350d', 'GLS400d',
+        'GLS450', 'GLS500',
+        'GLS580', 'GLS600 Maybach',
         'Maybach GLS600',
-        'AMG GLS63'
+        'AMG GLS63', 'GLS63 AMG'
     ],
 
     'G-Class': [
-        'G300', 'G320', 'G350d', 'G400d',
-        'G500', 'G550',
+        '230GE', '240GD', '250GD',
+        '270 CDI', '280GE',
+        '290GD', '300GD', '300GE',
+        'G230', 'G250', 'G270',
+        'G290', 'G300', 'G320',
+        'G350d', 'G400d',
+        'G500', 'G500 4x4²',
+        'G550', 'G550 4x4²',
+        'G650 Landaulet',
         'AMG G55', 'AMG G63', 'AMG G65'
     ],
 
     'SL': [
-        'SL280', 'SL300', 'SL320', 'SL350',
-        'SL400', 'SL450', 'SL500', 'SL550',
+        'SL280', 'SL300', 'SL320',
+        'SL350', 'SL400', 'SL450',
+        'SL500', 'SL550', 'SL600',
         'SL55 AMG', 'SL63 AMG', 'SL65 AMG'
     ],
 
@@ -209,19 +252,24 @@ CAR_HIERARCHY = {
     ],
 
     'SLK': [
-        'SLK200', 'SLK230', 'SLK250',
-        'SLK280', 'SLK300', 'SLK350',
+        'SLK170', 'SLK200', 'SLK230',
+        'SLK250', 'SLK280',
+        'SLK300', 'SLK350',
         'SLK32 AMG', 'SLK55 AMG'
     ],
 
     'CLK': [
-        'CLK200', 'CLK240', 'CLK280',
-        'CLK320', 'CLK350', 'CLK430',
-        'CLK500', 'CLK55 AMG', 'CLK63 AMG'
+        'CLK200', 'CLK200 Kompressor',
+        'CLK230 Kompressor', 'CLK240',
+        'CLK280', 'CLK320',
+        'CLK350', 'CLK430',
+        'CLK500', 'CLK55 AMG',
+        'CLK63 AMG'
     ],
 
     'CL-Class': [
-        'CL500', 'CL550', 'CL600',
+        'CL500', 'CL500 4MATIC',
+        'CL550', 'CL600',
         'CL63 AMG', 'CL65 AMG'
     ],
 
@@ -231,14 +279,20 @@ CAR_HIERARCHY = {
     ],
 
     'M-Class': [
-        'ML250', 'ML270 CDI', 'ML280 CDI',
-        'ML300', 'ML320', 'ML350',
-        'ML400', 'ML430', 'ML500',
-        'ML550', 'ML55 AMG', 'ML63 AMG'
+        'ML230', 'ML250', 'ML270',
+        'ML270 CDI', 'ML280',
+        'ML280 CDI', 'ML300',
+        'ML300 CDI', 'ML320',
+        'ML320 CDI', 'ML350',
+        'ML350 Bluetec', 'ML400',
+        'ML430', 'ML500',
+        'ML550', 'ML55 AMG',
+        'ML63 AMG'
     ],
 
     'GL-Class': [
-        'GL320 CDI', 'GL350',
+        'GL320', 'GL320 CDI',
+        'GL350', 'GL350 Bluetec',
         'GL420 CDI', 'GL450',
         'GL500', 'GL550',
         'GL63 AMG'
@@ -247,28 +301,39 @@ CAR_HIERARCHY = {
     'GLK': [
         'GLK200', 'GLK220 CDI',
         'GLK250', 'GLK280',
-        'GLK300', 'GLK350'
+        'GLK300', 'GLK320',
+        'GLK350'
     ],
 
     'EQ Series': [
-        'EQA 250', 'EQA 300', 'EQA 350',
-        'EQB 250', 'EQB 300', 'EQB 350',
+        'EQA 220', 'EQA 250', 'EQA 250+',
+        'EQA 300', 'EQA 350',
+        'EQB 250', 'EQB 250+',
+        'EQB 300', 'EQB 350',
         'EQC 400',
-        'EQE 350', 'EQE 350+', 'EQE 500',
+        'EQE 350', 'EQE 350+',
+        'EQE 500', 'EQE 500 SUV',
         'AMG EQE 43', 'AMG EQE 53',
-        'EQS 450', 'EQS 450+', 'EQS 580',
+        'EQS 450', 'EQS 450+',
+        'EQS 500', 'EQS 580',
         'Maybach EQS 680',
         'AMG EQS 53',
-        'EQT',
-        'eVito',
-        'eSprinter'
+        'AMG EQS SUV 53',
+        'EQT', 'eCitan',
+        'eVito', 'eSprinter'
     ],
 
     'AMG GT': [
-        'AMG GT', 'AMG GT S', 'AMG GT C',
-        'AMG GT R', 'AMG GT Black Series',
-        'AMG GT 43', 'AMG GT 53',
-        'AMG GT 63', 'AMG GT 63 S'
+        'AMG GT', 'AMG GT S',
+        'AMG GT C', 'AMG GT R',
+        'AMG GT Pro',
+        'AMG GT Track Series',
+        'AMG GT Black Series',
+        'AMG GT 43',
+        'AMG GT 53',
+        'AMG GT 63',
+        'AMG GT 63 S',
+        'AMG GT XX'
     ],
 
     'Citan': [
@@ -280,12 +345,17 @@ CAR_HIERARCHY = {
     ],
 
     'Vito': [
-        '109 CDI', '111 CDI', '113 CDI',
-        '114 CDI', '116 CDI', '119 CDI'
+        '109 CDI', '110 CDI',
+        '111 CDI', '113 CDI',
+        '114 CDI', '115 CDI',
+        '116 CDI', '119 CDI',
+        '120 CDI'
     ],
 
     'V-Class': [
-        'V220d', 'V250d', 'V300d'
+        'V200d', 'V220d',
+        'V250d', 'V300',
+        'V300d'
     ],
 
     'X-Class': [
@@ -293,18 +363,26 @@ CAR_HIERARCHY = {
     ],
 
     'Sprinter': [
-        '211 CDI', '213 CDI', '311 CDI',
-        '313 CDI', '315 CDI', '316 CDI',
-        '318 CDI', '319 CDI', '411 CDI',
-        '413 CDI', '416 CDI', '419 CDI',
-        '511 CDI', '515 CDI', '516 CDI',
-        '519 CDI'
+        '208 CDI', '210 CDI',
+        '211 CDI', '212 CDI',
+        '213 CDI', '214 CDI',
+        '310 CDI', '311 CDI',
+        '313 CDI', '314 CDI',
+        '315 CDI', '316 CDI',
+        '317 CDI', '318 CDI',
+        '319 CDI', '411 CDI',
+        '413 CDI', '416 CDI',
+        '419 CDI', '511 CDI',
+        '515 CDI', '516 CDI',
+        '517 CDI', '519 CDI',
+        '519 BlueTEC'
     ],
 
     'T-Class': [
         'T160', 'T180'
     ]
 },
+
 
    'Audi': {
     'A1': ['Sportback'],
