@@ -878,10 +878,12 @@
             </div>
         </div>
     </nav>
-    <a href="{% url 'chat_page' %}" class="ai-chat-bubble" aria-label="Open AI Chat" title="Drag to move or click to open AI Chat">
-    <i class="fa-solid fa-robot" aria-hidden="true"></i>
-    <span>AI CHAT</span>
-    </a>
+    {% if request.resolver_match.url_name != 'chat_page' and request.resolver_match.url_name != 'aichat' %}
+        <a href="{% url 'chat_page' %}" class="ai-chat-bubble" aria-label="Open AI Chat" title="Drag to move or click to open AI Chat">
+            <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            <span>AI CHAT</span>
+        </a>
+    {% endif %}
     <!-- Messages -->
     {% if messages %}
         <div class="container mt-3">
