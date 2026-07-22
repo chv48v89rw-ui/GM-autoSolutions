@@ -1065,15 +1065,25 @@
             let moved = false;
             let offsetX = 0;
             let offsetY = 0;
+            let holdTimer = null;
 
             chatBubble.addEventListener('pointerdown', function (event) {
-                isDragging = true;
                 moved = false;
                 const bubbleRect = chatBubble.getBoundingClientRect();
                 offsetX = event.clientX - bubbleRect.left;
                 offsetY = event.clientY - bubbleRect.top;
-                chatBubble.classList.add('is-dragging');
                 chatBubble.setPointerCapture(event.pointerId);
+
+                const startDragging = () => {
+                    isDragging = true;
+                    chatBubble.classList.add('is-dragging');
+                };
+
+                if (event.pointerType === 'mouse') {
+                    holdTimer = window.setTimeout(startDragging, 250);
+                } else {
+                    startDragging();
+                }
             });
 
             chatBubble.addEventListener('pointermove', function (event) {
@@ -1089,6 +1099,16 @@
             });
 
             chatBubble.addEventListener('pointerup', function (event) {
+                window.clearTimeout(holdTimer);
+                holdTimer = null;
+                isDragging = false;
+                chatBubble.classList.remove('is-dragging');
+                chatBubble.releasePointerCapture(event.pointerId);
+            });
+
+            chatBubble.addEventListener('pointercancel', function (event) {
+                window.clearTimeout(holdTimer);
+                holdTimer = null;
                 isDragging = false;
                 chatBubble.classList.remove('is-dragging');
                 chatBubble.releasePointerCapture(event.pointerId);
