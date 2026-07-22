@@ -179,7 +179,7 @@
                                             <div class="col-md-8">
                                                 <div class="card-body">
                                                     <h6 class="card-title">{{ favorite.car.year }} {{ favorite.car.make }} {{ favorite.car.model }}</h6>
-                                                    <p class="card-text text-accent fw-bold mb-1">KES {{ favorite.car.price|floatformat:0|intcomma }}</p>
+                                                    <p class="card-text text-accent fw-bold mb-1">KES {{ favorite.car.price|floatformat:0|intcomma }}{% if favorite.car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</p>
                                                     <p class="card-text small text-muted mb-2">
                                                         {{ favorite.car.mileage }} km • {{ favorite.car.fuel_type }} • {{ favorite.car.condition }}
                                                     </p>

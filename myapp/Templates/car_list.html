@@ -357,7 +357,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
                                     <p class="card-text text-accent fw-bold fs-5">
-                                        KES {{ car.price|floatformat:0|intcomma }}
+                                        KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}
                                     </p>
 
                                     <ul style="list-style: none; padding: 0; font-size: 0.9rem;">

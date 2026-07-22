@@ -69,7 +69,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h2 class="mb-3">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h2>
-                    <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|intcomma }}</h3>
+                    <h3 class="text-accent mb-4">KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</h3>
 
                     <div class="row g-4">
                         <div class="col-md-6">
@@ -303,7 +303,7 @@
                                         </div>
                                         <div class="card-body">
                                                                     <h6 class="card-title">{{ similar_car.year }} {{ similar_car.make }} {{ similar_car.model }}</h6>
-                                            <p class="card-text text-accent fw-bold">KES {{ similar_car.price|floatformat:0|intcomma }}</p>
+                                            <p class="card-text text-accent fw-bold">KES {{ similar_car.price|floatformat:0|intcomma }}{% if similar_car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</p>
                                             <small class="text-muted d-block mb-2">
                                                 {{ similar_car.dealership.company_name }}
                                                 {% include 'includes/dealership_rating.html' with dealership=similar_car.dealership %}

@@ -3529,7 +3529,7 @@ class CarForm(forms.ModelForm):
 
     class Meta:
         model = Car
-        fields = ('title', 'make', 'model', 'variant', 'year', 'price', 'mileage', 
+        fields = ('title', 'make', 'model', 'variant', 'year', 'price', 'is_price_negotiable', 'mileage', 
                  'fuel_type', 'transmission', 'condition', 'color', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'seats',
                  'engine_size', 'doors', 'body_type', 'previous_owners', 'number_of_keys',
                  'fuel_economy_source', 'fuel_economy_combined',
@@ -3547,6 +3547,7 @@ class CarForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Price in KES'
             }),
+            'is_price_negotiable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Mileage (km)'

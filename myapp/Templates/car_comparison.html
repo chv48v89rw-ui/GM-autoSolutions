@@ -80,7 +80,7 @@
                                         {% endif %}
                                         <br><small class="text-muted">Joined: {{ car.dealership.created_at|date:"M d, Y" }}</small>
                                     </small>
-                                    <p class="mt-2"><strong class="h5">KES {{ car.price|floatformat:0|intcomma }}</strong></p>
+                                    <p class="mt-2"><strong class="h5">KES {{ car.price|floatformat:0|intcomma }}</strong>{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</p>
                                     <small class="text-muted">Added: {{ car.created_at|date:"M d, Y" }}</small>
                                     <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-primary">View Details</a>
                                     <button class="btn btn-sm btn-danger js-remove-comparison" data-car-id="{{ car.id }}">Remove</button>
@@ -226,7 +226,7 @@
                     <tr>
                         <td><strong>Price</strong></td>
                         {% for car in cars %}
-                            <td class="h5">KES {{ car.price|floatformat:0|intcomma }}</td>
+                            <td class="h5">KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</td>
                         {% endfor %}
                     </tr>
                 </tbody>

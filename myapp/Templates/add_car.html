@@ -55,6 +55,10 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Price (KES)</label>
                                 {{ form.price }}
+                                <div class="form-check mt-2">
+                                    {{ form.is_price_negotiable }}
+                                    <label class="form-check-label" for="{{ form.is_price_negotiable.id_for_label }}">Price is negotiable</label>
+                                </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Mileage (km)</label>

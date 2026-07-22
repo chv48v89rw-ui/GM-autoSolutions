@@ -265,6 +265,7 @@ class Car(models.Model):
     variant = models.CharField(max_length=100, blank=True)
     year = models.IntegerField(validators=[MinValueValidator(1990), MaxValueValidator(datetime.now().year + 1)])
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    is_price_negotiable = models.BooleanField(default=False)
     mileage = models.IntegerField()  # in kilometers
     fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICES)
     transmission = models.CharField(max_length=20, choices=TRANSMISSION_CHOICES)

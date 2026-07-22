@@ -250,7 +250,7 @@
                             </a>
                             <div class="card-body">
                                 <h5 class="card-title fs-6 mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
-                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
+                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</p>
                                 <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
                                 <div class="mb-0 text-muted small">
                                     {{ car.dealership.company_name }}
@@ -320,7 +320,7 @@
                                         <span class="badge bg-warning text-dark">Premium</span>
                                     {% endif %}
                                 </div>
-                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}</p>
+                                <p class="mb-2 text-primary fw-bold">KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</p>
                                 <p class="mb-2 text-muted small">{{ car.mileage }} km • {{ car.get_condition_display }}</p>
                                 <div class="mb-0 text-muted small">
                                     {{ car.dealership.company_name }}

@@ -180,7 +180,7 @@
                                                 <strong>{{ car.year }} {{ car.make }} {{ car.model }}</strong>
                                             </a>
                                         </td>
-                                        <td>KES {{ car.price|floatformat:0|intcomma }}</td>
+                                        <td>KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}</td>
                                         <td>{{ car.mileage }} km</td>
                                         <td>
                                             <div>
