@@ -1874,7 +1874,9 @@ def remove_from_comparison(request, car_id):
 def view_comparison(request):
     """View car comparison"""
     comparison_ids = request.session.get('comparison_cars', [])
+    filter_form = CarSearchForm(request.GET or None)
     cars = Car.objects.filter(id__in=comparison_ids, is_approved=True, is_sold=False)
+    cars = apply_car_filters(cars, filter_form)
     
     # Preserve order
     cars_dict = {car.id: car for car in cars}
@@ -1883,6 +1885,7 @@ def view_comparison(request):
     context = {
         'cars': ordered_cars,
         'comparison_count': len(ordered_cars),
+        'form': filter_form,
     }
     return render(request, 'car_comparison.html', context)
 

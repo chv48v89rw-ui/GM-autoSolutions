@@ -8,6 +8,49 @@
     <h2>Car Comparison</h2>
     <p class="text-muted">Compare up to 10 cars side-by-side</p>
     <div id="comparison-message-container"></div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Filter Compared Cars</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="comparisonFilterForm">
+                <div class="row g-3">
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Make</label>{{ form.make }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Model</label>{{ form.model }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Variant</label>{{ form.variant }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Year From</label>{{ form.year_from }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Year To</label>{{ form.year_to }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Price From (KES)</label>{{ form.price_from }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Price To (KES)</label>{{ form.price_to }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Mileage From (km)</label>{{ form.mileage_from }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Mileage To (km)</label>{{ form.mileage_to }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Fuel Type</label>{{ form.fuel_type }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Transmission</label>{{ form.transmission }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Condition</label>{{ form.condition }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Engine Size From</label>{{ form.engine_size_from }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Engine Size To</label>{{ form.engine_size_to }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Number of Doors</label>{{ form.doors }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Body Type</label>{{ form.body_type }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Exterior Color</label>{{ form.exterior_color }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Interior Color</label>{{ form.interior_color }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Previous Owners</label>{{ form.previous_owners }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Minimum Seats</label>{{ form.seats }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Seat Material</label>{{ form.seat_material }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Interior Trim</label>{{ form.interior_trim }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Features</label>{{ form.features }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Number of Keys</label>{{ form.number_of_keys }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Fuel Economy Source</label>{{ form.fuel_economy_source }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Fuel Economy From (km/L)</label>{{ form.fuel_economy_from }}</div>
+                    <div class="col-md-4 col-lg-3"><label class="form-label">Fuel Economy To (km/L)</label>{{ form.fuel_economy_to }}</div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'view_comparison' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
     
     {% if cars %}
         <div class="table-responsive mt-4">
@@ -153,6 +196,25 @@
                         <td><strong>Interior Trim</strong></td>
                         {% for car in cars %}
                             <td>{{ car.interior_trim|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>Number of Keys</strong></td>
+                        {% for car in cars %}
+                            <td>{{ car.number_of_keys|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        <td><strong>Fuel Economy</strong></td>
+                        {% for car in cars %}
+                            <td>
+                                {% if car.fuel_economy_combined %}
+                                    {{ car.fuel_economy_combined }} km/L{% if car.fuel_economy_source %} ({{ car.get_fuel_economy_source_display }}){% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                         {% endfor %}
                     </tr>
                     <tr>
