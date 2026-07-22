@@ -765,6 +765,7 @@
             z-index: 9999;
             cursor: grab;
             touch-action: none;
+            user-select: none;
 
             transition: all 0.3s ease;
         }
@@ -1066,9 +1067,13 @@
             let offsetX = 0;
             let offsetY = 0;
             let holdTimer = null;
+            let startX = 0;
+            let startY = 0;
 
             chatBubble.addEventListener('pointerdown', function (event) {
                 moved = false;
+                startX = event.clientX;
+                startY = event.clientY;
                 const bubbleRect = chatBubble.getBoundingClientRect();
                 offsetX = event.clientX - bubbleRect.left;
                 offsetY = event.clientY - bubbleRect.top;
@@ -1087,8 +1092,13 @@
             });
 
             chatBubble.addEventListener('pointermove', function (event) {
-                if (!isDragging) return;
+                if (!isDragging) {
+                    const distanceMoved = Math.hypot(event.clientX - startX, event.clientY - startY);
+                    if (event.buttons !== 1 || distanceMoved < 4) return;
+                    return;
+                }
 
+                event.preventDefault();
                 moved = true;
                 const left = Math.max(0, Math.min(window.innerWidth - chatBubble.offsetWidth, event.clientX - offsetX));
                 const top = Math.max(0, Math.min(window.innerHeight - chatBubble.offsetHeight, event.clientY - offsetY));
@@ -1099,6 +1109,10 @@
             });
 
             chatBubble.addEventListener('pointerup', function (event) {
+
+            chatBubble.addEventListener('dragstart', function (event) {
+                event.preventDefault();
+            });
                 window.clearTimeout(holdTimer);
                 holdTimer = null;
                 isDragging = false;
