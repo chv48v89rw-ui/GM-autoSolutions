@@ -738,6 +738,37 @@
         footer {
             padding: 50px 0;
         }
+        .ai-chat-bubble {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+
+            width: 64px;
+            height: 64px;
+
+            background: linear-gradient(135deg, #0d6efd, #0056d6);
+            color: #fff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 18px;   /* Rounded square */
+            text-decoration: none;
+            font-size: 28px;
+
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+
+            transition: all 0.3s ease;
+        }
+
+        .ai-chat-bubble:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: linear-gradient(135deg, #0056d6, #003f9e);
+            color: #fff;
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.3);
+        }
 
         .footer-bottom {
             text-align: center;
@@ -827,7 +858,9 @@
             </div>
         </div>
     </nav>
-
+    <a href="{% url 'chat_page' %}" class="ai-chat-bubble">
+    <i class="bi bi-robot"></i>
+    </a>
     <!-- Messages -->
     {% if messages %}
         <div class="container mt-3">

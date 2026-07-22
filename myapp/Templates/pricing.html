@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="alert alert-info mb-4" role="status">
+    <div class="alert bg-light-accent border-accent mb-4" role="status">
         <p>Thank you for your interest in our membership subscriptions.</p>
         <p>We are currently finalizing a premium subscription experience designed to provide enhanced features, exclusive benefits, and added value for our community. To ensure the highest standards of quality, reliability, and user experience, subscriptions are not yet available for activation.</p>
         <p>Our team is carefully completing the final stages of development and testing before the official launch. Once subscriptions become available, you'll be able to access a range of exclusive services and features designed to make your experience even more rewarding.</p>
@@ -13,7 +13,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card">
-                <div class="card-header bg-primary text-black text-center">
+                <div class="card-header text-center">
                     <h2 class="mb-0">💰 Pricing Plans</h2>
                     <p class="mb-0">Choose the perfect plan for your dealership</p>
                 </div>
@@ -30,11 +30,11 @@
                     <!-- Premium Dealership -->
                     <div class="row mb-4">
                         <div class="col-12">
-                            <div class="card h-100 border-warning shadow-sm">
+                            <div class="card h-100 border-accent shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <span class="badge bg-warning text-dark mb-3">Premium Spotlight</span>
+                                    <span class="badge badge-primary mb-3">Premium Spotlight</span>
                                     <h4 class="card-title">⭐ Premium Dealership</h4>
-                                    <h3 class="text-warning mb-3">KES 15,000/month OR KES 120,000/Year</h3>
+                                    <h3 class="text-accent mb-3">KES 15,000/month OR KES 120,000/Year</h3>
                                     <p class="text-muted">Top placement, verified badge, and priority exposure for your dealership.</p>
                                     <ul class="list-unstyled text-start mx-auto" style="max-width: 640px;">
                                         <li>✅ Featured in search results</li>
@@ -47,7 +47,7 @@
                                         <div class="col-sm-6">
                                             <form method="post" action="{% url 'pricing_subscribe' 'premium_monthly' %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-warning w-100">
+                                                    <button type="submit" class="btn btn-primary w-100">
                                                     Premium Monthly
                                                 </button>
                                             </form>
@@ -55,7 +55,7 @@
                                         <div class="col-sm-6">
                                             <form method="post" action="{% url 'pricing_subscribe' 'premium_yearly' %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-warning w-100">
+                                                    <button type="submit" class="btn btn-outline-primary w-100">
                                                     Premium Yearly
                                                 </button>
                                             </form>
@@ -68,10 +68,10 @@
 
                     <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
                         <div class="col">
-                            <div class="card h-100 border-primary shadow-sm">
+                            <div class="card h-100 border-accent shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">📅 Monthly</h4>
-                                    <h3 class="text-primary mb-3">KES 10,000</h3>
+                                    <h3 class="text-accent mb-3">KES 10,000</h3>
                                     <p class="text-muted">Perfect for growing dealerships</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
@@ -89,7 +89,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card h-100 border-secondary shadow-sm">
+                            <div class="card h-100 border-dark shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">🟡 Half-Yearly</h4>
                                     <h3 class="text-secondary mb-3">KES 50,000</h3>
@@ -110,10 +110,10 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card h-100 border-success shadow-sm">
+                            <div class="card h-100 border-accent shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">📆 Yearly</h4>
-                                    <h3 class="text-success mb-3">KES 100,000</h3>
+                                    <h3 class="text-accent mb-3">KES 100,000</h3>
                                     <p class="text-muted">Save 17% with annual billing</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Unlimited car listings</li>
@@ -132,10 +132,10 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card h-100 border-info shadow-sm">
+                            <div class="card h-100 border-accent shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
                                     <h4 class="card-title">🚗 Per Car Listing</h4>
-                                    <h3 class="text-info mb-3">KES 2,500</h3>
+                                    <h3 class="text-accent mb-3">KES 2,500</h3>
                                     <p class="text-muted">Pay only for cars you want featured</p>
                                     <ul class="list-unstyled text-start">
                                         <li>✅ Featured car listing</li>
@@ -144,7 +144,7 @@
                                         <li>✅ One-time payment</li>
                                     </ul>
                                     <div class="mt-auto">
-                                        <a href="{% url 'pricing_choose_car' %}" class="btn btn-info w-100">Choose Per Car</a>
+                                        <a href="{% url 'pricing_choose_car' %}" class="btn btn-primary w-100">Choose Per Car</a>
                                     </div>
                                 </div>
                             </div>
