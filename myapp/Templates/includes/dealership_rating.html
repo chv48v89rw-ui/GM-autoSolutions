@@ -1,0 +1,13 @@
+{# Include to display dealership rating and review count. Expects `dealership` variable. #}
+<div class="dealership-rating ms-2">
+    <span class="stars text-warning" aria-hidden="true">
+        {% for _ in "12345" %}
+            {% if forloop.counter <= dealership.rating %}
+                <i class="fas fa-star"></i>
+            {% else %}
+                <i class="far fa-star"></i>
+            {% endif %}
+        {% endfor %}
+    </span>
+    <small class="rating-number ms-1 d-none d-sm-inline">{{ dealership.rating|floatformat:1 }}{% if dealership.reviews.count %} • {{ dealership.reviews.count }}{% endif %}</small>
+</div>

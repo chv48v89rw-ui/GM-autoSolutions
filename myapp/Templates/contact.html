@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact {{ dealership.company_name }} - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Contact {{ dealership.company_name }}</h3>
+                    <p class="text-muted mb-0 mt-2">Get in touch with this dealership</p>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Dealership Info Section -->
+                    <div class="row mb-5">
+                        <div class="col-lg-6 col-md-12 mb-4">
+                            <div class="card border-accent">
+                                <div class="card-body text-center">
+                                    {% if dealership.logo %}
+                                        <img src="{{ dealership.logo.url }}" alt="{{ dealership.company_name }}"
+                                             style="max-width: 120px; max-height: 120px; object-fit: contain; margin-bottom: 1rem;">
+                                    {% else %}
+                                        <div class="bg-light-accent rounded mb-3" style="width: 120px; height: 120px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <span class="text-accent" style="font-size: 3rem;">🏢</span>
+                                        </div>
+                                    {% endif %}
+
+                                    <h4 class="text-accent">
+                                        {{ dealership.company_name }}
+                                        {% include 'includes/dealership_rating.html' with dealership=dealership %}
+                                        {% if dealership.is_verified %}
+                                            <span class="badge bg-success text-white ms-2"><i class="fas fa-check-circle"></i> Verified</span>
+                                        {% endif %}
+                                    </h4>
+
+                                    <div class="stars mb-3">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= dealership_rating %}
+                                                ★
+                                            {% else %}
+                                                ☆
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="text-muted ms-2">({{ dealership_rating|floatformat:1 }})</small>
+                                    </div>
+
+                                    {% if dealership.response_time_badge_enabled and dealership.response_time_badge_choice %}
+                                        <div class="badge bg-info text-dark mb-3">
+                                            Estimated reply time: {{ dealership.response_time_badge_label }}
+                                        </div>
+                                    {% endif %}
+
+                                    <p class="text-muted">{{ dealership.description|truncatewords:20 }}</p>
+
+                                    <hr>
+
+                                    <div class="text-start">
+                                        <p class="mb-2">
+                                            <strong>📍 Location:</strong><br>
+                                            {{ dealership.location }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>📞 Phone:</strong><br>
+                                            <a href="tel:{{ dealership.phone_number }}" class="text-accent">{{ dealership.phone_number }}</a>
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>📧 Email:</strong><br>
+                                            <a href="mailto:{{ dealership.email }}" class="text-accent">{{ dealership.email }}</a>
+                                        </p>
+                                        {% if dealership.website %}
+                                            <p class="mb-2">
+                                                <strong>🌐 Website:</strong><br>
+                                                <a href="{{ dealership.website }}" target="_blank" rel="noopener noreferrer" onclick="trackClick('website')" class="btn btn-website btn-sm mt-1">Visit Website</a>
+                                            </p>
+                                        {% endif %}
+                                        <p class="mb-0">
+                                            <strong>🏠 Address:</strong><br>
+                                            {{ dealership.address }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card bg-light-accent border-accent">
+                                <div class="card-body">
+                                    <h5 class="text-accent mb-4">💬 Send a Message</h5>
+                                    <p class="mb-4">Have questions about their cars or services? Send them a message and they'll get back to you soon.</p>
+
+                                    <form method="post">
+                                        {% csrf_token %}
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Your Name</label>
+                                            {{ form.buyer_name }}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Your Email</label>
+                                            {{ form.buyer_email }}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Your Phone Number</label>
+                                            {{ form.buyer_phone }}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Subject/Topic</label>
+                                            <select class="form-select" name="subject" required>
+                                                <option value="">Select a topic</option>
+                                                <option value="general">General Inquiry</option>
+                                                <option value="car_info">Car Information</option>
+                                                <option value="pricing">Pricing & Financing</option>
+                                                <option value="test_drive">Test Drive Request</option>
+                                                <option value="trade_in">Trade-In Evaluation</option>
+                                                <option value="service">Service & Maintenance</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Your Message</label>
+                                            {{ form.message }}
+                                            <small class="form-text text-muted">Tell them what you're looking for or any specific questions you have</small>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                            📤 Send Message
+                                        </button>
+                                        <button type="button" id="send-whatsapp" class="btn btn-success w-100 btn-lg mt-2">
+                                            💬 Send via WhatsApp
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Contact Options -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-accent mb-4">Other Ways to Contact</h5>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">📞</div>
+                                    <h6>Call Directly</h6>
+                                    <p class="text-muted small mb-3">Speak with a representative immediately</p>
+                                    <a href="tel:{{ dealership.phone_number }}" class="btn btn-outline-primary w-100">
+                                        {{ dealership.phone_number }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">📧</div>
+                                    <h6>Email Us</h6>
+                                    <p class="text-muted small mb-3">Send detailed inquiries via email</p>
+                                    <a href="mailto:terrogamez1@gmail.com" class="btn btn-outline-primary w-100">
+                                        terrogamez1@gmail.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">💬</div>
+                                    <h6>WhatsApp</h6>
+                                    <p class="text-muted small mb-3">Start a chat on WhatsApp</p>
+                                    <button class="btn btn-success w-100" id="quick-whatsapp">
+                                        Message on WhatsApp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">📍</div>
+                                    <h6>Visit Us</h6>
+                                    <p class="text-muted small mb-3">Come see us in person</p>
+                                    <button class="btn btn-outline-primary w-100 js-show-address" data-address="{{ dealership.address|escape }}">
+                                        Get Directions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Hours -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-accent mb-3">🕒 Business Hours</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Monday - Friday:</strong> 8:00 AM - 6:00 PM</p>
+                                            <p class="mb-1"><strong>Saturday:</strong> 9:00 AM - 4:00 PM</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Sunday:</strong> Closed</p>
+                                            <p class="mb-0"><strong>Public Holidays:</strong> By appointment only</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Back to Dealership -->
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <a href="/dealership/{{ dealership.id }}/" class="btn btn-secondary">
+                                ← Back to Dealership Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.js-show-address').forEach(button => {
+    button.addEventListener('click', () => alert(`Address: ${button.dataset.address}`));
+});
+
+function sanitizeNumber(number) {
+    return String(number || '').replace(/[^0-9]/g, '');
+}
+
+function openWhatsapp(number, text) {
+    try {
+        var DEFAULT_CC = '254'; // fallback country code
+        var raw = String(number || '');
+        var sanitized = sanitizeNumber(raw);
+
+        if (!sanitized) {
+            alert('WhatsApp number not available for this dealership.');
+            return;
+        }
+
+        if (sanitized.length < 9) {
+            sanitized = DEFAULT_CC + sanitized.replace(/^0+/, '');
+        }
+
+        var url = 'https://wa.me/' + sanitized + '?text=' + encodeURIComponent(text || '');
+        // Track the click on server
+        fetch('/dealership/{{ dealership.id }}/track-click/?type=whatsapp').catch(() => {});
+        console.log('Opening WhatsApp URL:', url, 'sanitized:', sanitized, 'raw:', raw);
+        window.open(url, '_blank');
+    } catch (e) {
+        console.error('WhatsApp open failed', e);
+        alert('Unable to open WhatsApp link. See console for details.');
+    }
+}
+
+// Quick WhatsApp button in the contact cards
+var quickBtn = document.getElementById('quick-whatsapp');
+if (quickBtn) {
+    quickBtn.addEventListener('click', function() {
+        openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', 'Hi {{ dealership.company_name|escapejs }} - I would like to enquire about your listings.');
+    });
+}
+
+// Send the current form content via WhatsApp instead of form submit
+var sendWhatsappBtn = document.getElementById('send-whatsapp');
+if (sendWhatsappBtn) {
+    sendWhatsappBtn.addEventListener('click', function() {
+        var name = document.querySelector('[name="buyer_name"]').value || '';
+        var email = document.querySelector('[name="buyer_email"]').value || '';
+        var phone = document.querySelector('[name="buyer_phone"]').value || '';
+        var subject = document.querySelector('[name="subject"]').value || '';
+        var message = document.querySelector('[name="message"]').value || '';
+
+        var full = 'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email + '\nSubject: ' + subject + '\n\nMessage: ' + message;
+        openWhatsapp('{{ whatsapp_number|default:dealership.phone_number|escapejs }}', full);
+    });
+}
+
+</script>
+{% endblock %}

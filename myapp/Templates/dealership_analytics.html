@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Analytics - GM autoSolutions{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .analytics-shell {
+        background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+        border-radius: 20px;
+        padding: 20px;
+    }
+    .kpi-card {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.07);
+        padding: 18px;
+        height: 100%;
+    }
+    .kpi-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(13,110,253,0.1);
+        color: #0d6efd;
+        font-size: 20px;
+    }
+    .chart-card {
+        background: white;
+        border-radius: 18px;
+        padding: 18px;
+        height: 100%;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.07);
+    }
+    .insight-card {
+        background: linear-gradient(135deg, #ffffff, #f3f6fe);
+        border-left: 4px solid #0d6efd;
+        border-radius: 16px;
+        padding: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="analytics-shell">
+        <div class="row align-items-center mb-4">
+            <div class="col-lg-8">
+                <h2 class="mb-2"><i class="fas fa-chart-line"></i> Dealership Analytics</h2>
+                <p class="text-muted mb-0">Performance insights for {{ dealership.company_name }}</p>
+            </div>
+            <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end">
+                <a href="/dashboard/dealership/" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <a href="{% url 'dealership_more_metrics' %}" class="btn btn-primary">
+                    <i class="fas fa-chart-area"></i> More Metrics
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-car"></i></div>
+                        <span class="badge bg-primary-subtle text-primary">Listings</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ total_listings|intcomma }}</div>
+                    <div class="text-muted">Total Listings</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                        <span class="badge bg-success-subtle text-success">Active</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ active_listings|intcomma }}</div>
+                    <div class="text-muted">Active Listings</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-file-alt"></i></div>
+                        <span class="badge bg-warning-subtle text-warning">Draft</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ draft_listings|intcomma }}</div>
+                    <div class="text-muted">Draft Listings</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-handshake"></i></div>
+                        <span class="badge bg-info-subtle text-info">Sold</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ sold_vehicles|intcomma }}</div>
+                    <div class="text-muted">Sold Vehicles</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-eye"></i></div>
+                        <span class="badge bg-secondary-subtle text-secondary">Traffic</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ total_car_views|intcomma }}</div>
+                    <div class="text-muted">Total Vehicle Views</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-user-friends"></i></div>
+                        <span class="badge bg-dark-subtle text-dark">Visitors</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ unique_visitors|intcomma }}</div>
+                    <div class="text-muted">Unique Visitors</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-repeat"></i></div>
+                        <span class="badge bg-success-subtle text-success">Returners</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ returning_visitors|intcomma }}</div>
+                    <div class="text-muted">Returning Visitors</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-heart"></i></div>
+                        <span class="badge bg-danger-subtle text-danger">Saved</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ saved_vehicles|intcomma }}</div>
+                    <div class="text-muted">Saved Vehicles</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-envelope-open-text"></i></div>
+                        <span class="badge bg-primary-subtle text-primary">Leads</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ total_leads|intcomma }}</div>
+                    <div class="text-muted">Total Leads</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fab fa-whatsapp"></i></div>
+                        <span class="badge bg-success-subtle text-success">WhatsApp</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ whatsapp_clicks|intcomma }}</div>
+                    <div class="text-muted">WhatsApp Clicks</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-phone"></i></div>
+                        <span class="badge bg-info-subtle text-info">Calls</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ phone_clicks|intcomma }}</div>
+                    <div class="text-muted">Phone Call Clicks</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <span class="badge bg-warning-subtle text-warning">Requests</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ inquiry_requests|intcomma }}</div>
+                    <div class="text-muted">Inquiry Requests</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+                        <span class="badge bg-secondary-subtle text-secondary">Rate</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ conversion_rate|floatformat:1 }}%</div>
+                    <div class="text-muted">Conversion Rate</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                        <span class="badge bg-info-subtle text-info">Avg</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ avg_days_on_market|intcomma }}</div>
+                    <div class="text-muted">Average Days on Market</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <span class="badge bg-success-subtle text-success">Value</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">KES {{ avg_vehicle_price|floatformat:0|intcomma }}</div>
+                    <div class="text-muted">Average Vehicle Price</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-wallet"></i></div>
+                        <span class="badge bg-warning-subtle text-warning">Revenue</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">KES {{ inventory_value|floatformat:0|intcomma }}</div>
+                    <div class="text-muted">Total Inventory Value</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-star"></i></div>
+                        <span class="badge bg-warning-subtle text-warning">Rating</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ avg_rating|floatformat:1 }}</div>
+                    <div class="text-muted">Dealer Rating</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon"><i class="fas fa-chart-area"></i></div>
+                        <span class="badge bg-success-subtle text-success">Growth</span>
+                    </div>
+                    <div class="display-6 fw-bold text-dark">{{ monthly_growth|floatformat:1 }}%</div>
+                    <div class="text-muted">Monthly Growth</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-line"></i> Daily Traffic</h5>
+                    <canvas id="dailyTrafficChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Vehicle Makes</h5>
+                    <canvas id="makeChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Lead Sources</h5>
+                    <canvas id="leadSourcesChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Fuel Types</h5>
+                    <canvas id="fuelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-table"></i> Top Performing Vehicles</h5>
+                    {% if top_vehicles %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Views</th>
+                                        <th>Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in top_vehicles %}
+                                        <tr>
+                                            <td>{{ item.car.title }}</td>
+                                            <td>{{ item.views }}</td>
+                                            <td>{{ item.percentage }}%</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No listing performance data available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-lightbulb"></i> AI Insights</h5>
+                    {% for insight in ai_insights %}
+                        <div class="insight-card mb-2">
+                            <div class="fw-semibold text-primary">Recommendation</div>
+                            <div>{{ insight }}</div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No insights available yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ daily_views|json_script:"dailyViewsData" }}
+{{ make_distribution|json_script:"makeDistributionData" }}
+{{ fuel_distribution|json_script:"fuelDistributionData" }}
+{{ lead_sources|json_script:"leadSourcesData" }}
+
+<script>
+    const dailyViewsData = JSON.parse(document.getElementById('dailyViewsData').textContent);
+    const dailyTrafficCtx = document.getElementById('dailyTrafficChart');
+    if (dailyTrafficCtx && dailyViewsData.length) {
+        new Chart(dailyTrafficCtx, {
+            type: 'line',
+            data: {
+                labels: dailyViewsData.map(item => item.label),
+                datasets: [{
+                    label: 'Views',
+                    data: dailyViewsData.map(item => item.value),
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.15)',
+                    tension: 0.35,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    const makeDistributionData = JSON.parse(document.getElementById('makeDistributionData').textContent);
+    const makeChartCtx = document.getElementById('makeChart');
+    if (makeChartCtx && makeDistributionData.length) {
+        new Chart(makeChartCtx, {
+            type: 'bar',
+            data: {
+                labels: makeDistributionData.map(item => item.label),
+                datasets: [{
+                    label: 'Listings',
+                    data: makeDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1', '#20c997']
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    const fuelDistributionData = JSON.parse(document.getElementById('fuelDistributionData').textContent);
+    const fuelChartCtx = document.getElementById('fuelChart');
+    if (fuelChartCtx && fuelDistributionData.length) {
+        new Chart(fuelChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: fuelDistributionData.map(item => item.label),
+                datasets: [{
+                    data: fuelDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    const leadSourcesData = JSON.parse(document.getElementById('leadSourcesData').textContent);
+    const leadSourcesChartCtx = document.getElementById('leadSourcesChart');
+    if (leadSourcesChartCtx && leadSourcesData.length) {
+        new Chart(leadSourcesChartCtx, {
+            type: 'pie',
+            data: {
+                labels: leadSourcesData.map(item => item.label),
+                datasets: [{
+                    data: leadSourcesData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
+{% endblock %}

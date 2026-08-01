@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Conversation - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Conversation</h3>
+                    <p class="text-muted mb-0 mt-2">Chat between the buyer and dealership for this enquiry.</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Buyer</h5>
+                            <p class="mb-1"><strong>Name:</strong> {{ enquiry.buyer_name }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ enquiry.buyer_email }}</p>
+                            <p class="mb-1"><strong>Phone:</strong> {{ enquiry.buyer_phone }}</p>
+                        </div>
+                                <div class="col-md-6">
+                            <h5>Dealership</h5>
+                            {% if enquiry.dealership %}
+                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.dealership.company_name }}{% if enquiry.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}</p>
+                                <p class="mb-1"><strong>Location:</strong> {{ enquiry.dealership.location }}</p>
+                                <p class="mb-1 small text-muted">Joined: {{ enquiry.dealership.created_at|date:"M d, Y" }}</p>
+                            {% elif enquiry.car %}
+                                <p class="mb-1"><strong>Name:</strong> {{ enquiry.car.dealership.company_name }}{% if enquiry.car.dealership.is_verified %} <span class="badge bg-success text-white small ms-1">Verified</span>{% endif %}</p>
+                                <p class="mb-1"><strong>Location:</strong> {{ enquiry.car.dealership.location }}</p>
+                                <p class="mb-1 small text-muted">Joined: {{ enquiry.car.dealership.created_at|date:"M d, Y" }}</p>
+                            {% endif %}
+                            <p class="mb-1"><strong>Listing:</strong>
+                                {% if enquiry.car %}
+                                    <a href="{% url 'car_detail' enquiry.car.id %}">{{ enquiry.car.year }} {{ enquiry.car.make }} {{ enquiry.car.model }}</a>
+                                {% else %}
+                                    General enquiry
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if is_waiting_reply and is_dealership %}
+                        <div class="alert alert-warning">
+                            This buyer is waiting for your reply.
+                        </div>
+                    {% elif is_waiting_reply and is_buyer %}
+                        <div class="alert alert-info">
+                            Your latest message has been sent. The dealership will reply here soon.
+                        </div>
+                    {% endif %}
+
+                    <div class="border rounded p-3 mb-4" style="background: #f8f9fa;">
+                        {% if messages %}
+                            {% for msg in messages %}
+                                <div class="mb-3 d-flex {% if msg.sender_type == 'buyer' %}justify-content-end{% else %}justify-content-start{% endif %}">
+                                    <div class="p-3 rounded shadow-sm" style="max-width: 90%; background: {% if msg.sender_type == 'buyer' %}#0d6efd{% else %}#6c757d{% endif %}; color: white;">
+                                        <div class="small text-uppercase mb-1">{{ msg.sender_name }} • {{ msg.created_at|date:"M d, Y H:i" }}</div>
+                                        <div>{{ msg.message|linebreaks }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted mb-0">No conversation messages yet. Start by sending the first message below.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Send a Message</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    {{ form.message.label_tag }}
+                                    {{ form.message }}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        {% if is_dealership %}Send Reply{% else %}Send Message{% endif %}
+                                    </button>
+                                    <a href="{% if is_buyer %}{% url 'buyer_dashboard' %}{% else %}{% url 'dealership_dashboard' %}{% endif %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,2263 @@
+from multiprocessing import context
+import random
+import json
+from decimal import Decimal
+import logging
+
+
+
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.db.models import Q, Avg, Exists, OuterRef, FloatField, Count, Sum
+from django.db.models.functions import Cast
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.utils import timezone
+from django.core.mail import send_mail
+from datetime import timedelta
+import secrets
+import re
+from .models import (ChatUsage, UserProfile, Dealership, Car, CarImage, Review, DealershipReview, Enquiry, EnquiryMessage, 
+                     Favorite, Report, CarView, DealershipClick, SavedSearch, CarComparison, 
+                     Notification, NotificationPreference)
+
+logger = logging.getLogger(__name__)
+from .forms import (UserRegistrationForm, BuyerUserForm, UserProfileForm, DealershipRegistrationForm,
+                    CarForm, ReviewForm, DealershipReviewForm, EnquiryForm, ConversationMessageForm, CarSearchForm, 
+                    ReportForm, SavedSearchForm, ComparisonForm, NotificationPreferenceForm)
+from django.conf import settings
+from .utils import geocode_address, haversine_distance
+
+from django.views.decorators.csrf import csrf_exempt
+
+# `ask_chatgpt` is imported locally inside the view to avoid import-time
+# failures when the OpenAI client or dependencies aren't available
+# (e.g. during certain deploy/build checks).
+
+
+# Email verification removed: send_verification_email no longer used
+
+def apply_car_filters(cars, form):
+    """Apply shared car search filters to a queryset."""
+    if not form.is_valid():
+        return cars
+
+    if form.cleaned_data.get('make'):
+        cars = cars.filter(make__icontains=form.cleaned_data['make'])
+    if form.cleaned_data.get('model'):
+        cars = cars.filter(model__icontains=form.cleaned_data['model'])
+    if form.cleaned_data.get('variant'):
+        cars = cars.filter(variant__icontains=form.cleaned_data['variant'])
+    if form.cleaned_data.get('year_from'):
+        cars = cars.filter(year__gte=form.cleaned_data['year_from'])
+    if form.cleaned_data.get('year_to'):
+        cars = cars.filter(year__lte=form.cleaned_data['year_to'])
+    if form.cleaned_data.get('price_from'):
+        cars = cars.filter(price__gte=form.cleaned_data['price_from'])
+    if form.cleaned_data.get('price_to'):
+        cars = cars.filter(price__lte=form.cleaned_data['price_to'])
+    if form.cleaned_data.get('mileage_from'):
+        cars = cars.filter(mileage__gte=form.cleaned_data['mileage_from'])
+    if form.cleaned_data.get('mileage_to'):
+        cars = cars.filter(mileage__lte=form.cleaned_data['mileage_to'])
+    if form.cleaned_data.get('fuel_type'):
+        cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
+    if form.cleaned_data.get('transmission'):
+        cars = cars.filter(transmission=form.cleaned_data['transmission'])
+    if form.cleaned_data.get('condition'):
+        cars = cars.filter(condition=form.cleaned_data['condition'])
+
+    if form.cleaned_data.get('engine_size_from') or form.cleaned_data.get('engine_size_to'):
+        cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
+        if form.cleaned_data.get('engine_size_from'):
+            cars = cars.filter(engine_size_value__gte=float(form.cleaned_data['engine_size_from']))
+        if form.cleaned_data.get('engine_size_to'):
+            cars = cars.filter(engine_size_value__lte=float(form.cleaned_data['engine_size_to']))
+
+    if form.cleaned_data.get('doors'):
+        cars = cars.filter(doors=form.cleaned_data['doors'])
+    if form.cleaned_data.get('body_type'):
+        cars = cars.filter(body_type=form.cleaned_data['body_type'])
+    if form.cleaned_data.get('previous_owners'):
+        cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
+    if form.cleaned_data.get('seats'):
+        cars = cars.filter(seats__gte=form.cleaned_data['seats'])
+
+    if form.cleaned_data.get('exterior_color'):
+        cars = cars.filter(exterior_color=form.cleaned_data['exterior_color'])
+    if form.cleaned_data.get('interior_color'):
+        cars = cars.filter(interior_color=form.cleaned_data['interior_color'])
+    if form.cleaned_data.get('seat_material'):
+        cars = cars.filter(seat_material=form.cleaned_data['seat_material'])
+    if form.cleaned_data.get('interior_trim'):
+        cars = cars.filter(interior_trim=form.cleaned_data['interior_trim'])
+
+    if form.cleaned_data.get('color'):
+        cars = cars.filter(color__icontains=form.cleaned_data['color'])
+
+    if form.cleaned_data.get('features'):
+        feature_terms = [feature.strip() for feature in form.cleaned_data['features'].split(',') if feature.strip()]
+        if feature_terms:
+            feature_query = Q()
+            for feature in feature_terms:
+                feature_query |= Q(features__icontains=feature)
+            cars = cars.filter(feature_query)
+
+    if form.cleaned_data.get('number_of_keys'):
+        cars = cars.filter(number_of_keys=form.cleaned_data['number_of_keys'])
+
+    if form.cleaned_data.get('fuel_economy_source'):
+        cars = cars.filter(fuel_economy_source=form.cleaned_data['fuel_economy_source'])
+
+    if form.cleaned_data.get('fuel_economy_from') or form.cleaned_data.get('fuel_economy_to'):
+        cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
+        if form.cleaned_data.get('fuel_economy_from'):
+            cars = cars.filter(fuel_economy_value__gte=float(form.cleaned_data['fuel_economy_from']))
+        if form.cleaned_data.get('fuel_economy_to'):
+            cars = cars.filter(fuel_economy_value__lte=float(form.cleaned_data['fuel_economy_to']))
+
+    return cars
+
+
+def home(request):
+    """Home page with search filters and featured cars"""
+    form = CarSearchForm(request.GET or None)
+    cars = Car.objects.select_related('dealership').filter(is_sold=False, is_approved=True)  # Exclude sold cars and unapproved
+    dealerships = Dealership.objects.filter(is_approved=True)  # Only show approved dealerships
+    premium_dealerships = dealerships.filter(is_premium=True).order_by('-rating')[:4]
+    highlighted_dealerships = premium_dealerships if premium_dealerships.exists() else dealerships.order_by('-rating')[:4]
+    premium_cars = Car.objects.select_related('dealership').filter(
+        is_sold=False,
+        is_approved=True,
+        is_premium=True
+    ).order_by('-created_at')[:8]
+    top_pick_cars = Car.objects.select_related('dealership').filter(
+        is_sold=False,
+        is_approved=True,
+        is_top_pick=True
+    ).order_by('-created_at')[:8]
+    
+    # Search functionality
+    cars = apply_car_filters(cars, form)
+
+    # Get featured/recent cars
+    featured_cars = cars[:12]
+    
+    context = {
+        'form': form,
+        'cars': cars,
+        'featured_cars': featured_cars,
+        'dealerships': dealerships,
+        'highlighted_dealerships': highlighted_dealerships,
+        'best_cars': premium_cars,
+        'top_pick_cars': top_pick_cars,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+    }
+    return render(request, 'home.html', context)
+
+
+def register(request):
+    if request.method == 'POST':
+        user_form = UserRegistrationForm(request.POST)
+        profile_form = UserProfileForm(request.POST, request.FILES)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            try:
+                # Create user
+                user = user_form.save(commit=False)
+                user.set_password(user_form.cleaned_data['password'])
+                user.save()
+
+                # Generate OTP
+                otp = str(random.randint(100000, 999999))
+
+                # Create profile
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.user_type = 'buyer'
+                profile.otp_code = otp
+                profile.is_verified = False
+                profile.save()
+
+                # 📩 SEND EMAIL (THIS WAS MISSING)
+                send_mail(
+                    subject="GM AutoSolutions OTP Verification",
+                    message=f"Your OTP code is: {otp}",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
+                # Save user id in session (IMPORTANT FIX)
+                request.session['verify_user_id'] = user.id
+
+                return redirect('verify_otp')
+
+            except Exception as e:
+                logger.exception(f'Registration failed: {str(e)}')
+                messages.error(request, f'Registration failed: {str(e)}')
+                try:
+                    user.delete()
+                except:
+                    pass
+
+    else:
+        user_form = UserRegistrationForm()
+        profile_form = UserProfileForm()
+
+    return render(request, 'register.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+
+
+def verify_otp(request):
+    user_id = request.session.get('verify_user_id')
+
+    if not user_id:
+        messages.error(request, "Session expired. Please register again.")
+        return redirect('register')
+
+    user = User.objects.get(id=user_id)
+    profile = user.profile
+
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+
+        if profile.otp_code == otp:
+
+            profile.is_verified = True
+            profile.otp_code = ""
+            profile.save()
+
+            # clear session
+            del request.session['verify_user_id']
+
+            messages.success(request, "Verification successful!")
+            return redirect('login')
+
+        else:
+            messages.error(request, "Invalid OTP")
+
+    return render(request, 'verify_otp.html')
+
+
+def dealership_register(request):
+    """Dealership registration page"""
+    if request.method == 'POST':
+        user_form = UserRegistrationForm(request.POST)
+        dealership_form = DealershipRegistrationForm(request.POST, request.FILES)
+        
+        if user_form.is_valid() and dealership_form.is_valid():
+            # Create user
+            user = user_form.save(commit=False)
+            user.set_password(user_form.cleaned_data['password'])
+            user.save()
+            
+            # Create user profile
+            profile = UserProfile.objects.create(
+                user=user,
+                user_type='dealership',
+                phone_number=dealership_form.cleaned_data['phone_number'],
+                is_verified=True
+            )
+            
+            # Create dealership
+            dealership = dealership_form.save(commit=False)
+            dealership.user = user
+            dealership.is_approved = False  # Dealership needs approval
+            
+            # Auto-populate company_name with username if not provided
+            if not dealership.company_name or dealership.company_name.strip() == '':
+                dealership.company_name = user.username
+            
+            # Try to geocode the address for precise coordinates
+            # Build comprehensive address with area code for better precision
+            address_parts = []
+            if dealership.address:
+                address_parts.append(dealership.address)
+            if dealership.area_code:
+                address_parts.append(f"Area Code: {dealership.area_code}")
+            if dealership.location:
+                address_parts.append(dealership.location)
+            address_parts.append("Kenya")
+            
+            full_address = ", ".join(address_parts)
+            lat, lon = geocode_address(full_address)
+            if lat and lon:
+                dealership.latitude = lat
+                dealership.longitude = lon
+                print(f"Geocoded '{dealership.company_name}' to coordinates: {lat}, {lon}")
+            else:
+                print(f"Failed to geocode address for '{dealership.company_name}': {full_address}")
+            
+            dealership.save()
+            
+            messages.success(request, 'Dealership registration successful! Your account has been submitted for review and will be reviewed by our admin team on the admin dashboard. You will be able to log in once approved.')
+            return redirect('login')
+    else:
+        user_form = UserRegistrationForm()
+        dealership_form = DealershipRegistrationForm()
+    
+    context = {
+        'user_form': user_form,
+        'dealership_form': dealership_form,
+    }
+    return render(request, 'dealership_register.html', context)
+
+
+def login_view(request):
+    """Login page"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        try:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                try:
+                    profile = user.profile
+                    # Check if user is a dealership and if they are approved
+                    if profile.user_type == 'dealership':
+                        try:
+                            if not user.dealership.is_approved:
+                                messages.error(request, 'Your dealership account is pending approval. Please contact the administrator.')
+                                return redirect('login')
+                        except Dealership.DoesNotExist:
+                            logger.error(f'Dealership profile missing for user {user.username}')
+                            messages.error(request, 'Dealership profile not found. Please contact support.')
+                            return redirect('login')
+                    else:
+                        if not profile.is_verified:
+                            messages.error(request, 'Please verify your account first.')
+                            return redirect('verify_otp')
+                    
+                    login(request, user)
+                    # Redirect based on user type
+                    if profile.user_type == 'dealership':
+                        return redirect('dealership_dashboard')
+                    else:
+                        return redirect('buyer_dashboard')
+                        
+                except UserProfile.DoesNotExist:
+                    logger.error(f'User profile missing for user {user.username}')
+                    messages.error(request, 'User profile not found. Please contact support.')
+                    return redirect('login')
+            else:
+                messages.error(request, 'Invalid username or password!')
+        except Exception as e:
+            logger.exception(f'Login error: {str(e)}')
+            messages.error(request, 'An error occurred during login. Please try again.')
+    
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    """Logout user"""
+    logout(request)
+    messages.success(request, 'You have been logged out.')
+    return redirect('home')
+
+
+@login_required(login_url='login')
+def buyer_dashboard(request):
+    """Buyer dashboard"""
+    try:
+        profile = request.user.profile
+        if profile.user_type != 'buyer':
+            return redirect('dealership_dashboard')
+    except UserProfile.DoesNotExist:
+        logger.error(f'User profile missing for user {request.user.username}')
+        messages.error(request, 'Profile not found. Please complete your registration.')
+        return redirect('home')
+    except Exception as e:
+        logger.exception(f'Error accessing buyer dashboard: {str(e)}')
+        messages.error(request, 'An error occurred. Please try again.')
+        return redirect('home')
+    
+    # Get user's enquiries
+    enquiries = Enquiry.objects.filter(buyer_email=request.user.email).order_by('-created_at')
+    
+    # Get user's favorite cars
+    favorites = Favorite.objects.filter(user=request.user).select_related('car__dealership').order_by('-created_at')
+    
+    context = {
+        'enquiries': enquiries,
+        'favorites': favorites,
+        'profile': profile,
+    }
+    return render(request, 'buyer_dashboard.html', context)
+
+
+@login_required(login_url='login')
+def edit_profile(request):
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'buyer':
+        messages.error(request, 'Only buyers can edit this profile.')
+        return redirect('home')
+
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        user_form = BuyerUserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('buyer_dashboard')
+    else:
+        user_form = BuyerUserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=profile)
+
+    return render(request, 'edit_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    })
+
+
+@login_required(login_url='login')
+def edit_dealership_profile(request):
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'Only dealerships can edit this profile.')
+        return redirect('home')
+
+    dealership = request.user.dealership
+
+    if request.method == 'POST':
+        dealership_form = DealershipRegistrationForm(request.POST, request.FILES, instance=dealership)
+        if dealership_form.is_valid():
+            dealership = dealership_form.save(commit=False)
+            if not dealership.company_name or dealership.company_name.strip() == '':
+                dealership.company_name = request.user.username
+            dealership.save()
+            messages.success(request, 'Your dealership profile has been updated successfully.')
+            return redirect('dealership_dashboard')
+    else:
+        dealership_form = DealershipRegistrationForm(instance=dealership)
+
+    return render(request, 'edit_dealership.html', {
+        'dealership_form': dealership_form,
+        'dealership': dealership,
+    })
+
+
+@login_required(login_url='login')
+def dealership_dashboard(request):
+    """Dealership dashboard"""
+    # Check if user is a dealership
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'You must be logged in as a dealership to access this page.')
+        return redirect('home')
+    
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found. Please complete your dealership registration.')
+        return redirect('home')
+    
+    cars = dealership.cars.all()
+    reviews = dealership.reviews.all()
+    # Get aggregate average (None if no reviews)
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+    # Determine display rating: use computed average if present, otherwise keep stored dealership.rating
+    display_avg = float(avg_rating) if avg_rating is not None else float(dealership.rating or 0)
+    # Persist computed average rating only when there are actual reviews
+    try:
+        if avg_rating is not None:
+            normalized = round(float(avg_rating), 1)
+            if dealership.rating != normalized:
+                dealership.rating = normalized
+                dealership.save(update_fields=['rating'])
+    except Exception:
+        logger.exception('Failed to persist dealership rating for %s', getattr(dealership, 'id', 'unknown'))
+    
+    if request.method == 'POST' and request.POST.get('form_type') == 'response_time_settings':
+        response_time_badge_enabled = request.POST.get('response_time_badge_enabled') == 'on'
+        response_time_badge_choice = request.POST.get('response_time_badge_choice', '')
+
+        if response_time_badge_enabled and response_time_badge_choice in dict(Dealership.RESPONSE_TIME_CHOICES):
+            dealership.response_time_badge_enabled = True
+            dealership.response_time_badge_choice = response_time_badge_choice
+        else:
+            dealership.response_time_badge_enabled = False
+            dealership.response_time_badge_choice = ''
+
+        dealership.save()
+        messages.success(request, 'Response time badge settings updated.')
+        return redirect('dealership_dashboard')
+
+    enquiries = Enquiry.objects.filter(
+        Q(dealership=dealership) | Q(car__dealership=dealership)
+    ).order_by('-created_at')
+    unread_enquiries = enquiries.filter(is_read=False).count()
+    
+    context = {
+        'dealership': dealership,
+        'cars': cars,
+        'reviews': reviews,
+        'avg_rating': display_avg,
+        'enquiries': enquiries,
+        'total_cars': cars.count(),
+        'total_enquiries': enquiries.count(),
+        'unread_enquiries': unread_enquiries,
+        'response_time_choices': Dealership.RESPONSE_TIME_CHOICES,
+    }
+    return render(request, 'dealership_dashboard.html', context)
+
+
+def get_dealership_analytics_context(dealership):
+    """Build the dealership analytics KPI and statistics payload used across the analytics screens."""
+    cars = dealership.cars.select_related('dealership').all()
+    cars_qs = cars
+    total_listings = cars_qs.count()
+    active_listings = cars_qs.filter(is_approved=True, is_sold=False).count()
+    draft_listings = cars_qs.filter(is_approved=False, submitted_for_review=False).count()
+    sold_vehicles = cars_qs.filter(is_sold=True).count()
+    inventory_value = round(float(cars_qs.aggregate(total=Sum('price'))['total'] or 0), 2)
+    avg_vehicle_price = round(float(cars_qs.aggregate(avg_price=Avg('price'))['avg_price'] or 0), 2)
+    avg_days_on_market = 0
+    if total_listings:
+        day_deltas = []
+        for car in cars_qs:
+            delta = timezone.now() - car.created_at
+            day_deltas.append(max(delta.days, 1))
+        avg_days_on_market = round(sum(day_deltas) / len(day_deltas), 1)
+
+    car_views_qs = CarView.objects.filter(car__dealership=dealership)
+    total_car_views = car_views_qs.count()
+    unique_visitors = 0
+    if total_car_views:
+        visitor_keys = set()
+        for row in car_views_qs.values('user_id', 'ip_address'):
+            visitor_keys.add((row['user_id'] or 0, row['ip_address'] or ''))
+        unique_visitors = len(visitor_keys)
+
+    returning_visitors = 0
+    if total_car_views:
+        visit_counts = {}
+        for row in car_views_qs.values('user_id', 'ip_address'):
+            key = (row['user_id'] or 0, row['ip_address'] or '')
+            visit_counts[key] = visit_counts.get(key, 0) + 1
+        returning_visitors = sum(1 for count in visit_counts.values() if count > 1)
+
+    click_stats = {}
+    click_qs = DealershipClick.objects.filter(dealership=dealership)
+    total_clicks = click_qs.count()
+    click_types = dict(DealershipClick.CLICK_TYPES)
+    for click_type, display_name in click_types.items():
+        count = click_qs.filter(click_type=click_type).count()
+        click_stats[click_type] = {
+            'name': display_name,
+            'count': count,
+            'percentage': round((count / total_clicks) * 100, 1) if total_clicks else 0,
+        }
+
+    enquiries_qs = Enquiry.objects.filter(dealership=dealership)
+    total_leads = enquiries_qs.count()
+    inquiry_requests = total_leads
+    phone_clicks = click_qs.filter(click_type='phone').count()
+    whatsapp_clicks = click_qs.filter(click_type='website').count()
+    favorite_count = Favorite.objects.filter(car__dealership=dealership).count()
+    saved_search_count = SavedSearch.objects.filter(user=dealership.user).count()
+    response_time = dealership.response_time_badge_label or 'Not set'
+    avg_rating = float(dealership.rating or 0)
+
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    recent_views = CarView.objects.filter(car__dealership=dealership, viewed_at__gte=thirty_days_ago).count()
+    recent_clicks = DealershipClick.objects.filter(dealership=dealership, clicked_at__gte=thirty_days_ago).count()
+    recent_leads = enquiries_qs.filter(created_at__gte=thirty_days_ago).count()
+
+    month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    previous_month_start = (month_start - timedelta(days=1)).replace(day=1)
+    current_month_views = CarView.objects.filter(car__dealership=dealership, viewed_at__gte=month_start).count()
+    previous_month_views = CarView.objects.filter(car__dealership=dealership, viewed_at__gte=previous_month_start, viewed_at__lt=month_start).count()
+    monthly_growth = round(((current_month_views - previous_month_views) / previous_month_views) * 100, 1) if previous_month_views else 0
+
+    car_views = {}
+    for car in cars_qs:
+        views_count = CarView.objects.filter(car=car).count()
+        car_views[car.id] = {
+            'car': car,
+            'views': views_count,
+            'percentage': 0,
+        }
+
+    if total_car_views:
+        for car_data in car_views.values():
+            car_data['percentage'] = round((car_data['views'] / total_car_views) * 100, 1)
+
+    most_viewed_car = None
+    max_views = 0
+    for car_data in car_views.values():
+        if car_data['views'] > max_views:
+            max_views = car_data['views']
+            most_viewed_car = car_data['car']
+
+    sorted_car_views = sorted(car_views.values(), key=lambda x: x['views'], reverse=True)
+    top_cars_30_days = []
+    for car in cars_qs:
+        views_30_days = CarView.objects.filter(car=car, viewed_at__gte=thirty_days_ago).count()
+        if views_30_days > 0:
+            top_cars_30_days.append({'car': car, 'views': views_30_days})
+    top_cars_30_days.sort(key=lambda x: x['views'], reverse=True)
+    top_cars_30_days = top_cars_30_days[:5]
+
+    daily_views = list(
+        CarView.objects.filter(car__dealership=dealership, viewed_at__gte=thirty_days_ago)
+        .extra({'day': "date(viewed_at)",})
+        .values('day')
+        .annotate(total=Count('id'))
+        .order_by('day')
+    )
+    daily_views = [
+        {'label': item['day'].strftime('%Y-%m-%d') if hasattr(item['day'], 'strftime') else str(item['day']), 'value': item['total']}
+        for item in daily_views
+    ]
+
+    daily_leads = list(
+        enquiries_qs.filter(created_at__gte=thirty_days_ago)
+        .extra({'day': "date(created_at)",})
+        .values('day')
+        .annotate(total=Count('id'))
+        .order_by('day')
+    )
+    daily_leads = [
+        {'label': item['day'].strftime('%Y-%m-%d') if hasattr(item['day'], 'strftime') else str(item['day']), 'value': item['total']}
+        for item in daily_leads
+    ]
+
+    make_distribution = []
+    for make, total in cars_qs.values_list('make').annotate(total=Count('id')).order_by('-total')[:6]:
+        if make:
+            make_distribution.append({'label': make, 'value': total})
+
+    fuel_distribution = []
+    for fuel_type, total in cars_qs.exclude(fuel_type='').values_list('fuel_type').annotate(total=Count('id')).order_by('-total'):
+        fuel_distribution.append({'label': fuel_type.title(), 'value': total})
+
+    body_type_distribution = []
+    for body_type, total in cars_qs.exclude(body_type='').values_list('body_type').annotate(total=Count('id')).order_by('-total'):
+        body_type_distribution.append({'label': body_type.title(), 'value': total})
+
+    lead_sources = []
+    for click_type, display_name in click_types.items():
+        count = click_qs.filter(click_type=click_type).count()
+        if count:
+            lead_sources.append({'label': display_name, 'value': count})
+
+    top_vehicles = []
+    for car_data in sorted_car_views[:5]:
+        top_vehicles.append({
+            'car': car_data['car'],
+            'views': car_data['views'],
+            'percentage': car_data['percentage'],
+        })
+
+    conversion_rate = round((total_leads / total_car_views) * 100, 1) if total_car_views else 0
+    monthly_revenue = round(float(cars_qs.filter(is_sold=True).aggregate(total=Sum('price'))['total'] or 0), 2)
+
+    ai_insights = []
+    if top_vehicles:
+        ai_insights.append(f"{top_vehicles[0]['car'].title} is your strongest listing with {top_vehicles[0]['views']} views.")
+    if avg_rating:
+        ai_insights.append(f"Your dealership rating stands at {avg_rating:.1f}/5.0, which supports stronger buyer trust.")
+    if sold_vehicles and total_listings:
+        ai_insights.append(f"{round((sold_vehicles / total_listings) * 100, 1)}% of your inventory has already sold.")
+    best = cars_qs.order_by('-price').first()
+    if total_listings and best:
+        ai_insights.append(f"{best.title} is your highest-priced listing and should be monitored for pricing competitiveness.")
+
+    return {
+        'dealership': dealership,
+        'total_listings': total_listings,
+        'active_listings': active_listings,
+        'draft_listings': draft_listings,
+        'sold_vehicles': sold_vehicles,
+        'total_car_views': total_car_views,
+        'unique_visitors': unique_visitors,
+        'returning_visitors': returning_visitors,
+        'saved_vehicles': favorite_count,
+        'total_leads': total_leads,
+        'whatsapp_clicks': whatsapp_clicks,
+        'phone_clicks': phone_clicks,
+        'inquiry_requests': inquiry_requests,
+        'conversion_rate': conversion_rate,
+        'avg_days_on_market': avg_days_on_market,
+        'avg_vehicle_price': avg_vehicle_price,
+        'inventory_value': inventory_value,
+        'avg_rating': avg_rating,
+        'monthly_growth': monthly_growth,
+        'monthly_revenue': monthly_revenue,
+        'response_time': response_time,
+        'most_viewed_car': most_viewed_car,
+        'max_views': max_views,
+        'sorted_car_views': sorted_car_views,
+        'click_stats': click_stats,
+        'total_clicks': total_clicks,
+        'recent_views': recent_views,
+        'recent_clicks': recent_clicks,
+        'recent_leads': recent_leads,
+        'top_cars_30_days': top_cars_30_days,
+        'daily_views': daily_views,
+        'daily_leads': daily_leads,
+        'make_distribution': make_distribution,
+        'fuel_distribution': fuel_distribution,
+        'body_type_distribution': body_type_distribution,
+        'lead_sources': lead_sources,
+        'ai_insights': ai_insights,
+        'top_vehicles': top_vehicles,
+        'saved_search_count': saved_search_count,
+        'total_inventory_value': inventory_value,
+    }
+
+
+@login_required(login_url='login')
+def dealership_analytics(request):
+    """Dealership analytics dashboard for real dealership-owned inventory and engagement data."""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'You must be logged in as a dealership to access this page.')
+        return redirect('home')
+
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+
+    context = get_dealership_analytics_context(dealership)
+    return render(request, 'dealership_analytics.html', context)
+
+
+@login_required(login_url='login')
+def dealership_more_metrics(request):
+    """Landing page for the dealership analytics metric variants."""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'You must be logged in as a dealership to access this page.')
+        return redirect('home')
+
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+
+    context = get_dealership_analytics_context(dealership)
+    context['metric_type'] = 'overview'
+    context['available_metrics'] = [
+        {'slug': 'traffic', 'title': 'Traffic Trend', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'make-distribution', 'title': 'Vehicle Makes', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'lead-sources', 'title': 'Lead Sources', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'body-types', 'title': 'Body Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'top-vehicles', 'title': 'Top Performing Vehicles', 'kind': 'table', 'icon': 'fas fa-table'},
+    ]
+    return render(request, 'dealership_metrics.html', context)
+
+
+@login_required(login_url='login')
+def dealership_more_metrics_detail(request, metric_type):
+    """Dedicated analytics page for a chosen chart/table statistic."""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'You must be logged in as a dealership to access this page.')
+        return redirect('home')
+
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+
+    context = get_dealership_analytics_context(dealership)
+    context['metric_type'] = metric_type
+    context['available_metrics'] = [
+        {'slug': 'traffic', 'title': 'Traffic Trend', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'make-distribution', 'title': 'Vehicle Makes', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'lead-sources', 'title': 'Lead Sources', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'body-types', 'title': 'Body Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'top-vehicles', 'title': 'Top Performing Vehicles', 'kind': 'table', 'icon': 'fas fa-table'},
+    ]
+
+    return render(request, 'dealership_metrics.html', context)
+
+
+@login_required(login_url='login')
+@require_http_methods(["POST"])
+def submit_cars_for_review(request):
+    """Submit selected cars for admin review"""
+    # Check if user is a dealership
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'Only dealerships can submit cars for review.')
+        return redirect('home')
+    
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+    
+    # Get selected car IDs from POST data
+    selected_car_ids = request.POST.getlist('selected_cars[]')
+    
+    if not selected_car_ids:
+        messages.warning(request, 'Please select at least one car to submit.')
+        return redirect('dealership_dashboard')
+    
+    try:
+        # Update the selected cars
+        cars = Car.objects.filter(id__in=selected_car_ids, dealership=dealership)
+        count = cars.update(submitted_for_review=True, submitted_at=timezone.now())
+        
+        messages.success(request, f'{count} car(s) submitted for admin review. The admin team will review and approve them shortly.')
+    except Exception as e:
+        messages.error(request, f'Error submitting cars: {str(e)}')
+    
+    return redirect('dealership_dashboard')
+
+
+@login_required(login_url='login')
+def add_car(request):
+    """Add new car listing (dealership only)"""
+    # Check if user is a dealership
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'dealership':
+        messages.error(request, 'Only dealerships can add cars.')
+        return redirect('home')
+    
+    try:
+        dealership = request.user.dealership
+    except AttributeError:
+        messages.error(request, 'Dealership profile not found.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        if not post_data.get('title'):
+            make = post_data.get('make', '').strip()
+            model = post_data.get('model', '').strip()
+            year = post_data.get('year', '').strip()
+            post_data['title'] = ' '.join(part for part in [year, make, model] if part)
+        if not post_data.get('color'):
+            post_data['color'] = post_data.get('exterior_color', '').strip() or 'Not specified'
+
+        form = CarForm(post_data, request.FILES)
+        images = request.FILES.getlist('images')
+        if form.is_valid():
+            if len(images) > 15:
+                form.add_error(None, 'You can upload up to 15 images only.')
+            else:
+                car = form.save(commit=False)
+                car.dealership = dealership
+                car.is_approved = True
+                car.save()
+
+                for image in images:
+                    CarImage.objects.create(car=car, image=image)
+
+                messages.success(request, 'Car added successfully!')
+                return redirect('dealership_dashboard')
+    else:
+        form = CarForm()
+    
+    context = {'form': form}
+    return render(request, 'add_car.html', context)
+
+
+@login_required(login_url='login')
+def edit_car(request, car_id):
+    """Edit car listing (dealership only)"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    # Check if user owns this car
+    if car.dealership.user != request.user:
+        messages.error(request, 'You cannot edit this car.')
+        return redirect('dealership_dashboard')
+    
+    if request.method == 'POST':
+        form = CarForm(request.POST, request.FILES, instance=car)
+        images = request.FILES.getlist('images')
+        if form.is_valid():
+            if len(images) > 15:
+                form.add_error('images', 'You can upload up to 15 images only.')
+            else:
+                updated_car = form.save(commit=False)
+                updated_car.is_approved = True
+                updated_car.save()
+                for image in images:
+                    CarImage.objects.create(car=updated_car, image=image)
+                messages.success(request, 'Car updated successfully!')
+                return redirect('dealership_dashboard')
+    else:
+        form = CarForm(instance=car)
+    
+    context = {'form': form, 'car': car}
+    return render(request, 'edit_car.html', context)
+
+
+@login_required(login_url='login')
+def delete_car(request, car_id):
+    """Delete car listing (dealership only)"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    if car.dealership.user != request.user:
+        messages.error(request, 'You cannot delete this car.')
+        return redirect('dealership_dashboard')
+    
+    if request.method == 'POST':
+        car.delete()
+        messages.success(request, 'Car deleted successfully!')
+        return redirect('dealership_dashboard')
+    
+    context = {'car': car}
+    return render(request, 'confirm_delete.html', context)
+
+
+def car_list(request):
+    """List all cars with filters"""
+    form = CarSearchForm(request.GET or None)
+    cars = Car.objects.select_related('dealership').filter(is_sold=False, is_approved=True)  # Exclude sold cars and unapproved
+    
+    if request.user.is_authenticated:
+        cars = cars.annotate(is_favorited=Exists(Favorite.objects.filter(user=request.user, car=OuterRef('pk'))))
+    
+    cars = apply_car_filters(cars, form)
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(cars, 12)
+    page_number = request.GET.get('page')
+    cars = paginator.get_page(page_number)
+    
+    context = {
+        'form': form,
+        'cars': cars,
+    }
+    return render(request, 'car_list.html', context)
+
+
+
+def terms(request):
+    return render(request, 'terms.html')
+
+
+
+
+def privacy(request):
+    return render(request, 'privacy.html')
+
+
+@login_required(login_url='login')
+def report_car(request, car_id):
+    """Report a car listing"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.car = car
+            report.save()
+            messages.success(request, 'Your report has been submitted successfully. Our team will review it.')
+            return redirect('car_detail', car_id=car_id)
+    else:
+        form = ReportForm()
+    
+    context = {
+        'form': form,
+        'car': car,
+        'report_type': 'car',
+    }
+    return render(request, 'report.html', context)
+
+
+@login_required(login_url='login')
+def report_dealership(request, dealership_id):
+    """Report a dealership"""
+    dealership = get_object_or_404(Dealership, id=dealership_id)
+    
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.dealership = dealership
+            report.save()
+            messages.success(request, 'Your report has been submitted successfully. Our team will review it.')
+            return redirect('dealership_detail', dealership_id=dealership_id)
+    else:
+        form = ReportForm()
+    
+    context = {
+        'form': form,
+        'dealership': dealership,
+        'report_type': 'dealership',
+    }
+    return render(request, 'report.html', context)
+
+
+@login_required(login_url='login')
+def report_user(request, user_id):
+    """Report a user"""
+    reported_user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.reported_user = reported_user
+            report.save()
+            messages.success(request, 'Your report has been submitted successfully. Our team will review it.')
+            return redirect('home')
+    else:
+        form = ReportForm()
+    
+    context = {
+        'form': form,
+        'reported_user': reported_user,
+        'report_type': 'user',
+    }
+    return render(request, 'report.html', context)
+
+def general_report(request):
+    """General reporting interface for all types of issues"""
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            
+            # Set the appropriate item based on selection
+            item_type = form.cleaned_data.get('item_type')
+            if item_type == 'car':
+                car_id = form.cleaned_data.get('car_id')
+                if car_id:
+                    report.car = Car.objects.get(id=car_id)
+            elif item_type == 'dealership':
+                dealership_id = form.cleaned_data.get('dealership_id')
+                if dealership_id:
+                    report.dealership = Dealership.objects.get(id=dealership_id)
+            elif item_type == 'user':
+                username = form.cleaned_data.get('reported_user_username')
+                if username:
+                    from django.contrib.auth.models import User
+                    try:
+                        reported_user = User.objects.get(username=username)
+                        report.reported_user = reported_user
+                    except User.DoesNotExist:
+                        messages.error(request, 'User not found with that username.')
+                        return render(request, 'report.html', {
+                            'form': form,
+                            'cars': Car.objects.all(),
+                            'dealerships': Dealership.objects.all(),
+                            'report_type': 'general'
+                        })
+            
+            report.save()
+            messages.success(request, 'Your report has been submitted successfully! Our admin team will review it.')
+            return redirect('home')
+    else:
+        form = ReportForm()
+    
+    context = {
+        'form': form,
+        'cars': Car.objects.all(),
+        'dealerships': Dealership.objects.all(),
+        'report_type': 'general'
+    }
+    return render(request, 'report.html', context)
+
+
+@login_required(login_url='login')
+def my_reports(request):
+    """View user's submitted reports"""
+    reports = Report.objects.filter(reporter=request.user).order_by('-created_at')
+    
+    context = {
+        'reports': reports,
+    }
+    return render(request, 'my_reports.html', context)
+
+
+def pricing_page(request):
+    """Pricing page with dealership-only access control"""
+    # Check if user is authenticated
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login to view pricing plans.')
+        return redirect('login')
+    
+    # Check if user has dealership profile
+    try:
+        dealership = request.user.dealership
+        context = {
+            'dealership': dealership,
+        }
+        return render(request, 'pricing.html', context)
+    except:
+        # User doesn't have dealership profile
+        messages.error(request, 'Pricing plans are only available for dealership accounts.')
+        return redirect('dealership-register')
+
+
+def pricing_subscribe(request, plan):
+    """Create a quick subscription request from the pricing page."""
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login to request a subscription plan.')
+        return redirect('login')
+
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Only dealership accounts can request subscription plans.')
+        return redirect('dealership-register')
+
+    if request.method != 'POST':
+        messages.error(request, 'Invalid request method for subscription plan selection.')
+        return redirect('pricing')
+
+    from .models import SubscriptionRequest
+
+    contact_person = request.user.get_full_name() or request.user.username
+    subscription_type = plan
+    # If a specific car is provided (per-car plan), validate ownership
+    car_id = request.POST.get('car_id')
+    message = 'Subscription request created from pricing page quick link.'
+    if subscription_type == 'per_car' and car_id:
+        try:
+            car = Car.objects.get(id=car_id, dealership=dealership)
+            message = f'Per-car subscription requested for car: {car.id} - {car.title}'
+        except Car.DoesNotExist:
+            messages.error(request, 'Selected car not found or does not belong to your dealership.')
+            return redirect('pricing_choose_car')
+    sr_kwargs = {
+        'company_name': dealership.company_name,
+        'contact_person': contact_person,
+        'email': dealership.email,
+        'phone': dealership.phone_number,
+        'subscription_type': subscription_type,
+        'message': message,
+        'dealership': dealership,
+    }
+
+    if subscription_type == 'per_car' and car_id and 'car' in locals():
+        sr_kwargs['car'] = car
+
+    SubscriptionRequest.objects.create(**sr_kwargs)
+
+    messages.success(request, 'Your subscription request has been received and will be reviewed. We will get back to you within 24 hours.')
+    return redirect('pricing')
+
+
+@login_required(login_url='login')
+def pricing_choose_car(request):
+    """Show dealership-owned cars for selecting a car for per-car subscription."""
+    try:
+        dealership = request.user.dealership
+    except:
+        messages.error(request, 'Only dealership accounts can request subscription plans.')
+        return redirect('dealership-register')
+
+    cars = Car.objects.filter(dealership=dealership).order_by('-created_at')
+
+    if request.method == 'POST':
+        car_id = request.POST.get('car_id')
+        if not car_id:
+            messages.error(request, 'Please select a car to continue.')
+            return redirect('pricing_choose_car')
+
+        # Redirect to pricing_subscribe which will validate ownership again
+        return redirect('pricing_subscribe', plan='per_car')
+
+    context = {
+        'dealership': dealership,
+        'cars': cars,
+    }
+    return render(request, 'pricing_choose_car.html', context)
+
+
+def subscription_request(request):
+    """Handle subscription requests from users"""
+    from .models import SubscriptionRequest
+    
+    if request.method == 'POST':
+        # Get form data
+        company_name = request.POST.get('company_name')
+        contact_person = request.POST.get('contact_person')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        subscription_type = request.POST.get('subscription_type')
+        message = request.POST.get('message', '')
+        terms = request.POST.get('terms')
+        
+        # Validate required fields
+        if not all([company_name, contact_person, email, phone, subscription_type, terms]):
+            return JsonResponse({'success': False, 'error': 'Please fill in all required fields.'})
+        
+        # Create subscription request record
+        subscription_request = SubscriptionRequest.objects.create(
+            company_name=company_name,
+            contact_person=contact_person,
+            email=email,
+            phone=phone,
+            subscription_type=subscription_type,
+            message=message
+        )
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Your subscription request has been received and is currently under review. Please wait 24 hours for processing. We will contact you at your provided email address with the decision.'
+        })
+    
+    return JsonResponse({'success': False, 'error': 'Only POST requests allowed.'})
+
+
+def get_models_for_make(request):
+    """API endpoint to get models for a selected make"""
+    from .models import Car
+    
+    make = request.GET.get('make', '')
+    if make:
+        models = Car.objects.filter(make=make).values_list('model', flat=True).distinct().order_by('model')
+        model_list = [{'value': model, 'label': model} for model in models]
+        return JsonResponse({'models': model_list})
+    else:
+        return JsonResponse({'models': []})
+
+
+def get_dealerships_json(request):
+    dealerships = Dealership.objects.filter(is_approved=True).values(
+        'id',
+        'company_name',
+        'location',
+        'latitude',
+        'longitude',
+        'rating'
+    )
+    data = []
+    for dealership in dealerships:
+        data.append({
+            'id': dealership['id'],
+            'name': dealership['company_name'],
+            'location': dealership['location'],
+            'lat': dealership['latitude'],
+            'lng': dealership['longitude'],
+            'rating': dealership['rating'] or 0,
+            'url': f"/dealership/{dealership['id']}/",
+        })
+    return JsonResponse(data, safe=False)
+
+
+def car_detail(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+
+    # Track car view for analytics
+    CarView.objects.create(
+        car=car,
+        user=request.user if request.user.is_authenticated else None,
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
+    reviews = car.reviews.filter(is_approved=True)
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
+    pending_review = None
+    if request.user.is_authenticated:
+        pending_review = car.reviews.filter(buyer=request.user, is_approved=False).order_by('-created_at').first()
+
+    dealership = car.dealership
+    dealership_reviews = dealership.reviews.filter(is_approved=True)
+    dealership_rating = dealership_reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.car = car
+            review.buyer = request.user
+            review.save()
+            messages.success(request, 'Thank you! Your review has been submitted and will be visible once approved by our admin team.')
+            return redirect('car_detail', car_id=car.id)
+    else:
+        form = ReviewForm() if request.user.is_authenticated else None
+
+    gallery_images = []
+    if car.main_image:
+        gallery_images.append(car.main_image)
+    if car.image2:
+        gallery_images.append(car.image2)
+    if car.image3:
+        gallery_images.append(car.image3)
+    if car.image4:
+        gallery_images.append(car.image4)
+
+    gallery_images += [img.image for img in car.images.all()]
+
+    is_favorited = False
+    if request.user.is_authenticated:
+        is_favorited = Favorite.objects.filter(user=request.user, car=car).exists()
+
+    car_features = car.features.split(',') if car.features else []
+
+    # Get similar cars (same make/model or similar price range)
+    price_range = car.price * Decimal('0.3')  # 30% price variance
+    similar_cars = Car.objects.filter(
+        is_approved=True,
+        is_sold=False
+    ).exclude(
+        id=car.id
+    ).filter(
+        Q(make=car.make) | 
+        Q(model=car.model) |
+        Q(price__gte=car.price - price_range, price__lte=car.price + price_range)
+    ).select_related('dealership')[:6]
+
+    filter_form = CarSearchForm(request.GET or None)
+
+    context = {
+        'car': car,
+        'reviews': reviews,
+        'pending_review': pending_review,
+        'avg_rating': avg_rating,
+        'dealership': dealership,
+        'dealership_reviews': dealership_reviews,
+        'dealership_rating': dealership_rating,
+        'form': form,
+        'filter_form': filter_form,
+        'gallery_images': gallery_images,
+        'is_favorited': is_favorited,
+        'car_features': car_features,
+        'similar_cars': similar_cars,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+    }
+
+    return render(request, 'car_detail.html', context)
+
+
+def dealership_detail(request, dealership_id):
+    dealership = get_object_or_404(Dealership, id=dealership_id, is_approved=True)
+
+    if request.user.is_authenticated and hasattr(request.user, 'dealership') and request.user.dealership == dealership:
+        cars = dealership.cars.all()
+    else:
+        cars = dealership.cars.filter(is_sold=False, is_approved=True)
+
+    reviews = dealership.reviews.filter(is_approved=True)
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
+    pending_review = None
+    if request.user.is_authenticated:
+        pending_review = dealership.reviews.filter(buyer=request.user, is_approved=False).order_by('-created_at').first()
+
+    form = None
+    if request.user.is_authenticated:
+        form = DealershipReviewForm(request.POST or None)
+        if request.method == 'POST' and form.is_valid():
+            review = form.save(commit=False)
+            review.dealership = dealership
+            review.buyer = request.user
+            review.save()
+            messages.success(request, 'Thank you! Your review has been submitted and will be visible once approved by our admin team.')
+            return redirect('dealership_detail', dealership_id=dealership.id)
+
+    def _compute_whatsapp_number(dealership):
+        # Normalize phone to international format required by wa.me (no +, digits only)
+        DEFAULT_CC = '254'  # fallback country code (Kenya)
+        num = ''
+        try:
+            num = getattr(dealership.user.profile, 'phone_number', '') or ''
+        except Exception:
+            num = ''
+        if not num:
+            num = dealership.phone_number or ''
+
+        cleaned = re.sub(r'\D', '', str(num))
+
+        if not cleaned:
+            return ''
+
+        # Handle different local/international formats
+        if cleaned.startswith('00'):
+            # remove international prefix (00) -> left with country + number
+            cleaned = cleaned.lstrip('0')
+        elif cleaned.startswith('0'):
+            # replace leading 0 with default country code
+            cleaned = DEFAULT_CC + cleaned[1:]
+        elif not cleaned.startswith(DEFAULT_CC) and len(cleaned) <= 9:
+            # too short and missing country code
+            cleaned = DEFAULT_CC + cleaned.lstrip('0')
+
+        return cleaned
+
+    whatsapp_number = _compute_whatsapp_number(dealership)
+
+    context = {
+        'dealership': dealership,
+        'cars': cars,
+        'reviews': reviews,
+        'pending_review': pending_review,
+        'avg_rating': avg_rating,
+        'dealership_reviews': reviews,
+        'dealership_rating': avg_rating,
+        'form': form,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+        'whatsapp_number': whatsapp_number,
+    }
+
+    return render(request, 'dealership_detail.html', context)
+
+
+def track_dealership_click(request, dealership_id):
+    """Track dealership clicks for analytics"""
+    dealership = get_object_or_404(Dealership, id=dealership_id)
+    click_type = request.GET.get('type', 'contact')
+
+    # Validate click type
+    valid_types = [choice[0] for choice in DealershipClick.CLICK_TYPES]
+    if click_type not in valid_types:
+        click_type = 'contact'
+
+    # Create click record
+    DealershipClick.objects.create(
+        dealership=dealership,
+        click_type=click_type,
+        user=request.user if request.user.is_authenticated else None,
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
+    # Return appropriate response based on click type
+    if click_type == 'phone':
+        return JsonResponse({'success': True, 'phone': dealership.phone_number})
+    elif click_type == 'email':
+        return JsonResponse({'success': True, 'email': dealership.email})
+    elif click_type == 'website':
+        return JsonResponse({'success': True, 'website': dealership.website})
+    else:
+        return JsonResponse({'success': True})
+
+
+@login_required(login_url='login')
+def enquire_car(request, car_id):
+    """Submit an enquiry for a car"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    if request.method == 'POST':
+        form = EnquiryForm(request.POST)
+        if form.is_valid():
+            enquiry = form.save(commit=False)
+            enquiry.car = car
+            enquiry.dealership = car.dealership
+            enquiry.save()
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='buyer',
+                sender_name=enquiry.buyer_name,
+                message=enquiry.message,
+            )
+            messages.success(request, 'Your enquiry has been sent successfully!')
+            return redirect('car_detail', car_id=car.id)
+    else:
+        form = EnquiryForm()
+    
+    context = {'car': car, 'form': form}
+    return render(request, 'enquire_car.html', context)
+
+
+@login_required(login_url='login')
+def enquiry_conversation(request, enquiry_id):
+    enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+    user = request.user
+    is_dealership = hasattr(user, 'dealership') and (
+        (enquiry.dealership and enquiry.dealership.user == user) or
+        (enquiry.car and enquiry.car.dealership.user == user)
+    )
+    is_buyer = hasattr(user, 'profile') and user.profile.user_type == 'buyer' and enquiry.buyer_email == user.email
+
+    if not (is_dealership or is_buyer):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ConversationMessageForm(request.POST)
+        if form.is_valid():
+            message_text = form.cleaned_data['message']
+            sender_name = enquiry.dealership.company_name if is_dealership else enquiry.buyer_name
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='dealership' if is_dealership else 'buyer',
+                sender_name=sender_name,
+                message=message_text,
+            )
+
+            if is_dealership:
+                enquiry.dealership_response = message_text
+                enquiry.responded_at = timezone.now()
+                enquiry.is_read = True
+            else:
+                enquiry.is_read = False
+
+            enquiry.save()
+            messages.success(request, 'Message sent successfully.')
+            return redirect('view_enquiry', enquiry_id=enquiry.id)
+    else:
+        form = ConversationMessageForm()
+
+    messages_list = enquiry.messages.order_by('created_at')
+    last_message = messages_list.last()
+    is_waiting_reply = last_message and last_message.sender_type == 'buyer'
+
+    context = {
+        'enquiry': enquiry,
+        'messages': messages_list,
+        'form': form,
+        'is_dealership': is_dealership,
+        'is_buyer': is_buyer,
+        'is_waiting_reply': is_waiting_reply,
+    }
+    return render(request, 'view_enquiry.html', context)
+
+
+@login_required(login_url='login')
+def view_enquiry(request, enquiry_id):
+    return enquiry_conversation(request, enquiry_id)
+
+
+
+
+def dealerships_map(request):
+    query = request.GET.get('q', '').strip()
+    premium_filter = request.GET.get('premium') == '1'
+    buyer_location = request.GET.get('buyer_location', '').strip()
+
+    dealerships = Dealership.objects.filter(is_approved=True)
+
+    if query:
+        dealerships = dealerships.filter(
+            Q(area_code__icontains=query) |
+            Q(location__icontains=query) |
+            Q(company_name__icontains=query)
+        )
+
+    if premium_filter:
+        dealerships = dealerships.filter(is_premium=True)
+
+    dealerships = dealerships.only(
+        'id', 'company_name', 'location', 'address', 'phone_number', 'email',
+        'area_code', 'latitude', 'longitude', 'is_premium'
+    )
+
+    # Calculate distances if buyer location is provided
+    buyer_lat, buyer_lon = None, None
+    if buyer_location:
+        buyer_lat, buyer_lon = geocode_address(buyer_location)
+
+    dealership_list = []
+    for d in dealerships:
+        distance = None
+        if buyer_lat and buyer_lon and d.latitude and d.longitude:
+            distance = haversine_distance(buyer_lat, buyer_lon, d.latitude, d.longitude)
+        
+        dealership_list.append({
+            'dealership': d,
+            'distance': distance
+        })
+
+    # Sort by distance if location provided, otherwise by name
+    if buyer_location and buyer_lat:
+        dealership_list.sort(key=lambda x: (x['distance'] is None, x['distance'] or 0))
+    else:
+        dealership_list.sort(key=lambda x: x['dealership'].company_name.lower())
+
+    # Convert to JSON for JavaScript (keeping original structure)
+    dealerships_json = json.dumps([
+        {
+            'id': item['dealership'].id,
+            'company_name': item['dealership'].company_name,
+            'location': item['dealership'].location,
+            'address': item['dealership'].address,
+            'phone_number': item['dealership'].phone_number,
+            'email': item['dealership'].email,
+            'area_code': item['dealership'].area_code,
+            'latitude': float(item['dealership'].latitude) if item['dealership'].latitude else None,
+            'longitude': float(item['dealership'].longitude) if item['dealership'].longitude else None,
+            'is_premium': item['dealership'].is_premium,
+            'distance': item['distance']
+        } for item in dealership_list
+    ])
+
+    return render(request, 'dealerships_map.html', {
+        'dealership_list': dealership_list,
+        'dealerships_json': dealerships_json,
+        'search_query': query,
+        'premium_filter': premium_filter,
+        'buyer_location': buyer_location,
+    })
+
+
+
+@login_required(login_url='login')
+def contact_dealership(request, dealership_id):
+    """Contact page for a specific dealership (login required)"""
+    dealership = get_object_or_404(Dealership, id=dealership_id, is_approved=True)  # Only approved dealerships
+    reviews = dealership.reviews.all()
+    dealership_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    
+    if request.method == 'POST':
+        form = EnquiryForm(request.POST)
+        if form.is_valid():
+            # Create a general enquiry (not tied to a specific car)
+            enquiry = Enquiry.objects.create(
+                car=None,  # No specific car for general contact
+                dealership=dealership,
+                buyer_name=form.cleaned_data['buyer_name'],
+                buyer_email=form.cleaned_data['buyer_email'],
+                buyer_phone=form.cleaned_data['buyer_phone'],
+                message=f"Subject: {request.POST.get('subject', 'General Inquiry')}\n\n{form.cleaned_data['message']}"
+            )
+            EnquiryMessage.objects.create(
+                enquiry=enquiry,
+                sender_type='buyer',
+                sender_name=enquiry.buyer_name,
+                message=enquiry.message,
+            )
+            messages.success(request, f'Your message has been sent to {dealership.company_name}! They will get back to you soon.')
+            return redirect('contact_dealership', dealership_id=dealership.id)
+    else:
+        form = EnquiryForm()
+    
+    # compute whatsapp number similar to dealership_detail
+    def _compute_whatsapp_number(dealership):
+        DEFAULT_CC = '254'
+        num = ''
+        try:
+            num = getattr(dealership.user.profile, 'phone_number', '') or ''
+        except Exception:
+            num = ''
+        if not num:
+            num = dealership.phone_number or ''
+        cleaned = re.sub(r'\D', '', str(num))
+        if not cleaned:
+            return ''
+
+        if cleaned.startswith('00'):
+            cleaned = cleaned.lstrip('0')
+        elif cleaned.startswith('0'):
+            cleaned = DEFAULT_CC + cleaned[1:]
+        elif not cleaned.startswith(DEFAULT_CC) and len(cleaned) <= 9:
+            cleaned = DEFAULT_CC + cleaned.lstrip('0')
+        return cleaned
+
+    whatsapp_number = _compute_whatsapp_number(dealership)
+
+    context = {
+        'dealership': dealership,
+        'reviews': reviews,
+        'dealership_rating': dealership_rating,
+        'form': form,
+        'whatsapp_number': whatsapp_number,
+    }
+    return render(request, 'contact.html', context)
+
+
+@login_required(login_url='login')
+def add_to_favorites(request, car_id):
+    """Add car to user's favorites"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    # Check if already favorited
+    favorite, created = Favorite.objects.get_or_create(
+        user=request.user,
+        car=car
+    )
+    
+    if created:
+        messages.success(request, f'{car.year} {car.make} {car.model} added to your favorites!')
+    else:
+        messages.info(request, 'This car is already in your favorites.')
+    
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+@login_required(login_url='login')
+def remove_from_favorites(request, car_id):
+    """Remove car from user's favorites"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    try:
+        favorite = Favorite.objects.get(user=request.user, car=car)
+        favorite.delete()
+        messages.success(request, f'{car.year} {car.make} {car.model} removed from your favorites.')
+    except Favorite.DoesNotExist:
+        messages.error(request, 'This car is not in your favorites.')
+    
+    return redirect(request.META.get('HTTP_REFERER', 'buyer_dashboard'))
+
+
+@login_required(login_url='login')
+def mark_car_sold(request, car_id):
+    """Mark car as sold (dealership only)"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    # Check if user owns this car
+    if car.dealership.user != request.user:
+        messages.error(request, 'You cannot modify this car.')
+        return redirect('dealership_dashboard')
+    
+    if request.method == 'POST':
+        car.is_sold = True
+        car.save()
+        messages.success(request, f'{car.year} {car.make} {car.model} marked as sold!')
+    
+    return redirect('dealership_dashboard')
+
+
+# Admin views for dealership approval
+@login_required(login_url='login')
+def admin_dashboard(request):
+    """Admin dashboard for managing dealership approvals, reports, and analytics"""
+    # Check if user is admin
+    if not request.user.is_superuser:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    # Dealership data
+    pending_dealerships = Dealership.objects.filter(is_approved=False).order_by('-created_at')
+    approved_dealerships = Dealership.objects.filter(is_approved=True).order_by('-created_at')
+    
+    # Reports data
+    reports = Report.objects.all().order_by('-created_at')
+    pending_reports = reports.filter(status='pending')
+    under_review_reports = reports.filter(status='under_review')
+    
+    # Subscription requests data
+    from .models import SubscriptionRequest
+    subscription_requests = SubscriptionRequest.objects.all().order_by('-created_at')
+    pending_subscriptions = subscription_requests.filter(status='pending')
+    
+    # Car submissions for review
+    pending_cars = Car.objects.filter(submitted_for_review=True, is_approved=False).order_by('-submitted_at')
+
+    # Reviews data
+    from .models import Review, DealershipReview
+    pending_car_reviews = Review.objects.filter(is_approved=False).order_by('-created_at')
+    pending_dealership_reviews = DealershipReview.objects.filter(is_approved=False).order_by('-created_at')
+    all_car_reviews = Review.objects.all().order_by('-created_at')
+    all_dealership_reviews = DealershipReview.objects.all().order_by('-created_at')
+
+    # Analytics
+    total_dealerships = Dealership.objects.count()
+    total_cars = Car.objects.count()
+    total_users = User.objects.count()
+    total_enquiries = Enquiry.objects.count()
+    approved_cars = Car.objects.filter(is_approved=True).count()
+    pending_car_count = pending_cars.count()
+    
+    # Recent activity
+    recent_dealerships = Dealership.objects.all().order_by('-created_at')[:5]
+    recent_users = User.objects.all().order_by('-date_joined')[:5]
+    
+    context = {
+        'pending_dealerships': pending_dealerships,
+        'approved_dealerships': approved_dealerships,
+        'pending_count': pending_dealerships.count(),
+        'approved_count': approved_dealerships.count(),
+        'reports': reports,
+        'pending_reports': pending_reports,
+        'under_review_reports': under_review_reports,
+        'pending_reports_count': pending_reports.count(),
+        'subscription_requests': subscription_requests,
+        'pending_subscriptions_count': pending_subscriptions.count(),
+        'pending_cars': pending_cars,
+        'pending_car_count': pending_car_count,
+        # Reviews
+        'pending_car_reviews': pending_car_reviews,
+        'pending_dealership_reviews': pending_dealership_reviews,
+        'all_car_reviews': all_car_reviews,
+        'all_dealership_reviews': all_dealership_reviews,
+        'pending_car_reviews_count': pending_car_reviews.count(),
+        'pending_dealership_reviews_count': pending_dealership_reviews.count(),
+        # Analytics
+        'total_dealerships': total_dealerships,
+        'total_cars': total_cars,
+        'total_users': total_users,
+        'total_enquiries': total_enquiries,
+        'approved_cars': approved_cars,
+        'recent_dealerships': recent_dealerships,
+        'recent_users': recent_users,
+    }
+    return render(request, 'admin/dashboard.html', context)
+
+
+@login_required(login_url='login')
+def approve_dealership(request, dealership_id):
+    """Approve a dealership registration"""
+    if not request.user.is_superuser:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    dealership = get_object_or_404(Dealership, id=dealership_id)
+    dealership.is_approved = True
+    dealership.save()
+    
+    messages.success(request, f'{dealership.company_name} has been approved!')
+    return redirect('admin_dashboard')
+
+
+@login_required(login_url='login')
+def reject_dealership(request, dealership_id):
+    """Reject a dealership registration"""
+    if not request.user.is_superuser:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    dealership = get_object_or_404(Dealership, id=dealership_id)
+    dealership_name = dealership.company_name
+    dealership.delete()  # Delete the dealership and associated user
+    
+    messages.success(request, f'{dealership_name} has been rejected and removed.')
+    return redirect('admin_dashboard')
+
+# Report management views
+@login_required(login_url='login')
+def update_report_status(request, report_id):
+    """Update report status (AJAX endpoint)"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+    try:
+        report = Report.objects.get(id=report_id)
+        new_status = request.POST.get('status')
+        
+        if new_status in ['pending', 'under_review', 'resolved']:
+            report.status = new_status
+            report.save()
+            return JsonResponse({'success': True, 'new_status': new_status})
+        else:
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+            
+    except Report.DoesNotExist:
+        return JsonResponse({'error': 'Report not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# ========== FEATURE #5: ADVANCED SEARCH & FILTERS ==========
+
+@login_required(login_url='login')
+def saved_searches(request):
+    """View and manage saved searches"""
+    if request.user.profile.user_type != 'buyer':
+        messages.error(request, 'Only buyers can access saved searches.')
+        return redirect('home')
+    
+    searches = SavedSearch.objects.filter(user=request.user)
+    
+    if request.method == 'POST':
+        form = SavedSearchForm(request.POST)
+        if form.is_valid():
+            search = form.save(commit=False)
+            search.user = request.user
+            search.save()
+            messages.success(request, 'Search saved successfully!')
+            return redirect('saved_searches')
+    else:
+        form = SavedSearchForm()
+    
+    context = {
+        'searches': searches,
+        'form': form,
+    }
+    return render(request, 'saved_searches.html', context)
+
+
+@login_required(login_url='login')
+def apply_saved_search(request, search_id):
+    """Apply a saved search filter"""
+    try:
+        search = SavedSearch.objects.get(id=search_id, user=request.user)
+    except SavedSearch.DoesNotExist:
+        messages.error(request, 'Search not found.')
+        return redirect('home')
+    
+    # Build query parameters
+    params = []
+    if search.make:
+        params.append(f'make={search.make}')
+    if search.model:
+        params.append(f'model={search.model}')
+    if search.year_from:
+        params.append(f'year_from={search.year_from}')
+    if search.year_to:
+        params.append(f'year_to={search.year_to}')
+    if search.price_from:
+        params.append(f'price_from={search.price_from}')
+    if search.price_to:
+        params.append(f'price_to={search.price_to}')
+    if search.fuel_type:
+        params.append(f'fuel_type={search.fuel_type}')
+    if search.color:
+        params.append(f'color={search.color}')
+    if search.body_type:
+        params.append(f'body_type={search.body_type}')
+    if search.features:
+        params.append(f'features={search.features}')
+    
+    query_string = '&'.join(params)
+    return redirect(f'/cars/?{query_string}')
+
+
+@login_required(login_url='login')
+def delete_saved_search(request, search_id):
+    """Delete a saved search"""
+    try:
+        search = SavedSearch.objects.get(id=search_id, user=request.user)
+        search.delete()
+        messages.success(request, 'Search deleted.')
+    except SavedSearch.DoesNotExist:
+        messages.error(request, 'Search not found.')
+    return redirect('saved_searches')
+
+
+@login_required(login_url='login')
+def approve_car_review(request, review_id):
+    """Approve a car review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = Review.objects.get(id=review_id)
+        review.is_approved = True
+        review.save()
+
+        # Update dealership rating
+        dealership = review.car.dealership
+        reviews = dealership.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        dealership.rating = round(avg_rating, 1)
+        dealership.save()
+
+        return JsonResponse({'success': True})
+    except Review.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def reject_car_review(request, review_id):
+    """Reject/delete a car review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = Review.objects.get(id=review_id)
+        review.delete()
+        return JsonResponse({'success': True})
+    except Review.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def approve_dealership_review(request, review_id):
+    """Approve a dealership review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = DealershipReview.objects.get(id=review_id)
+        review.is_approved = True
+        review.save()
+
+        # Update dealership rating
+        dealership = review.dealership
+        reviews = dealership.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        dealership.rating = round(avg_rating, 1)
+        dealership.save()
+
+        return JsonResponse({'success': True})
+    except DealershipReview.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+@login_required(login_url='login')
+def reject_dealership_review(request, review_id):
+    """Reject/delete a dealership review"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    try:
+        review = DealershipReview.objects.get(id=review_id)
+        review.delete()
+        return JsonResponse({'success': True})
+    except DealershipReview.DoesNotExist:
+        return JsonResponse({'error': 'Review not found'}, status=404)
+
+
+# ========== FEATURE #6: CAR COMPARISON TOOL ==========
+
+def add_to_comparison(request, car_id):
+    """Add car to comparison"""
+    try:
+        car = Car.objects.get(id=car_id, is_approved=True, is_sold=False)
+    except Car.DoesNotExist:
+        return JsonResponse({'error': 'Car not found'}, status=404)
+    
+    # Get or create comparison list for user (store as session)
+    if 'comparison_cars' not in request.session:
+        request.session['comparison_cars'] = []
+    
+    if car_id not in request.session['comparison_cars']:
+        if len(request.session['comparison_cars']) < 10:  # Max 10 cars
+            request.session['comparison_cars'].append(car_id)
+            request.session.modified = True
+            return JsonResponse({'success': True, 'message': 'Added to comparison'})
+        else:
+            return JsonResponse({'error': 'Maximum 10 cars in comparison'}, status=400)
+    else:
+        return JsonResponse({'error': 'Already in comparison'}, status=400)
+
+
+def remove_from_comparison(request, car_id):
+    """Remove car from comparison"""
+    if 'comparison_cars' in request.session:
+        if car_id in request.session['comparison_cars']:
+            request.session['comparison_cars'].remove(car_id)
+            request.session.modified = True
+            return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Car not in comparison'}, status=404)
+
+
+def view_comparison(request):
+    """View car comparison"""
+    comparison_ids = request.session.get('comparison_cars', [])
+    filter_form = CarSearchForm(request.GET or None)
+    cars = Car.objects.filter(id__in=comparison_ids, is_approved=True, is_sold=False)
+    cars = apply_car_filters(cars, filter_form)
+    
+    # Preserve order
+    cars_dict = {car.id: car for car in cars}
+    ordered_cars = [cars_dict[id] for id in comparison_ids if id in cars_dict]
+    
+    context = {
+        'cars': ordered_cars,
+        'comparison_count': len(ordered_cars),
+        'form': filter_form,
+    }
+    return render(request, 'car_comparison.html', context)
+
+
+# ========== FEATURE #7: NOTIFICATIONS & ALERTS ==========
+
+@login_required(login_url='login')
+def notifications(request):
+    """View user notifications"""
+    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    unread_count = user_notifications.filter(is_read=False).count()
+    
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Mark as read AJAX
+        notification_id = request.POST.get('notification_id')
+        try:
+            notif = Notification.objects.get(id=notification_id, user=request.user)
+            notif.mark_as_read()
+            return JsonResponse({'success': True})
+        except Notification.DoesNotExist:
+            return JsonResponse({'error': 'Not found'}, status=404)
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(user_notifications, 20)
+    page_number = request.GET.get('page')
+    user_notifications = paginator.get_page(page_number)
+    
+    context = {
+        'notifications': user_notifications,
+        'unread_count': unread_count,
+    }
+    return render(request, 'notifications.html', context)
+
+
+@login_required(login_url='login')
+def notification_preferences(request):
+    """Manage notification preferences"""
+    try:
+        preference = NotificationPreference.objects.get(user=request.user)
+    except NotificationPreference.DoesNotExist:
+        preference = NotificationPreference.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = NotificationPreferenceForm(request.POST, instance=preference)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Notification preferences saved!')
+            return redirect('notification_preferences')
+    else:
+        form = NotificationPreferenceForm(instance=preference)
+    
+    context = {'form': form, 'preference': preference}
+    return render(request, 'notification_preferences.html', context)
+
+
+def send_notification(user, notification_type, title, message, car=None, dealership=None):
+    """Helper function to send notifications"""
+    try:
+        preference = NotificationPreference.objects.get(user=user)
+    except NotificationPreference.DoesNotExist:
+        preference = NotificationPreference.objects.create(user=user)
+    
+    # Create notification record
+    notification = Notification.objects.create(
+        user=user,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+        car=car,
+        dealership=dealership,
+    )
+    
+    # Send email if enabled
+    if getattr(preference, f'email_on_{notification_type}', False):
+        notification.is_sent_email = True
+        try:
+            send_mail(
+                title,
+                message,
+                settings.DEFAULT_FROM_EMAIL or 'noreply@cardealership.com',
+                [user.email],
+                fail_silently=True,
+            )
+        except:
+            pass
+    
+    # Send SMS if enabled and phone number provided
+    if getattr(preference, f'sms_on_{notification_type}', False) and preference.sms_phone_number:
+        notification.is_sent_sms = True
+        # TODO: Implement SMS sending (requires Twilio or similar)
+    
+    notification.save()
+    return notification
+
+@csrf_exempt
+def ai_chat(request):
+    # Require login to send chat messages
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "YOU MUST BE LOGGED IN TO USE THE AI CHAT"}, status=401)
+    
+    # Import the AI service here so Django's import-time checks won't fail
+    # if the OpenAI client or network-dependent packages are missing.
+    try:
+        from .services.openai_service import ask_chatgpt
+    except Exception:
+        return JsonResponse({"error": "AI service unavailable."}, status=503)
+    if request.method == "POST":
+        data = json.loads(request.body)
+        message = data.get("message", "")
+        # allow caller to specify desired max tokens (optional)
+        try:
+            max_output_tokens = int(data.get('max_output_tokens', 75))
+        except Exception:
+            max_output_tokens = 75
+        current_date = timezone.localdate()
+
+        if request.user.is_authenticated:
+            usage, _ = ChatUsage.objects.get_or_create(
+                user=request.user,
+                date=current_date,
+            )
+        else:
+            ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
+            if ip_address:
+                ip_address = ip_address.split(",")[0].strip()
+            else:
+                ip_address = request.META.get("REMOTE_ADDR")
+
+            usage, _ = ChatUsage.objects.get_or_create(
+                user=None,
+                ip_address=ip_address,
+                date=current_date,
+            )
+
+        # determine daily limit per user role
+        if request.user.is_authenticated:
+            try:
+                profile = request.user.profile
+                if getattr(profile, 'user_type', '') == 'dealership':
+                    daily_limit = 50
+                else:
+                    daily_limit = 10
+            except Exception:
+                daily_limit = 10
+        else:
+            daily_limit = 5
+
+        if usage.messages_used >= daily_limit:
+            return JsonResponse(
+                {
+                    "reply": f"You have reached your daily limit of {daily_limit} messages. Try again tomorrow."
+                },
+                status=429,
+            )
+
+        # temporary simple history (you can improve later with DB/session)
+        history = request.session.get("chat_history", [])
+
+        try:
+            reply = ask_chatgpt(message, history, max_output_tokens=max_output_tokens, include_car_data=True)
+        except Exception:
+            return JsonResponse({"error": "AI service temporarily unavailable."}, status=503)
+
+        usage.messages_used += 1
+        usage.save()
+
+        # update history
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": reply})
+
+        request.session["chat_history"] = history[-10:]  # keep last 10 messages
+
+        return JsonResponse({"reply": reply})
+
+
+
+
+def chat_page(request):
+    # Compute daily limits and remaining messages to show in the UI
+    current_date = timezone.localdate()
+
+    if request.user.is_authenticated:
+        try:
+            profile = request.user.profile
+            if getattr(profile, 'user_type', '') == 'dealership':
+                daily_limit = 50
+            else:
+                daily_limit = 10
+        except Exception:
+            daily_limit = 10
+
+        usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
+    else:
+        daily_limit = 5
+        ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
+        if ip_address:
+            ip_address = ip_address.split(",")[0].strip()
+        else:
+            ip_address = request.META.get("REMOTE_ADDR")
+
+        usage, _ = ChatUsage.objects.get_or_create(user=None, ip_address=ip_address, date=current_date)
+
+    remaining = max(0, daily_limit - usage.messages_used)
+
+    return render(request, "aichat.html", {"remaining": remaining, "daily_limit": daily_limit})
+
+
+def ai_instructions(request):
+    """AI instructions page"""
+    return render(request, "ai_instructions.html")
+

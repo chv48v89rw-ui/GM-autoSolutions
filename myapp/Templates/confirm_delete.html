@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Confirm Delete</h4>
+                </div>
+                <div class="card-body text-center p-5">
+                    <div style="font-size: 4rem; color: #ff6b6b; margin-bottom: 1rem;">⚠️</div>
+                    <h5>Delete {{ car.year }} {{ car.make }} {{ car.model }}?</h5>
+                    <p class="text-muted mb-4">This action cannot be undone. All enquiries for this car will also be deleted.</p>
+
+                    <form method="post" class="d-inline-block">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg me-2">Yes, Delete</button>
+                        <a href="/dashboard/dealership/" class="btn btn-secondary btn-lg">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

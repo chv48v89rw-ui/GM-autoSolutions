@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}My Reports - Car Dealership{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="mb-4">
+                <h1 class="h3">My Reports</h1>
+                <p class="text-muted">Track all reports you've submitted to our moderation team.</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if reports %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Report Type</th>
+                                <th>Status</th>
+                                <th>Description</th>
+                                <th>Submitted On</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-warning">{{ report.get_report_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if report.status == 'pending' %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                        {% elif report.status == 'under_review' %}
+                                            <span class="badge bg-info">Under Review</span>
+                                        {% elif report.status == 'resolved' %}
+                                            <span class="badge bg-success">Resolved</span>
+                                        {% elif report.status == 'dismissed' %}
+                                            <span class="badge bg-danger">Dismissed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ report.description|truncatewords:15 }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ report.created_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reportModal{{ report.id }}">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+
+                                <!-- Report Detail Modal -->
+                                <div class="modal fade" id="reportModal{{ report.id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ report.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Report Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <strong>Report Type:</strong>
+                                                    <p>{{ report.get_report_type_display }}</p>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <strong>Status:</strong>
+                                                    <p>
+                                                        {% if report.status == 'pending' %}
+                                                            <span class="badge bg-secondary">Pending</span>
+                                                        {% elif report.status == 'under_review' %}
+                                                            <span class="badge bg-info">Under Review</span>
+                                                        {% elif report.status == 'resolved' %}
+                                                            <span class="badge bg-success">Resolved</span>
+                                                        {% elif report.status == 'dismissed' %}
+                                                            <span class="badge bg-danger">Dismissed</span>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <strong>Your Description:</strong>
+                                                    <p>{{ report.description }}</p>
+                                                </div>
+                                                {% if report.admin_notes %}
+                                                    <div class="mb-3">
+                                                        <strong>Admin Notes:</strong>
+                                                        <div class="alert alert-info">
+                                                            {{ report.admin_notes }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="mb-3">
+                                                    <strong>Submitted:</strong>
+                                                    <p>{{ report.created_at|date:"M d, Y H:i" }}</p>
+                                                </div>
+                                                {% if report.resolved_at %}
+                                                    <div class="mb-3">
+                                                        <strong>Resolved:</strong>
+                                                        <p>{{ report.resolved_at|date:"M d, Y H:i" }}</p>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                {% if report.car %}
+                                                    <div class="mt-3 p-3 bg-light border">
+                                                        <strong>Related Car:</strong>
+                                                        <p class="mb-0">{{ report.car.year }} {{ report.car.make }} {{ report.car.model }}</p>
+                                                        <a href="{% url 'car_detail' report.car.id %}" class="small text-primary">View Listing</a>
+                                                    </div>
+                                                {% elif report.dealership %}
+                                                    <div class="mt-3 p-3 bg-light border">
+                                                        <strong>Related Dealership:</strong>
+                                                        <p class="mb-0">{{ report.dealership.company_name }}</p>
+                                                        <p class="mb-0 small text-muted">Joined: {{ report.dealership.created_at|date:"M d, Y" }}</p>
+                                                        <a href="{% url 'dealership_detail' report.dealership.id %}" class="small text-primary">View Dealership</a>
+                                                    </div>
+                                                {% elif report.reported_user %}
+                                                    <div class="mt-3 p-3 bg-light border">
+                                                        <strong>Reported User:</strong>
+                                                        <p class="mb-0">{{ report.reported_user.username }}</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <strong>No reports yet.</strong>
+                    <p class="mb-0">You haven't submitted any reports. If you encounter an issue with a listing or user, please report it to help us maintain a safe marketplace.</p>
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

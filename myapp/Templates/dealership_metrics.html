@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}More Metrics - GM autoSolutions{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .metrics-shell {
+        background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+        border-radius: 20px;
+        padding: 20px;
+    }
+    .metric-card {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.07);
+        padding: 18px;
+        height: 100%;
+    }
+    .metric-card a {
+        text-decoration: none;
+    }
+    .chart-card {
+        background: white;
+        border-radius: 18px;
+        padding: 18px;
+        height: 100%;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.07);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="metrics-shell">
+        <div class="row align-items-center mb-4">
+            <div class="col-lg-8">
+                <h2 class="mb-2"><i class="fas fa-chart-area"></i> More Metrics</h2>
+                <p class="text-muted mb-0">Choose a metric variation to view analytics in a dedicated chart or table view.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'dealership_analytics' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Summary
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            {% for metric in available_metrics %}
+                <div class="col-xl-3 col-md-6">
+                    <div class="metric-card">
+                        <a href="#metric-{{ metric.slug }}">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="kpi-icon"><i class="{{ metric.icon }}"></i></div>
+                                <span class="badge bg-primary-subtle text-primary">{{ metric.kind }}</span>
+                            </div>
+                            <div class="display-6 fw-bold text-dark">{{ metric.title }}</div>
+                            <div class="text-muted">Jump to this analytics section</div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12" id="metric-traffic">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-line"></i> Daily Traffic Trend</h5>
+                    <canvas id="trafficMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-make-distribution">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Vehicle Makes</h5>
+                    <canvas id="makeMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-lead-sources">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Lead Sources</h5>
+                    <canvas id="leadMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-fuel-types">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Fuel Types</h5>
+                    <canvas id="fuelMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-body-types">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Body Types</h5>
+                    <canvas id="bodyMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-top-vehicles">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-table"></i> Top Performing Vehicles</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle</th>
+                                    <th>Views</th>
+                                    <th>Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in top_vehicles %}
+                                    <tr>
+                                        <td>{{ item.car.title }}</td>
+                                        <td>{{ item.views|intcomma }}</td>
+                                        <td>{{ item.percentage|floatformat:1 }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ daily_views|json_script:"dailyViewsData" }}
+{{ make_distribution|json_script:"makeDistributionData" }}
+{{ fuel_distribution|json_script:"fuelDistributionData" }}
+{{ lead_sources|json_script:"leadSourcesData" }}
+{{ body_type_distribution|json_script:"bodyTypeDistributionData" }}
+
+<script>
+    const dailyViewsData = JSON.parse(document.getElementById('dailyViewsData').textContent);
+    const trafficMetricCtx = document.getElementById('trafficMetricChart');
+    if (trafficMetricCtx && dailyViewsData.length) {
+        new Chart(trafficMetricCtx, {
+            type: 'line',
+            data: {
+                labels: dailyViewsData.map(item => item.label),
+                datasets: [{
+                    label: 'Views',
+                    data: dailyViewsData.map(item => item.value),
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.15)',
+                    tension: 0.35,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    const makeDistributionData = JSON.parse(document.getElementById('makeDistributionData').textContent);
+    const makeMetricCtx = document.getElementById('makeMetricChart');
+    if (makeMetricCtx && makeDistributionData.length) {
+        new Chart(makeMetricCtx, {
+            type: 'bar',
+            data: {
+                labels: makeDistributionData.map(item => item.label),
+                datasets: [{
+                    label: 'Listings',
+                    data: makeDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1', '#20c997']
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    const fuelDistributionData = JSON.parse(document.getElementById('fuelDistributionData').textContent);
+    const fuelMetricCtx = document.getElementById('fuelMetricChart');
+    if (fuelMetricCtx && fuelDistributionData.length) {
+        new Chart(fuelMetricCtx, {
+            type: 'doughnut',
+            data: {
+                labels: fuelDistributionData.map(item => item.label),
+                datasets: [{
+                    data: fuelDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    const leadSourcesData = JSON.parse(document.getElementById('leadSourcesData').textContent);
+    const leadMetricCtx = document.getElementById('leadMetricChart');
+    if (leadMetricCtx && leadSourcesData.length) {
+        new Chart(leadMetricCtx, {
+            type: 'pie',
+            data: {
+                labels: leadSourcesData.map(item => item.label),
+                datasets: [{
+                    data: leadSourcesData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    const bodyTypeDistributionData = JSON.parse(document.getElementById('bodyTypeDistributionData').textContent);
+    const bodyMetricCtx = document.getElementById('bodyMetricChart');
+    if (bodyMetricCtx && bodyTypeDistributionData.length) {
+        new Chart(bodyMetricCtx, {
+            type: 'doughnut',
+            data: {
+                labels: bodyTypeDistributionData.map(item => item.label),
+                datasets: [{
+                    data: bodyTypeDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1', '#20c997']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
+{% endblock %}

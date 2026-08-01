@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Dealerships - GM autoSolutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-store"></i> Our Dealerships
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Dealership List
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end mb-3">
+                        <div class="col-md-4">
+                            <label for="buyer-location" class="form-label fw-bold">Your Location</label>
+                            <input type="text" name="buyer_location" id="buyer-location" class="form-control" placeholder="Enter your city (e.g., Nairobi, Mombasa)" value="{{ buyer_location }}" title="Enter your location to see distances to dealerships">
+                            <div class="form-text">Enter your location to see distances in km</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="area-search" class="form-label fw-bold">Search Dealerships</label>
+                            <div class="input-group">
+                                <input type="text" name="q" id="area-search" class="form-control" placeholder="Search by postcode or location..." value="{{ search_query }}">
+                                <button class="btn btn-outline-secondary text-dark" type="submit"> Search
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Filter Options</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="premium" id="premium-filter" value="1" onchange="this.form.submit()" {% if premium_filter %}checked{% endif %}>
+                                <label class="form-check-label" for="premium-filter">
+                                    <i class="fas fa-star text-warning"></i> Show only premium dealerships
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if buyer_location %}
+                        <div class="alert alert-info py-2 mb-3">
+                            <small><i class="fas fa-info-circle"></i> Showing dealerships near <strong>{{ buyer_location }}</strong> (sorted by distance)</small>
+                        </div>
+                    {% endif %}
+
+                    <div id="dealership-list" class="row g-4">
+                        {% for item in dealership_list %}
+                            {% with dealership=item.dealership %}
+                            <div class="col-md-6 col-lg-4 dealership-item" 
+                                 data-name="{{ dealership.company_name }}"
+                                 data-area="{{ dealership.area_code|default:'' }}"
+                                 data-location="{{ dealership.location|default:'' }}">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h6 class="card-title mb-0 flex-grow-1">{{ dealership.company_name }} {% include 'includes/dealership_rating.html' with dealership=dealership %}</h6>
+                                                {% if dealership.is_premium %}
+                                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i></span>
+                                                {% endif %}
+                                                {% if dealership.is_verified %}
+                                                    <span class="badge bg-success text-white"><i class="fas fa-check-circle"></i> Verified</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-map-marker-alt"></i> {{ dealership.location }}
+                                            {% if dealership.area_code %}
+                                                <br><span class="badge bg-info">{{ dealership.area_code }}</span>
+                                            {% endif %}
+                                            <br>
+                                            <small>Joined: {{ dealership.created_at|date:"M d, Y" }}</small>
+                                        </p>
+                                        {% if item.distance %}
+                                            <p class="text-success small mb-2 fw-bold">
+                                                <i class="fas fa-route"></i> {{ item.distance|floatformat:1 }} km away from you
+                                            </p>
+                                        {% endif %}
+                                        
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-phone"></i> <a href="tel:{{ dealership.phone_number }}" class="text-decoration-none">{{ dealership.phone_number }}</a>
+                                        </p>
+                                        
+                                        {% if dealership.email %}
+                                            <p class="text-muted small mb-3">
+                                                <i class="fas fa-envelope"></i> <a href="mailto:{{ dealership.email }}" class="text-decoration-none">{{ dealership.email }}</a>
+                                            </p>
+                                        {% endif %}
+                                        
+                                        <div class="d-flex gap-2">
+                                            <a href="/dealership/{{ dealership.id }}/" class="btn btn-primary btn-sm flex-grow-1">
+                                                <i class="fas fa-info-circle"></i> View Details
+                                            </a>
+                                            {% if dealership.latitude and dealership.longitude %}
+                                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ dealership.latitude }},{{ dealership.longitude }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-directions"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endwith %}
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No dealerships found.</p>
+                                    <p class="text-muted small">Try adjusting your search or check back later.</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    window.searchByArea = function() {
+        const searchTerm = document.getElementById('area-search').value.toLowerCase().trim();
+        filterDealerships(searchTerm);
+    };
+
+    // Filter dealerships by search term and premium status
+    window.filterDealerships = function(searchTerm = null) {
+        if (searchTerm === null) {
+            searchTerm = document.getElementById('area-search').value.toLowerCase().trim();
+        }
+        
+        const premiumOnly = document.getElementById('premium-filter').checked;
+        const dealershipItems = document.querySelectorAll('.dealership-item');
+
+        dealershipItems.forEach(function(item) {
+            const areaCode = (item.dataset.area || '').toLowerCase();
+            const name = (item.dataset.name || '').toLowerCase();
+            const location = (item.dataset.location || '').toLowerCase();
+            const isPremium = item.querySelector('.badge.bg-warning') !== null;
+
+            const matchesSearch = !searchTerm || 
+                                areaCode.includes(searchTerm) ||
+                                name.includes(searchTerm) ||
+                                location.includes(searchTerm);
+            
+            const matchesPremium = !premiumOnly || isPremium;
+
+            const shouldShow = matchesSearch && matchesPremium;
+            item.style.display = shouldShow ? 'block' : 'none';
+        });
+    };
+});
+</script>
+
+{% endblock %}
+
