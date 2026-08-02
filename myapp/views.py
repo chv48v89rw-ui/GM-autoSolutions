@@ -1041,6 +1041,20 @@ def add_car(request):
                 car = form.save(commit=False)
                 car.dealership = dealership
                 car.is_approved = True
+                
+                # Generate inventory code if not provided
+                if not car.inventory_code:
+                    from myapp.models import Car
+                    last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
+                    if last_car and last_car.inventory_code:
+                        try:
+                            last_number = int(last_car.inventory_code.replace('GM', ''))
+                            car.inventory_code = f'GM{last_number + 1:04d}'
+                        except ValueError:
+                            car.inventory_code = 'GM0001'
+                    else:
+                        car.inventory_code = 'GM0001'
+                
                 car.save()
 
                 for image in images:
@@ -1074,6 +1088,20 @@ def edit_car(request, car_id):
             else:
                 updated_car = form.save(commit=False)
                 updated_car.is_approved = True
+                
+                # Generate inventory code if not provided
+                if not updated_car.inventory_code:
+                    from myapp.models import Car
+                    last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
+                    if last_car and last_car.inventory_code:
+                        try:
+                            last_number = int(last_car.inventory_code.replace('GM', ''))
+                            updated_car.inventory_code = f'GM{last_number + 1:04d}'
+                        except ValueError:
+                            updated_car.inventory_code = 'GM0001'
+                    else:
+                        updated_car.inventory_code = 'GM0001'
+                
                 updated_car.save()
                 for image in images:
                     CarImage.objects.create(car=updated_car, image=image)
