@@ -2439,11 +2439,11 @@ def chat_page(request):
         try:
             profile = request.user.profile
             if getattr(profile, 'user_type', '') == 'dealership':
-                daily_limit = 50
-            else:
                 daily_limit = 10
+            else:
+                daily_limit = 5
         except Exception:
-            daily_limit = 10
+            daily_limit = 5
 
         usage, _ = ChatUsage.objects.get_or_create(user=request.user, date=current_date)
     else:
