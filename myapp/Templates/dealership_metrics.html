@@ -181,9 +181,30 @@
 {{ body_type_distribution|json_script:"bodyTypeDistributionData" }}
 
 <script>
-    const priceYearTrendData = JSON.parse(document.getElementById('priceYearTrendData').textContent);
+    const safeJson = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return [];
+        try {
+            return JSON.parse(el.textContent || '[]');
+        } catch (error) {
+            console.warn(`Unable to parse JSON for ${id}:`, error);
+            return [];
+        }
+    };
+
+    const compactAxis = {
+        ticks: {
+            font: { size: 10 },
+            maxTicksLimit: 5,
+            callback: function(value) {
+                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+            }
+        }
+    };
+
+    const priceYearTrendData = safeJson('priceYearTrendData');
     const priceYearMetricCtx = document.getElementById('priceYearMetricChart');
-    if (priceYearMetricCtx && priceYearTrendData.length) {
+    if (priceYearMetricCtx && Array.isArray(priceYearTrendData) && priceYearTrendData.length) {
         new Chart(priceYearMetricCtx, {
             type: 'line',
             data: {
@@ -203,24 +224,15 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            font: { size: 10 },
-                            maxTicksLimit: 5,
-                            callback: function(value) {
-                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
-                            }
-                        }
-                    }
+                    y: compactAxis
                 }
             }
         });
     }
 
-    const mileageYearTrendData = JSON.parse(document.getElementById('mileageYearTrendData').textContent);
+    const mileageYearTrendData = safeJson('mileageYearTrendData');
     const mileageYearMetricCtx = document.getElementById('mileageYearMetricChart');
-    if (mileageYearMetricCtx && mileageYearTrendData.length) {
+    if (mileageYearMetricCtx && Array.isArray(mileageYearTrendData) && mileageYearTrendData.length) {
         new Chart(mileageYearMetricCtx, {
             type: 'line',
             data: {
@@ -240,24 +252,15 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            font: { size: 10 },
-                            maxTicksLimit: 5,
-                            callback: function(value) {
-                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
-                            }
-                        }
-                    }
+                    y: compactAxis
                 }
             }
         });
     }
 
-    const dailyLeadsData = JSON.parse(document.getElementById('dailyLeadsData').textContent);
+    const dailyLeadsData = safeJson('dailyLeadsData');
     const leadGrowthMetricCtx = document.getElementById('leadGrowthMetricChart');
-    if (leadGrowthMetricCtx && dailyLeadsData.length) {
+    if (leadGrowthMetricCtx && Array.isArray(dailyLeadsData) && dailyLeadsData.length) {
         new Chart(leadGrowthMetricCtx, {
             type: 'line',
             data: {
@@ -277,24 +280,15 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            font: { size: 10 },
-                            maxTicksLimit: 5,
-                            callback: function(value) {
-                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
-                            }
-                        }
-                    }
+                    y: compactAxis
                 }
             }
         });
     }
 
-    const bodyTypeDistributionData = JSON.parse(document.getElementById('bodyTypeDistributionData').textContent);
+    const bodyTypeDistributionData = safeJson('bodyTypeDistributionData');
     const filterBreakdownMetricCtx = document.getElementById('filterBreakdownMetricChart');
-    if (filterBreakdownMetricCtx && bodyTypeDistributionData.length) {
+    if (filterBreakdownMetricCtx && Array.isArray(bodyTypeDistributionData) && bodyTypeDistributionData.length) {
         new Chart(filterBreakdownMetricCtx, {
             type: 'bar',
             data: {
@@ -307,26 +301,18 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            font: { size: 10 },
-                            maxTicksLimit: 5,
-                            callback: function(value) {
-                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
-                            }
-                        }
-                    }
+                    y: compactAxis
                 }
             }
         });
     }
 
-    const categoryDistributionData = JSON.parse(document.getElementById('categoryDistributionData').textContent);
+    const categoryDistributionData = safeJson('categoryDistributionData');
     const categoryMetricCtx = document.getElementById('categoryMetricChart');
-    if (categoryMetricCtx && categoryDistributionData.length) {
+    if (categoryMetricCtx && Array.isArray(categoryDistributionData) && categoryDistributionData.length) {
         new Chart(categoryMetricCtx, {
             type: 'pie',
             data: {
@@ -336,13 +322,22 @@
                     backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1']
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                }
+            }
         });
     }
 
-    const fuelDistributionData = JSON.parse(document.getElementById('fuelDistributionData').textContent);
+    const fuelDistributionData = safeJson('fuelDistributionData');
     const fuelMetricCtx = document.getElementById('fuelMetricChart');
-    if (fuelMetricCtx && fuelDistributionData.length) {
+    if (fuelMetricCtx && Array.isArray(fuelDistributionData) && fuelDistributionData.length) {
         new Chart(fuelMetricCtx, {
             type: 'doughnut',
             data: {
@@ -352,13 +347,22 @@
                     backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1']
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                }
+            }
         });
     }
 
-    const topVehicleViewsData = JSON.parse(document.getElementById('topVehicleViewsData').textContent);
+    const topVehicleViewsData = safeJson('topVehicleViewsData');
     const topVehicleMetricCtx = document.getElementById('topVehicleMetricChart');
-    if (topVehicleMetricCtx && topVehicleViewsData.length) {
+    if (topVehicleMetricCtx && Array.isArray(topVehicleViewsData) && topVehicleViewsData.length) {
         new Chart(topVehicleMetricCtx, {
             type: 'bar',
             data: {
@@ -388,9 +392,9 @@
         });
     }
 
-    const funnelStageCountsData = JSON.parse(document.getElementById('funnelStageCountsData').textContent);
+    const funnelStageCountsData = safeJson('funnelStageCountsData');
     const leadFunnelCtx = document.getElementById('leadFunnelChart');
-    if (leadFunnelCtx && funnelStageCountsData.length) {
+    if (leadFunnelCtx && Array.isArray(funnelStageCountsData) && funnelStageCountsData.length) {
         new Chart(leadFunnelCtx, {
             type: 'bar',
             data: {
@@ -408,24 +412,15 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            font: { size: 10 },
-                            maxTicksLimit: 5,
-                            callback: function(value) {
-                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
-                            }
-                        }
-                    }
+                    y: compactAxis
                 }
             }
         });
     }
 
-    const leadSourcesData = JSON.parse(document.getElementById('leadSourcesData').textContent);
+    const leadSourcesData = safeJson('leadSourcesData');
     const leadMetricCtx = document.getElementById('leadMetricChart');
-    if (leadMetricCtx && leadSourcesData.length) {
+    if (leadMetricCtx && Array.isArray(leadSourcesData) && leadSourcesData.length) {
         new Chart(leadMetricCtx, {
             type: 'pie',
             data: {
@@ -435,23 +430,16 @@
                     backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1']
                 }]
             },
-            options: { responsive: true }
-        });
-    }
-
-    const bodyTypeDistributionData = JSON.parse(document.getElementById('bodyTypeDistributionData').textContent);
-    const bodyMetricCtx = document.getElementById('bodyMetricChart');
-    if (bodyMetricCtx && bodyTypeDistributionData.length) {
-        new Chart(bodyMetricCtx, {
-            type: 'doughnut',
-            data: {
-                labels: bodyTypeDistributionData.map(item => item.label),
-                datasets: [{
-                    data: bodyTypeDistributionData.map(item => item.value),
-                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1', '#20c997']
-                }]
-            },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                }
+            }
         });
     }
 </script>

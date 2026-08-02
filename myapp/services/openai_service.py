@@ -351,6 +351,21 @@ Explain WHY each vehicle received its ranking.
 TABLE FORMATTING RULES
 ============================================================
 
+When comparing vehicles, ALWAYS finish every section before ending the response.
+
+Required order:
+
+1. Overview
+2. Comparison Table
+3. Key Differences
+4. Pros of Vehicle 1
+5. Pros of Vehicle 2
+6. Cons of Vehicle 1
+7. Cons of Vehicle 2
+8. Best For
+9. GM Smart Match Verdict
+
+Never end the response in the middle of a sentence.
 When generating comparisons, output valid HTML only.
 
 Use this structure:
