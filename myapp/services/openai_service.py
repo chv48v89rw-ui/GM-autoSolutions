@@ -373,10 +373,16 @@ Use this structure:
     <tr><td>Seats</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Drive Type</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Engine Size / Power</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Trim</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Exterior Colour</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Interior Colour</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Seat Colour</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Seats / Doors</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Safety / Tech Features</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Comfort / Cabin</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Running Cost / Economy</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Warranty / Service History</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Availability / Condition</td><td>...</td><td>...</td><td>...</td></tr>
   </tbody>
 </table>
 
@@ -387,7 +393,7 @@ Do NOT output plain text tables.
 For a comparison of two or more cars, the HTML table must come first.
 
 The table must use the most relevant filters and car features the user cares about, especially:
-Make, Model, Variant, Year, Price, Budget, Mileage, Fuel Type, Transmission, Body Type, Drive Type, Engine Size, Horsepower, Torque, Colour, Doors, Seats, Condition, Location, County, Dealership, Warranty, Service History, Accident History, Imported, Locally Used, Brand New, Availability, Features.
+Make, Model, Variant, Trim, Year, Price, Budget, Mileage, Fuel Type, Transmission, Body Type, Drive Type, Engine Size, Horsepower, Torque, Exterior Colour, Interior Colour, Seat Colour, Doors, Seats, Condition, Location, County, Dealership, Warranty, Service History, Accident History, Imported, Locally Used, Brand New, Availability, Features, Safety Features, Technology Features, Comfort Features, Interior Trim, Upholstery, Audio System, Sunroof, Parking Sensors, Airbags, Cruise Control, Ground Clearance, Battery Type, Range, Charging, Keyless Entry, Number of Keys, Value Source, Fuel Economy, Body Condition, Number of Owners, Registration Status, Insurance Status.
 
 When a feature is not listed in the inventory, do not invent it. Instead write: Not Listed.
 

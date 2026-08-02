@@ -50,6 +50,9 @@ def search_cars_by_criteria(criteria=None):
     
     if criteria.get('condition'):
         cars = cars.filter(condition=criteria['condition'])
+
+    if criteria.get('inventory_code'):
+        cars = cars.filter(inventory_code__iexact=criteria['inventory_code'])
     
     return cars[:10]  # Limit to 10 results
 
@@ -66,7 +69,8 @@ def format_car_for_ai(car):
     """
     return {
         'id': car.id,
-        'title': f"{car.year} {car.make} {car.model}{' ' + car.variant if car.variant else ''}",
+        'inventory_code': car.inventory_code or 'Not Assigned',
+        'title': f"{car.inventory_code or 'GM0000'} - {car.year} {car.make} {car.model}{' ' + car.variant if car.variant else ''}",
         'price': float(car.price),
         'mileage': car.mileage,
         'fuel_type': car.get_fuel_type_display(),
@@ -158,9 +162,16 @@ def get_car_recommendations_context(user_message):
     elif 'used' in message_lower or 'second hand' in message_lower:
         criteria['condition'] = 'used_locally'
     
+    inventory_code_match = re.search(r'\bGM\d{4}\b', user_message, re.IGNORECASE)
+    if inventory_code_match:
+        criteria['inventory_code'] = inventory_code_match.group(0).upper()
+
     # Search for cars
     cars = search_cars_by_criteria(criteria)
     
+    if inventory_code_match:
+        cars = cars.filter(inventory_code__iexact=criteria['inventory_code'])
+
     if not cars.exists():
         return "No cars found matching your criteria. Try adjusting your preferences or browse all available cars."
     
@@ -171,6 +182,7 @@ def get_car_recommendations_context(user_message):
     context = f"Found {len(car_list)} cars matching your criteria:\n\n"
     for i, car in enumerate(car_list, 1):
         context += f"{i}. {car['title']}\n"
+        context += f"   Inventory Code: {car['inventory_code']}\n"
         context += f"   Price: KES {int(car['price']):,}\n"
         context += f"   Mileage: {car['mileage']:,} km\n"
         context += f"   Fuel: {car['fuel_type']} | Transmission: {car['transmission']}\n"

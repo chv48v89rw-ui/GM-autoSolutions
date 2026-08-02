@@ -260,6 +260,7 @@ class Car(models.Model):
     
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE, related_name='cars')
     title = models.CharField(max_length=255)
+    inventory_code = models.CharField(max_length=8, unique=True, blank=True, null=True, db_index=True)
     make = models.CharField(max_length=100)  # Toyota, BMW, etc.
     model = models.CharField(max_length=100)  # Camry, 3 Series, etc.
     variant = models.CharField(max_length=100, blank=True)
@@ -306,6 +307,23 @@ class Car(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+    def _generate_inventory_code(self):
+        highest_number = 0
+        for code in Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').values_list('inventory_code', flat=True):
+            if code and code.upper().startswith('GM') and code[2:].isdigit():
+                highest_number = max(highest_number, int(code[2:]))
+
+        next_number = highest_number + 1
+        if next_number > 9999:
+            raise ValueError('Inventory code limit reached. Maximum GM9999 has been allocated.')
+
+        return f"GM{next_number:04d}"
+
+    def save(self, *args, **kwargs):
+        if not self.inventory_code:
+            self.inventory_code = self._generate_inventory_code()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         variant_text = f" {self.variant}" if self.variant else ""
