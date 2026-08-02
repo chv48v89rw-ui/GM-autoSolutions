@@ -646,6 +646,14 @@ def get_dealership_analytics_context(dealership):
     for body_type, total in cars_qs.exclude(body_type='').values_list('body_type').annotate(total=Count('id')).order_by('-total'):
         body_type_distribution.append({'label': body_type.title(), 'value': total})
 
+    category_distribution = []
+    category_order = ['SUV', 'Sedan', 'Hatchback', 'Pickup']
+    for body_type, total in cars_qs.exclude(body_type='').values_list('body_type').annotate(total=Count('id')).order_by('-total'):
+        label = body_type.title()
+        if label in category_order:
+            category_distribution.append({'label': label, 'value': total})
+    category_distribution.sort(key=lambda item: category_order.index(item['label']) if item['label'] in category_order else len(category_order))
+
     lead_sources = []
     for click_type, display_name in click_types.items():
         count = click_qs.filter(click_type=click_type).count()
@@ -659,6 +667,19 @@ def get_dealership_analytics_context(dealership):
             'views': car_data['views'],
             'percentage': car_data['percentage'],
         })
+
+    top_vehicle_views_data = [
+        {'label': item['car'].title, 'value': item['views']}
+        for item in top_vehicles
+    ]
+
+    test_drive_requests = enquiries_qs.filter(message__icontains='test drive').count()
+    funnel_stage_counts = [
+        {'label': 'Views', 'value': total_car_views},
+        {'label': 'Enquiries', 'value': total_leads},
+        {'label': 'Test Drives', 'value': test_drive_requests},
+        {'label': 'Sales', 'value': sold_vehicles},
+    ]
 
     conversion_rate = round((total_leads / total_car_views) * 100, 1) if total_car_views else 0
     monthly_revenue = round(float(cars_qs.filter(is_sold=True).aggregate(total=Sum('price'))['total'] or 0), 2)
@@ -710,9 +731,12 @@ def get_dealership_analytics_context(dealership):
         'make_distribution': make_distribution,
         'fuel_distribution': fuel_distribution,
         'body_type_distribution': body_type_distribution,
+        'category_distribution': category_distribution,
         'lead_sources': lead_sources,
         'ai_insights': ai_insights,
         'top_vehicles': top_vehicles,
+        'top_vehicle_views_data': top_vehicle_views_data,
+        'funnel_stage_counts': funnel_stage_counts,
         'saved_search_count': saved_search_count,
         'total_inventory_value': inventory_value,
     }
@@ -751,11 +775,13 @@ def dealership_more_metrics(request):
     context = get_dealership_analytics_context(dealership)
     context['metric_type'] = 'overview'
     context['available_metrics'] = [
-        {'slug': 'traffic', 'title': 'Traffic Trend', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
-        {'slug': 'make-distribution', 'title': 'Vehicle Makes', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
-        {'slug': 'lead-sources', 'title': 'Lead Sources', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'traffic', 'title': 'Listing Views Over Time', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'make-distribution', 'title': 'Listings by Make', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'vehicle-categories', 'title': 'Vehicle Categories', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
-        {'slug': 'body-types', 'title': 'Body Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'most-viewed-vehicles', 'title': 'Most Viewed Vehicles', 'kind': 'horizontal bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'lead-funnel', 'title': 'Lead Funnel', 'kind': 'funnel chart', 'icon': 'fas fa-filter'},
+        {'slug': 'lead-growth', 'title': 'Lead Growth Over Time', 'kind': 'area chart', 'icon': 'fas fa-chart-area'},
         {'slug': 'top-vehicles', 'title': 'Top Performing Vehicles', 'kind': 'table', 'icon': 'fas fa-table'},
     ]
     return render(request, 'dealership_metrics.html', context)
@@ -777,11 +803,13 @@ def dealership_more_metrics_detail(request, metric_type):
     context = get_dealership_analytics_context(dealership)
     context['metric_type'] = metric_type
     context['available_metrics'] = [
-        {'slug': 'traffic', 'title': 'Traffic Trend', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
-        {'slug': 'make-distribution', 'title': 'Vehicle Makes', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
-        {'slug': 'lead-sources', 'title': 'Lead Sources', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'traffic', 'title': 'Listing Views Over Time', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'make-distribution', 'title': 'Listings by Make', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'vehicle-categories', 'title': 'Vehicle Categories', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
-        {'slug': 'body-types', 'title': 'Body Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
+        {'slug': 'most-viewed-vehicles', 'title': 'Most Viewed Vehicles', 'kind': 'horizontal bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'lead-funnel', 'title': 'Lead Funnel', 'kind': 'funnel chart', 'icon': 'fas fa-filter'},
+        {'slug': 'lead-growth', 'title': 'Lead Growth Over Time', 'kind': 'area chart', 'icon': 'fas fa-chart-area'},
         {'slug': 'top-vehicles', 'title': 'Top Performing Vehicles', 'kind': 'table', 'icon': 'fas fa-table'},
     ]
 

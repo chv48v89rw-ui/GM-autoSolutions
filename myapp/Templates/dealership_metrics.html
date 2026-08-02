@@ -67,22 +67,22 @@
         <div class="row g-4 mt-2">
             <div class="col-12" id="metric-traffic">
                 <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-line"></i> Daily Traffic Trend</h5>
+                    <h5 class="mb-3"><i class="fas fa-chart-line"></i> Listing Views Over Time</h5>
                     <canvas id="trafficMetricChart"></canvas>
                 </div>
             </div>
 
             <div class="col-12" id="metric-make-distribution">
                 <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Vehicle Makes</h5>
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Listings by Make</h5>
                     <canvas id="makeMetricChart"></canvas>
                 </div>
             </div>
 
-            <div class="col-12" id="metric-lead-sources">
+            <div class="col-12" id="metric-vehicle-categories">
                 <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Lead Sources</h5>
-                    <canvas id="leadMetricChart"></canvas>
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Vehicle Categories</h5>
+                    <canvas id="categoryMetricChart"></canvas>
                 </div>
             </div>
 
@@ -93,10 +93,24 @@
                 </div>
             </div>
 
-            <div class="col-12" id="metric-body-types">
+            <div class="col-12" id="metric-most-viewed-vehicles">
                 <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Body Types</h5>
-                    <canvas id="bodyMetricChart"></canvas>
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Most Viewed Vehicles</h5>
+                    <canvas id="topVehicleMetricChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-lead-funnel">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-filter"></i> Views → Enquiries → Test Drives → Sales</h5>
+                    <canvas id="leadFunnelChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12" id="metric-lead-growth">
+                <div class="chart-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-area"></i> Lead Growth Over Time</h5>
+                    <canvas id="leadGrowthMetricChart"></canvas>
                 </div>
             </div>
 
@@ -130,8 +144,12 @@
 </div>
 
 {{ daily_views|json_script:"dailyViewsData" }}
+{{ daily_leads|json_script:"dailyLeadsData" }}
 {{ make_distribution|json_script:"makeDistributionData" }}
+{{ category_distribution|json_script:"categoryDistributionData" }}
 {{ fuel_distribution|json_script:"fuelDistributionData" }}
+{{ top_vehicle_views_data|json_script:"topVehicleViewsData" }}
+{{ funnel_stage_counts|json_script:"funnelStageCountsData" }}
 {{ lead_sources|json_script:"leadSourcesData" }}
 {{ body_type_distribution|json_script:"bodyTypeDistributionData" }}
 
@@ -148,6 +166,31 @@
                     data: dailyViewsData.map(item => item.value),
                     borderColor: '#0d6efd',
                     backgroundColor: 'rgba(13,110,253,0.15)',
+                    tension: 0.35,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    const dailyLeadsData = JSON.parse(document.getElementById('dailyLeadsData').textContent);
+    const leadGrowthMetricCtx = document.getElementById('leadGrowthMetricChart');
+    if (leadGrowthMetricCtx && dailyLeadsData.length) {
+        new Chart(leadGrowthMetricCtx, {
+            type: 'line',
+            data: {
+                labels: dailyLeadsData.map(item => item.label),
+                datasets: [{
+                    label: 'Lead Growth',
+                    data: dailyLeadsData.map(item => item.value),
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25,135,84,0.15)',
                     tension: 0.35,
                     fill: true,
                 }]
@@ -178,6 +221,22 @@
         });
     }
 
+    const categoryDistributionData = JSON.parse(document.getElementById('categoryDistributionData').textContent);
+    const categoryMetricCtx = document.getElementById('categoryMetricChart');
+    if (categoryMetricCtx && categoryDistributionData.length) {
+        new Chart(categoryMetricCtx, {
+            type: 'pie',
+            data: {
+                labels: categoryDistributionData.map(item => item.label),
+                datasets: [{
+                    data: categoryDistributionData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
     const fuelDistributionData = JSON.parse(document.getElementById('fuelDistributionData').textContent);
     const fuelMetricCtx = document.getElementById('fuelMetricChart');
     if (fuelMetricCtx && fuelDistributionData.length) {
@@ -191,6 +250,49 @@
                 }]
             },
             options: { responsive: true }
+        });
+    }
+
+    const topVehicleViewsData = JSON.parse(document.getElementById('topVehicleViewsData').textContent);
+    const topVehicleMetricCtx = document.getElementById('topVehicleMetricChart');
+    if (topVehicleMetricCtx && topVehicleViewsData.length) {
+        new Chart(topVehicleMetricCtx, {
+            type: 'bar',
+            data: {
+                labels: topVehicleViewsData.map(item => item.label),
+                datasets: [{
+                    label: 'Views',
+                    data: topVehicleViewsData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1']
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+
+    const funnelStageCountsData = JSON.parse(document.getElementById('funnelStageCountsData').textContent);
+    const leadFunnelCtx = document.getElementById('leadFunnelChart');
+    if (leadFunnelCtx && funnelStageCountsData.length) {
+        new Chart(leadFunnelCtx, {
+            type: 'bar',
+            data: {
+                labels: funnelStageCountsData.map(item => item.label),
+                datasets: [{
+                    label: 'Counts',
+                    data: funnelStageCountsData.map(item => item.value),
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
         });
     }
 
