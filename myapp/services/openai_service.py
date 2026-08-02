@@ -2,6 +2,7 @@ from openai import OpenAI
 import os
 import logging
 from dotenv import load_dotenv, find_dotenv
+from .ai_prompt import AI_PROMPT
 
 # Load environment variables
 load_dotenv(find_dotenv())
@@ -50,7 +51,7 @@ def ask_chatgpt(message, history=None, max_output_tokens=75, include_car_data=Tr
             car_context = ""
 
             system_prompt = AI_PROMPT
-            
+
     if car_context:
         system_prompt += f"\n\nAVAILABLE VEHICLES:\n{car_context}"
 
