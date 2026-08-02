@@ -43,6 +43,163 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Email verification removed: send_verification_email no longer used
 
+MAX_TASK_TOKEN_BUDGET = 850
+
+TASK_TOKEN_BUDGETS = {
+    'greeting': 100,
+    'thank_you': 100,
+    'yes_no_question': 150,
+    'simple_car_fact': 200,
+    'vehicle_specification': 250,
+    'price_enquiry': 250,
+    'vehicle_availability': 300,
+    'explain_car_feature': 350,
+    'website_help': 350,
+    'faq': 350,
+    'dealership_search': 400,
+    'vehicle_search': 450,
+    'general_automotive_knowledge': 500,
+    'car_recommendation': 600,
+    'safety_features': 600,
+    'technology_features': 600,
+    'financing_advice': 650,
+    'insurance_advice': 650,
+    'maintenance_advice': 700,
+    'ownership_costs': 700,
+    'fuel_economy_advice': 700,
+    'family_car_recommendation': 750,
+    'first_car_recommendation': 750,
+    'off_road_recommendation': 750,
+    'diesel_vs_petrol': 800,
+    'electric_vs_hybrid': 800,
+    'buying_advice': 850,
+    'market_trends': 850,
+    'brand_comparison': 900,
+    'engine_comparison': 900,
+    'detailed_vehicle_review': 950,
+    'ai_buying_guide': 950,
+    'compare_2_vehicles': 1000,
+    'compare_3_vehicles': 1000,
+    'luxury_vehicle_comparison': 1000,
+    'suv_comparison': 1000,
+}
+
+
+def infer_task_token_budget(message):
+    """Infer a task-aware token budget from the user's message intent."""
+    text = (message or '').lower()
+
+    if not text:
+        return 400
+
+    def capped(task_key):
+        return min(TASK_TOKEN_BUDGETS[task_key], MAX_TASK_TOKEN_BUDGET)
+
+    if any(keyword in text for keyword in ['hello', 'hi there', 'hey', 'good morning', 'good evening']):
+        return capped('greeting')
+
+    if any(keyword in text for keyword in ['thank you', 'thanks', 'goodbye', 'bye']):
+        return capped('thank_you')
+
+    if re.search(r'\b(yes|no)\b', text) and len(text.split()) <= 8:
+        return capped('yes_no_question')
+
+    if any(keyword in text for keyword in ['price', 'how much', 'cost', 'budget']):
+        if 'available' in text or 'stock' in text or 'in stock' in text:
+            return capped('vehicle_availability')
+        return capped('price_enquiry')
+
+    if any(keyword in text for keyword in ['available', 'in stock', 'stock', 'still available']):
+        return capped('vehicle_availability')
+
+    if any(keyword in text for keyword in ['feature', 'sunroof', 'power steering', 'memory seats', 'seat material', 'audio', 'parking sensor', 'airbag']):
+        return capped('explain_car_feature')
+
+    if any(keyword in text for keyword in ['website', 'help', 'how do i', 'login', 'navigation']):
+        return capped('website_help')
+
+    if any(keyword in text for keyword in ['faq', 'common question', 'frequently asked']):
+        return capped('faq')
+
+    if any(keyword in text for keyword in ['dealership', 'dealer near', 'find a dealer', 'dealer search']):
+        return capped('dealership_search')
+
+    if any(keyword in text for keyword in ['search', 'find a car', 'looking for', 'vehicle search']):
+        return capped('vehicle_search')
+
+    if any(keyword in text for keyword in ['recommend', 'recommendation', 'best car', 'which car should i buy']):
+        if any(keyword in text for keyword in ['family', 'family car']):
+            return capped('family_car_recommendation')
+        if any(keyword in text for keyword in ['first car', 'starter car']):
+            return capped('first_car_recommendation')
+        if any(keyword in text for keyword in ['off-road', '4x4', '4wd', 'off road']):
+            return capped('off_road_recommendation')
+        return capped('car_recommendation')
+
+    if any(keyword in text for keyword in ['safety', 'airbag', 'abs', 'traction', 'brake assist']):
+        return capped('safety_features')
+
+    if any(keyword in text for keyword in ['technology', 'apple carplay', 'android auto', 'camera', 'screen', 'connected']):
+        return capped('technology_features')
+
+    if any(keyword in text for keyword in ['finance', 'financing', 'loan', 'payment plan']):
+        return capped('financing_advice')
+
+    if any(keyword in text for keyword in ['insurance', 'premium', 'cover']):
+        return capped('insurance_advice')
+
+    if any(keyword in text for keyword in ['maintenance', 'service', 'repair', 'running cost']):
+        return capped('maintenance_advice')
+
+    if any(keyword in text for keyword in ['ownership cost', 'total cost', 'fuel cost', 'operating cost']):
+        return capped('ownership_costs')
+
+    if any(keyword in text for keyword in ['fuel economy', 'km/l', 'mpg', 'running cost']):
+        return capped('fuel_economy_advice')
+
+    if any(keyword in text for keyword in ['diesel vs petrol', 'petrol vs diesel', 'diesel or petrol']):
+        return capped('diesel_vs_petrol')
+
+    if any(keyword in text for keyword in ['electric vs hybrid', 'hybrid vs electric', 'electric or hybrid']):
+        return capped('electric_vs_hybrid')
+
+    if any(keyword in text for keyword in ['buying advice', 'should i buy', 'buying guide']):
+        return capped('buying_advice')
+
+    if any(keyword in text for keyword in ['market trend', 'market trends', 'used car market']):
+        return capped('market_trends')
+
+    if any(keyword in text for keyword in ['brand comparison', 'compare brands', 'vs toyota', 'vs bmw']):
+        return capped('brand_comparison')
+
+    if any(keyword in text for keyword in ['engine comparison', 'engine power', 'torque comparison']):
+        return capped('engine_comparison')
+
+    if any(keyword in text for keyword in ['review', 'detailed review', 'full review']):
+        return capped('detailed_vehicle_review')
+
+    if any(keyword in text for keyword in ['compare', 'comparison']):
+        if re.search(r'\b(three|3)\b', text) or re.search(r'\bcompare\s+3\b', text):
+            return capped('compare_3_vehicles')
+        if re.search(r'\b(two|2)\b', text) or re.search(r'\bvs\b', text):
+            return capped('compare_2_vehicles')
+        return capped('compare_2_vehicles')
+
+    if any(keyword in text for keyword in ['luxury', 'premium', 'executive']):
+        return capped('luxury_vehicle_comparison')
+
+    if any(keyword in text for keyword in ['suv', 'crossover']):
+        return capped('suv_comparison')
+
+    if any(keyword in text for keyword in ['specification', 'specs', 'trim', 'engine size', 'fuel economy', 'seats', 'doors']):
+        return capped('vehicle_specification')
+
+    if any(keyword in text for keyword in ['fact', 'is a', 'what is a', 'how many']):
+        return capped('simple_car_fact')
+
+    return min(TASK_TOKEN_BUDGETS['general_automotive_knowledge'], MAX_TASK_TOKEN_BUDGET)
+
+
 def apply_car_filters(cars, form):
     """Apply shared car search filters to a queryset."""
     if not form.is_valid():
@@ -2188,11 +2345,13 @@ def ai_chat(request):
     if request.method == "POST":
         data = json.loads(request.body)
         message = data.get("message", "")
-        # allow caller to specify desired max tokens (optional)
+
         try:
-            max_output_tokens = int(data.get('max_output_tokens', 1000))
+            explicit_max_tokens = int(data.get('max_output_tokens', 0) or 0)
         except Exception:
-            max_output_tokens = 600
+            explicit_max_tokens = 0
+
+        max_output_tokens = min(explicit_max_tokens or infer_task_token_budget(message), MAX_TASK_TOKEN_BUDGET)
         current_date = timezone.localdate()
 
         if request.user.is_authenticated:
