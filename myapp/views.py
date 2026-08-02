@@ -609,18 +609,6 @@ def get_dealership_analytics_context(dealership):
     top_cars_30_days.sort(key=lambda x: x['views'], reverse=True)
     top_cars_30_days = top_cars_30_days[:5]
 
-    daily_views = list(
-        CarView.objects.filter(car__dealership=dealership, viewed_at__gte=thirty_days_ago)
-        .extra({'day': "date(viewed_at)",})
-        .values('day')
-        .annotate(total=Count('id'))
-        .order_by('day')
-    )
-    daily_views = [
-        {'label': item['day'].strftime('%Y-%m-%d') if hasattr(item['day'], 'strftime') else str(item['day']), 'value': item['total']}
-        for item in daily_views
-    ]
-
     daily_leads = list(
         enquiries_qs.filter(created_at__gte=thirty_days_ago)
         .extra({'day': "date(created_at)",})
@@ -645,6 +633,16 @@ def get_dealership_analytics_context(dealership):
     body_type_distribution = []
     for body_type, total in cars_qs.exclude(body_type='').values_list('body_type').annotate(total=Count('id')).order_by('-total'):
         body_type_distribution.append({'label': body_type.title(), 'value': total})
+
+    price_year_trend = []
+    for year, avg_price in cars_qs.exclude(year__isnull=True).exclude(price__isnull=True).values_list('year').annotate(avg_price=Avg('price')).order_by('year'):
+        if year:
+            price_year_trend.append({'label': str(year), 'value': round(float(avg_price or 0), 2)})
+
+    mileage_year_trend = []
+    for year, avg_mileage in cars_qs.exclude(year__isnull=True).exclude(mileage__isnull=True).values_list('year').annotate(avg_mileage=Avg('mileage')).order_by('year'):
+        if year:
+            mileage_year_trend.append({'label': str(year), 'value': round(float(avg_mileage or 0), 2)})
 
     category_distribution = []
     category_order = ['SUV', 'Sedan', 'Hatchback', 'Pickup']
@@ -726,11 +724,12 @@ def get_dealership_analytics_context(dealership):
         'recent_clicks': recent_clicks,
         'recent_leads': recent_leads,
         'top_cars_30_days': top_cars_30_days,
-        'daily_views': daily_views,
         'daily_leads': daily_leads,
         'make_distribution': make_distribution,
         'fuel_distribution': fuel_distribution,
         'body_type_distribution': body_type_distribution,
+        'price_year_trend': price_year_trend,
+        'mileage_year_trend': mileage_year_trend,
         'category_distribution': category_distribution,
         'lead_sources': lead_sources,
         'ai_insights': ai_insights,
@@ -775,8 +774,9 @@ def dealership_more_metrics(request):
     context = get_dealership_analytics_context(dealership)
     context['metric_type'] = 'overview'
     context['available_metrics'] = [
-        {'slug': 'traffic', 'title': 'Listing Views Over Time', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
-        {'slug': 'make-distribution', 'title': 'Listings by Make', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'price-vs-year', 'title': 'Price vs Year', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'mileage-vs-year', 'title': 'Mileage vs Year', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'filter-breakdown', 'title': 'Body Type Breakdown', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
         {'slug': 'vehicle-categories', 'title': 'Vehicle Categories', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'most-viewed-vehicles', 'title': 'Most Viewed Vehicles', 'kind': 'horizontal bar chart', 'icon': 'fas fa-chart-bar'},
@@ -803,8 +803,9 @@ def dealership_more_metrics_detail(request, metric_type):
     context = get_dealership_analytics_context(dealership)
     context['metric_type'] = metric_type
     context['available_metrics'] = [
-        {'slug': 'traffic', 'title': 'Listing Views Over Time', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
-        {'slug': 'make-distribution', 'title': 'Listings by Make', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
+        {'slug': 'price-vs-year', 'title': 'Price vs Year', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'mileage-vs-year', 'title': 'Mileage vs Year', 'kind': 'line chart', 'icon': 'fas fa-chart-line'},
+        {'slug': 'filter-breakdown', 'title': 'Body Type Breakdown', 'kind': 'bar chart', 'icon': 'fas fa-chart-bar'},
         {'slug': 'vehicle-categories', 'title': 'Vehicle Categories', 'kind': 'pie chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'fuel-types', 'title': 'Fuel Types', 'kind': 'doughnut chart', 'icon': 'fas fa-chart-pie'},
         {'slug': 'most-viewed-vehicles', 'title': 'Most Viewed Vehicles', 'kind': 'horizontal bar chart', 'icon': 'fas fa-chart-bar'},

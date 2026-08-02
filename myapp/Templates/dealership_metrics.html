@@ -29,6 +29,23 @@
         height: 100%;
         box-shadow: 0 8px 20px rgba(31, 41, 55, 0.07);
     }
+    .chart-card canvas {
+        width: 100% !important;
+        max-height: 420px;
+        min-height: 280px;
+    }
+    @media (max-width: 767.98px) {
+        .metrics-shell {
+            padding: 14px;
+        }
+        .chart-card {
+            padding: 12px;
+        }
+        .chart-card canvas {
+            max-height: 320px;
+            min-height: 240px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -65,18 +82,25 @@
         </div>
 
         <div class="row g-4 mt-2">
-            {% if metric_type == 'traffic' %}
-                <div class="col-12" id="metric-traffic">
+            {% if metric_type == 'price-vs-year' %}
+                <div class="col-12" id="metric-price-vs-year">
                     <div class="chart-card">
-                        <h5 class="mb-3"><i class="fas fa-chart-line"></i> Listing Views Over Time</h5>
-                        <canvas id="trafficMetricChart"></canvas>
+                        <h5 class="mb-3"><i class="fas fa-chart-line"></i> Price vs Year</h5>
+                        <canvas id="priceYearMetricChart"></canvas>
                     </div>
                 </div>
-            {% elif metric_type == 'make-distribution' %}
-                <div class="col-12" id="metric-make-distribution">
+            {% elif metric_type == 'mileage-vs-year' %}
+                <div class="col-12" id="metric-mileage-vs-year">
                     <div class="chart-card">
-                        <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Listings by Make</h5>
-                        <canvas id="makeMetricChart"></canvas>
+                        <h5 class="mb-3"><i class="fas fa-chart-line"></i> Mileage vs Year</h5>
+                        <canvas id="mileageYearMetricChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'filter-breakdown' %}
+                <div class="col-12" id="metric-filter-breakdown">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Body Type Breakdown</h5>
+                        <canvas id="filterBreakdownMetricChart"></canvas>
                     </div>
                 </div>
             {% elif metric_type == 'vehicle-categories' %}
@@ -145,9 +169,10 @@
     </div>
 </div>
 
-{{ daily_views|json_script:"dailyViewsData" }}
 {{ daily_leads|json_script:"dailyLeadsData" }}
 {{ make_distribution|json_script:"makeDistributionData" }}
+{{ price_year_trend|json_script:"priceYearTrendData" }}
+{{ mileage_year_trend|json_script:"mileageYearTrendData" }}
 {{ category_distribution|json_script:"categoryDistributionData" }}
 {{ fuel_distribution|json_script:"fuelDistributionData" }}
 {{ top_vehicle_views_data|json_script:"topVehicleViewsData" }}
@@ -156,16 +181,16 @@
 {{ body_type_distribution|json_script:"bodyTypeDistributionData" }}
 
 <script>
-    const dailyViewsData = JSON.parse(document.getElementById('dailyViewsData').textContent);
-    const trafficMetricCtx = document.getElementById('trafficMetricChart');
-    if (trafficMetricCtx && dailyViewsData.length) {
-        new Chart(trafficMetricCtx, {
+    const priceYearTrendData = JSON.parse(document.getElementById('priceYearTrendData').textContent);
+    const priceYearMetricCtx = document.getElementById('priceYearMetricChart');
+    if (priceYearMetricCtx && priceYearTrendData.length) {
+        new Chart(priceYearMetricCtx, {
             type: 'line',
             data: {
-                labels: dailyViewsData.map(item => item.label),
+                labels: priceYearTrendData.map(item => item.label),
                 datasets: [{
-                    label: 'Views',
-                    data: dailyViewsData.map(item => item.value),
+                    label: 'Average Price',
+                    data: priceYearTrendData.map(item => item.value),
                     borderColor: '#0d6efd',
                     backgroundColor: 'rgba(13,110,253,0.15)',
                     tension: 0.35,
@@ -177,9 +202,53 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
+                    x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
                     y: {
                         beginAtZero: true,
-                        ticks: { font: { size: 10 } }
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const mileageYearTrendData = JSON.parse(document.getElementById('mileageYearTrendData').textContent);
+    const mileageYearMetricCtx = document.getElementById('mileageYearMetricChart');
+    if (mileageYearMetricCtx && mileageYearTrendData.length) {
+        new Chart(mileageYearMetricCtx, {
+            type: 'line',
+            data: {
+                labels: mileageYearTrendData.map(item => item.label),
+                datasets: [{
+                    label: 'Average Mileage',
+                    data: mileageYearTrendData.map(item => item.value),
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25,135,84,0.15)',
+                    tension: 0.35,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
                     }
                 }
             }
@@ -207,29 +276,51 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
+                    x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
                     y: {
                         beginAtZero: true,
-                        ticks: { font: { size: 10 } }
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
                     }
                 }
             }
         });
     }
 
-    const makeDistributionData = JSON.parse(document.getElementById('makeDistributionData').textContent);
-    const makeMetricCtx = document.getElementById('makeMetricChart');
-    if (makeMetricCtx && makeDistributionData.length) {
-        new Chart(makeMetricCtx, {
+    const bodyTypeDistributionData = JSON.parse(document.getElementById('bodyTypeDistributionData').textContent);
+    const filterBreakdownMetricCtx = document.getElementById('filterBreakdownMetricChart');
+    if (filterBreakdownMetricCtx && bodyTypeDistributionData.length) {
+        new Chart(filterBreakdownMetricCtx, {
             type: 'bar',
             data: {
-                labels: makeDistributionData.map(item => item.label),
+                labels: bodyTypeDistributionData.map(item => item.label),
                 datasets: [{
                     label: 'Listings',
-                    data: makeDistributionData.map(item => item.value),
+                    data: bodyTypeDistributionData.map(item => item.value),
                     backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1', '#20c997']
                 }]
             },
-            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                scales: {
+                    x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -281,7 +372,18 @@
             options: {
                 indexAxis: 'y',
                 responsive: true,
-                scales: { x: { beginAtZero: true } }
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
+                    }
+                }
             }
         });
     }
@@ -302,11 +404,19 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
+                    x: { ticks: { maxTicksLimit: 6, autoSkip: true } },
                     y: {
                         beginAtZero: true,
-                        ticks: { font: { size: 10 } }
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 5,
+                            callback: function(value) {
+                                return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value;
+                            }
+                        }
                     }
                 }
             }
