@@ -2190,7 +2190,7 @@ def ai_chat(request):
         message = data.get("message", "")
         # allow caller to specify desired max tokens (optional)
         try:
-            max_output_tokens = int(data.get('max_output_tokens', 600))
+            max_output_tokens = int(data.get('max_output_tokens', 1000))
         except Exception:
             max_output_tokens = 600
         current_date = timezone.localdate()
