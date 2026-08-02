@@ -67,10 +67,17 @@ def format_car_for_ai(car):
     Returns:
         dict with car details
     """
+    features_text = car.features or ''
+    features_list = [feature.strip() for feature in features_text.split(',') if feature.strip()]
+
     return {
         'id': car.id,
         'inventory_code': car.inventory_code or 'Not Assigned',
         'title': f"{car.inventory_code or 'GM0000'} - {car.year} {car.make} {car.model}{' ' + car.variant if car.variant else ''}",
+        'make': car.make,
+        'model': car.model,
+        'variant': car.variant or 'Not specified',
+        'year': car.year,
         'price': float(car.price),
         'mileage': car.mileage,
         'fuel_type': car.get_fuel_type_display(),
@@ -78,8 +85,16 @@ def format_car_for_ai(car):
         'condition': car.get_condition_display(),
         'body_type': car.get_body_type_display() if car.body_type else 'Not specified',
         'color': car.color,
+        'exterior_color': car.exterior_color or car.color or 'Not specified',
+        'interior_color': car.interior_color or 'Not specified',
+        'seat_material': car.seat_material or 'Not specified',
+        'interior_trim': car.interior_trim or 'Not specified',
         'seats': car.seats,
+        'doors': car.doors or 'Not specified',
+        'number_of_keys': car.number_of_keys or 0,
         'engine_size': car.get_engine_size_display() if car.engine_size else 'Not specified',
+        'features': features_list,
+        'feature_summary': ', '.join(features_list) if features_list else 'Not Listed',
         'dealership': car.dealership.company_name,
         'dealership_rating': car.dealership.rating,
         'dealership_verified': car.dealership.is_verified,
@@ -183,10 +198,14 @@ def get_car_recommendations_context(user_message):
     for i, car in enumerate(car_list, 1):
         context += f"{i}. {car['title']}\n"
         context += f"   Inventory Code: {car['inventory_code']}\n"
+        context += f"   Year: {car['year']}\n"
+        context += f"   Make: {car['make']} | Model: {car['model']} | Variant: {car['variant']}\n"
         context += f"   Price: KES {int(car['price']):,}\n"
         context += f"   Mileage: {car['mileage']:,} km\n"
-        context += f"   Fuel: {car['fuel_type']} | Transmission: {car['transmission']}\n"
-        context += f"   Condition: {car['condition']} | Body: {car['body_type']}\n"
+        context += f"   Fuel: {car['fuel_type']} | Transmission: {car['transmission']} | Body: {car['body_type']}\n"
+        context += f"   Condition: {car['condition']} | Exterior Colour: {car['exterior_color']} | Interior Colour: {car['interior_color']}\n"
+        context += f"   Seat Material: {car['seat_material']} | Interior Trim: {car['interior_trim']} | Seats: {car['seats']} | Doors: {car['doors']} | Keys: {car['number_of_keys']}\n"
+        context += f"   Features: {car['feature_summary']}\n"
         context += f"   Dealership: {car['dealership']} (Rating: {car['dealership_rating']}/5"
         if car['dealership_verified']:
             context += ", ✓ Verified"

@@ -19,7 +19,7 @@ def get_openai_client():
     return OpenAI(api_key=api_key)
 
 
-def ask_chatgpt(message, history=None, max_output_tokens=75, include_car_data=True):
+def ask_chatgpt(message, history=None, max_output_tokens=400, include_car_data=True):
     """
     Send a chat request to OpenAI.
 
@@ -366,6 +366,8 @@ Required order:
 9. GM Smart Match Verdict
 
 Never end the response in the middle of a sentence.
+Never cut off the response after the table.
+Complete the full comparison in one full answer.
 When generating comparisons, output valid HTML only.
 
 Use this structure:
@@ -380,19 +382,26 @@ Use this structure:
     </tr>
   </thead>
   <tbody>
+    <tr><td>Inventory Code</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Year of Manufacture</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Price</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Body Type</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Transmission</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Fuel Type</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Mileage</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Seats</td><td>...</td><td>...</td><td>...</td></tr>
-    <tr><td>Drive Type</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Doors</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Engine Size / Power</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Fuel Economy</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Trim</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Exterior Colour</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Interior Colour</td><td>...</td><td>...</td><td>...</td></tr>
-    <tr><td>Seat Colour</td><td>...</td><td>...</td><td>...</td></tr>
-    <tr><td>Seats / Doors</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Seat Material</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Interior Trim</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Number of Keys</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Sunroof</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Power Steering</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Memory Seats</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Safety / Tech Features</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Comfort / Cabin</td><td>...</td><td>...</td><td>...</td></tr>
     <tr><td>Running Cost / Economy</td><td>...</td><td>...</td><td>...</td></tr>
@@ -408,9 +417,10 @@ Do NOT output plain text tables.
 For a comparison of two or more cars, the HTML table must come first.
 
 The table must use the most relevant filters and car features the user cares about, especially:
-Make, Model, Variant, Trim, Year, Price, Budget, Mileage, Fuel Type, Transmission, Body Type, Drive Type, Engine Size, Horsepower, Torque, Exterior Colour, Interior Colour, Seat Colour, Doors, Seats, Condition, Location, County, Dealership, Warranty, Service History, Accident History, Imported, Locally Used, Brand New, Availability, Features, Safety Features, Technology Features, Comfort Features, Interior Trim, Upholstery, Audio System, Sunroof, Parking Sensors, Airbags, Cruise Control, Ground Clearance, Battery Type, Range, Charging, Keyless Entry, Number of Keys, Value Source, Fuel Economy, Body Condition, Number of Owners, Registration Status, Insurance Status.
+Inventory Code, Make, Model, Variant, Trim, Year of Manufacture, Price, Budget, Mileage, Fuel Type, Transmission, Body Type, Drive Type, Engine Size, Horsepower, Torque, Fuel Economy, Exterior Colour, Interior Colour, Seat Material, Interior Trim, Seat Colour, Doors, Seats, Condition, Location, County, Dealership, Warranty, Service History, Accident History, Imported, Locally Used, Brand New, Availability, Features, Safety Features, Technology Features, Comfort Features, Upholstery, Audio System, Sunroof, Parking Sensors, Airbags, Cruise Control, Ground Clearance, Battery Type, Range, Charging, Keyless Entry, Number of Keys, Value Source, Body Condition, Number of Owners, Registration Status, Insurance Status, Power Steering, Memory Seats.
 
 When a feature is not listed in the inventory, do not invent it. Instead write: Not Listed.
+When comparing, include every available spec field that is present in the inventory records, especially trim, seat material, interior trim, exterior/interior colours, number of keys, sunroof, power steering, memory seats, and year of manufacture.
 
 In the Advantage column, give a short practical edge such as:
 Better value for money, lower running cost, more cabin space, stronger safety equipment, easier daily driving, better fuel economy, more comfortable ride, stronger resale value, more premium feel, more convenient features, better family practicality, lower maintenance cost, more powerful performance.
