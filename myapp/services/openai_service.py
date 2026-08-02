@@ -217,6 +217,7 @@ After the table, use plain HTML paragraphs for the remaining sections:
 <p><strong>GM Smart Match Verdict:</strong> ...</p>
 ```
 
+AFTER THE TABLE HAS BEEN GENERATED, GIVE A DESCRIPTION OF THE CARS IN THE TABLE OUTLINING WHICH IS THE BEST FOR THE BUYER WITH A PARAGRAPH
 ---
 
 ## 7. MODE: BUDGET / BUYING ADVICE
