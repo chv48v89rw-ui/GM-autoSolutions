@@ -51,13 +51,13 @@
             {% for metric in available_metrics %}
                 <div class="col-xl-3 col-md-6">
                     <div class="metric-card">
-                        <a href="#metric-{{ metric.slug }}">
+                        <a href="{% url 'dealership_more_metrics_detail' metric.slug %}">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div class="kpi-icon"><i class="{{ metric.icon }}"></i></div>
                                 <span class="badge bg-primary-subtle text-primary">{{ metric.kind }}</span>
                             </div>
                             <div class="display-6 fw-bold text-dark">{{ metric.title }}</div>
-                            <div class="text-muted">Jump to this analytics section</div>
+                            <div class="text-muted">Open this analytics page</div>
                         </a>
                     </div>
                 </div>
@@ -65,80 +65,82 @@
         </div>
 
         <div class="row g-4 mt-2">
-            <div class="col-12" id="metric-traffic">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-line"></i> Listing Views Over Time</h5>
-                    <canvas id="trafficMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-make-distribution">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Listings by Make</h5>
-                    <canvas id="makeMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-vehicle-categories">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Vehicle Categories</h5>
-                    <canvas id="categoryMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-fuel-types">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Fuel Types</h5>
-                    <canvas id="fuelMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-most-viewed-vehicles">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Most Viewed Vehicles</h5>
-                    <canvas id="topVehicleMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-lead-funnel">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-filter"></i> Views → Enquiries → Test Drives → Sales</h5>
-                    <canvas id="leadFunnelChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-lead-growth">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-chart-area"></i> Lead Growth Over Time</h5>
-                    <canvas id="leadGrowthMetricChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-12" id="metric-top-vehicles">
-                <div class="chart-card">
-                    <h5 class="mb-3"><i class="fas fa-table"></i> Top Performing Vehicles</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Vehicle</th>
-                                    <th>Views</th>
-                                    <th>Share</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in top_vehicles %}
-                                    <tr>
-                                        <td>{{ item.car.title }}</td>
-                                        <td>{{ item.views|intcomma }}</td>
-                                        <td>{{ item.percentage|floatformat:1 }}%</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            {% if metric_type == 'traffic' %}
+                <div class="col-12" id="metric-traffic">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-line"></i> Listing Views Over Time</h5>
+                        <canvas id="trafficMetricChart"></canvas>
                     </div>
                 </div>
-            </div>
+            {% elif metric_type == 'make-distribution' %}
+                <div class="col-12" id="metric-make-distribution">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Listings by Make</h5>
+                        <canvas id="makeMetricChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'vehicle-categories' %}
+                <div class="col-12" id="metric-vehicle-categories">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Vehicle Categories</h5>
+                        <canvas id="categoryMetricChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'fuel-types' %}
+                <div class="col-12" id="metric-fuel-types">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Fuel Types</h5>
+                        <canvas id="fuelMetricChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'most-viewed-vehicles' %}
+                <div class="col-12" id="metric-most-viewed-vehicles">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Most Viewed Vehicles</h5>
+                        <canvas id="topVehicleMetricChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'lead-funnel' %}
+                <div class="col-12" id="metric-lead-funnel">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-filter"></i> Views → Enquiries → Test Drives → Sales</h5>
+                        <canvas id="leadFunnelChart"></canvas>
+                    </div>
+                </div>
+            {% elif metric_type == 'lead-growth' %}
+                <div class="col-12" id="metric-lead-growth">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-chart-area"></i> Lead Growth Over Time</h5>
+                        <canvas id="leadGrowthMetricChart"></canvas>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12" id="metric-top-vehicles">
+                    <div class="chart-card">
+                        <h5 class="mb-3"><i class="fas fa-table"></i> Top Performing Vehicles</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Views</th>
+                                        <th>Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in top_vehicles %}
+                                        <tr>
+                                            <td>{{ item.car.title }}</td>
+                                            <td>{{ item.views|intcomma }}</td>
+                                            <td>{{ item.percentage|floatformat:1 }}%</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -174,7 +176,12 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { font: { size: 10 } }
+                    }
+                }
             }
         });
     }
@@ -199,7 +206,12 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { font: { size: 10 } }
+                    }
+                }
             }
         });
     }
@@ -291,7 +303,12 @@
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { font: { size: 10 } }
+                    }
+                }
             }
         });
     }
