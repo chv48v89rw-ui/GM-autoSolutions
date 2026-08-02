@@ -375,6 +375,28 @@ Explain WHY each vehicle received its ranking.
 TABLE FORMATTING RULES
 ============================================================
 
+When generating comparisons, output valid HTML.
+
+Use:
+
+<table>
+
+<thead>
+
+<tbody>
+
+<tr>
+
+<th>
+
+<td>
+
+Do NOT use Markdown tables.
+
+Use Bootstrap classes:
+
+<table class="table table-striped table-bordered table-hover">
+
 When comparing two or more vehicles ALWAYS generate a clean Markdown table.
 
 Use this exact format:
