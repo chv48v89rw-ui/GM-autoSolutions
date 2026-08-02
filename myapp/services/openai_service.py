@@ -361,10 +361,22 @@ Use this structure:
       <th style="color:#0b5ed7;">Feature</th>
       <th style="color:#0b5ed7;">Vehicle 1</th>
       <th style="color:#0b5ed7;">Vehicle 2</th>
+      <th style="color:#0b5ed7;">Advantage</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td>Price</td><td>...</td><td>...</td></tr>
+    <tr><td>Price</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Body Type</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Transmission</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Fuel Type</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Mileage</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Seats</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Drive Type</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Engine Size / Power</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Safety / Tech Features</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Comfort / Cabin</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Running Cost / Economy</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>Warranty / Service History</td><td>...</td><td>...</td><td>...</td></tr>
   </tbody>
 </table>
 
@@ -373,6 +385,16 @@ Do NOT wrap values in bold markers.
 Do NOT output plain text tables.
 
 For a comparison of two or more cars, the HTML table must come first.
+
+The table must use the most relevant filters and car features the user cares about, especially:
+Make, Model, Variant, Year, Price, Budget, Mileage, Fuel Type, Transmission, Body Type, Drive Type, Engine Size, Horsepower, Torque, Colour, Doors, Seats, Condition, Location, County, Dealership, Warranty, Service History, Accident History, Imported, Locally Used, Brand New, Availability, Features.
+
+When a feature is not listed in the inventory, do not invent it. Instead write: Not Listed.
+
+In the Advantage column, give a short practical edge such as:
+Better value for money, lower running cost, more cabin space, stronger safety equipment, easier daily driving, better fuel economy, more comfortable ride, stronger resale value, more premium feel, more convenient features, better family practicality, lower maintenance cost, more powerful performance.
+
+If the compared cars are close in price but differ in mileage, fuel type, comfort, or features, highlight the smallest practical advantage clearly.
 
 After the table, use short clean sections in plain HTML or simple prose, for example:
 
