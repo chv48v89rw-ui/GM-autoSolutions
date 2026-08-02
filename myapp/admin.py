@@ -88,14 +88,14 @@ class DealershipAdmin(admin.ModelAdmin):
 
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
-    list_display = ('title', 'dealership', 'price', 'year', 'mileage', 'condition', 'is_approved', 'is_premium', 'is_top_pick', 'submitted_for_review', 'is_sold', 'created_at')
+    list_display = ('title', 'inventory_code', 'dealership', 'price', 'year', 'mileage', 'condition', 'is_approved', 'is_premium', 'is_top_pick', 'submitted_for_review', 'is_sold', 'created_at')
     list_filter = ('dealership', 'year', 'fuel_type', 'condition', 'transmission', 'is_approved', 'is_premium', 'is_top_pick', 'submitted_for_review', 'is_sold', 'created_at')
     list_editable = ('is_top_pick',)
-    search_fields = ('title', 'make', 'model')
-    actions = ('approve_cars', 'reject_cars', 'mark_premium', 'unmark_premium', 'mark_top_pick', 'unmark_top_pick', 'mark_submission_reviewed')
+    search_fields = ('title', 'make', 'model', 'inventory_code')
+    actions = ('approve_cars', 'reject_cars', 'mark_premium', 'unmark_premium', 'mark_top_pick', 'unmark_top_pick', 'mark_submission_reviewed', 'generate_inventory_codes')
     fieldsets = (
         ('Dealership', {'fields': ('dealership',)}),
-        ('Basic Info', {'fields': ('title', 'make', 'model', 'year')}),
+        ('Basic Info', {'fields': ('title', 'inventory_code', 'make', 'model', 'year')}),
         ('Pricing & Condition', {'fields': ('price', 'mileage', 'condition', 'is_sold', 'is_approved', 'is_premium', 'is_top_pick')}),
         ('Review Status', {'fields': ('submitted_for_review', 'submitted_at')}),
         ('Vehicle Details', {'fields': ('fuel_type', 'transmission', 'color', 'seats')}),
@@ -137,6 +137,34 @@ class CarAdmin(admin.ModelAdmin):
     def mark_submission_reviewed(self, request, queryset):
         updated = queryset.update(submitted_for_review=False)
         self.message_user(request, f"{updated} car submission(s) marked as reviewed.")
+
+    @admin.action(description='Generate inventory codes (GM0001, GM0002, etc.) for selected cars')
+    def generate_inventory_codes(self, request, queryset):
+        from .models import Car
+        # Get the highest existing inventory code
+        last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
+        
+        if last_car and last_car.inventory_code:
+            # Extract the number from the last inventory code (e.g., GM0001 -> 1)
+            try:
+                last_number = int(last_car.inventory_code.replace('GM', ''))
+                start_number = last_number + 1
+            except ValueError:
+                start_number = 1
+        else:
+            start_number = 1
+        
+        updated = 0
+        for car in queryset.filter(inventory_code__isnull=True) | queryset.filter(inventory_code=''):
+            car.inventory_code = f'GM{start_number:04d}'
+            car.save()
+            start_number += 1
+            updated += 1
+        
+        if updated == 0:
+            self.message_user(request, "No cars without inventory codes were selected.")
+        else:
+            self.message_user(request, f"{updated} inventory code(s) generated starting from GM{start_number - updated:04d}.")
 
 
 @admin.register(Review)
