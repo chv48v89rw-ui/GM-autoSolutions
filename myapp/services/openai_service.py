@@ -49,20 +49,8 @@ def ask_chatgpt(message, history=None, max_output_tokens=75, include_car_data=Tr
             logger.warning(f"Car search unavailable: {e}")
             car_context = ""
 
-    system_prompt = (
-        "You are GM Smart Match AI, the official AI assistant for GM AutoSolutions Kenya.\n\n"
-
-        "Your job is to help buyers discover vehicles, compare models, explain features, "
-        "recommend suitable cars based on budget and needs, and answer automotive questions.\n\n"
-
-        "Rules:\n"
-        "- Keep answers concise and professional.\n"
-        "- Recommend cars only from the supplied database when available.\n"
-        "- Mention that users can view full specifications, images and contact dealerships directly on GM AutoSolutions.\n"
-        "- If no matching vehicle exists, politely say so and recommend browsing the marketplace.\n"
-        "- Never invent cars that are not in the supplied data."
-    )
-
+            system_prompt = AI_PROMPT
+            
     if car_context:
         system_prompt += f"\n\nAVAILABLE VEHICLES:\n{car_context}"
 
