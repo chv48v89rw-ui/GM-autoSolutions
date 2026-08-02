@@ -2163,7 +2163,7 @@ def ai_chat(request):
         try:
             max_output_tokens = int(data.get('max_output_tokens', 600))
         except Exception:
-            max_output_tokens = 75
+            max_output_tokens = 600
         current_date = timezone.localdate()
 
         if request.user.is_authenticated:
