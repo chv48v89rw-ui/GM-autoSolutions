@@ -3,7 +3,7 @@ import random
 import json
 from decimal import Decimal
 import logging
-
+import traceback
 
 
 
@@ -2207,11 +2207,27 @@ def ai_chat(request):
 
         # temporary simple history (you can improve later with DB/session)
         history = request.session.get("chat_history", [])
-
+        
         try:
-            reply = ask_chatgpt(message, history, max_output_tokens=max_output_tokens, include_car_data=True)
-        except Exception:
-            return JsonResponse({"error": "AI service temporarily unavailable."}, status=503)
+            reply = ask_chatgpt(
+                message,
+                history,
+                max_output_tokens=max_output_tokens,
+                include_car_data=True,
+            )
+        except Exception as e:
+            # Log the real error for debugging
+            logger.exception("OpenAI API Error")
+            traceback.print_exc()
+
+            # Show a friendly message to users
+            return JsonResponse({
+                "error": (
+                    "🚧 Our AI Assistant is temporarily unavailable. "
+                    "We're working to restore the service. "
+                    "Please try again in a few moments."
+                )
+            }, status=503)
 
         usage.messages_used += 1
         usage.save()
