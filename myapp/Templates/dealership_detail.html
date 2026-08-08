@@ -242,7 +242,12 @@
                         </div>
 
                         <div class="card-body">
-                            <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                <h5 class="card-title mb-0">{{ car.year }} {{ car.make }} {{ car.model }}{% if car.variant %} {{ car.variant }}{% endif %}</h5>
+                                {% if car.inventory_code %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ car.inventory_code }}</span>
+                                {% endif %}
+                            </div>
                             <p class="card-text text-accent fw-bold fs-5">
                                 KES {{ car.price|floatformat:0|intcomma }}{% if car.is_price_negotiable %} <small class="badge bg-light-accent text-accent border-accent">Negotiable</small>{% endif %}
                             </p>

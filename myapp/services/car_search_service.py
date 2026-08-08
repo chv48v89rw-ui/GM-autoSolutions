@@ -93,6 +93,10 @@ def format_car_for_ai(car):
         'doors': car.doors or 'Not specified',
         'number_of_keys': car.number_of_keys or 0,
         'engine_size': car.get_engine_size_display() if car.engine_size else 'Not specified',
+        'previous_owners': car.get_previous_owners_display() if car.previous_owners else 'Not specified',
+        'fuel_economy_source': car.get_fuel_economy_source_display() if car.fuel_economy_source else 'Not specified',
+        'fuel_economy_combined': car.get_fuel_economy_combined_display() if car.fuel_economy_combined else 'Not specified',
+        'value_source': car.get_value_source_display() if car.value_source else 'Not specified',
         'features': features_list,
         'feature_summary': ', '.join(features_list) if features_list else 'Not Listed',
         'dealership': car.dealership.company_name,
@@ -205,6 +209,9 @@ def get_car_recommendations_context(user_message):
         context += f"   Fuel: {car['fuel_type']} | Transmission: {car['transmission']} | Body: {car['body_type']}\n"
         context += f"   Condition: {car['condition']} | Exterior Colour: {car['exterior_color']} | Interior Colour: {car['interior_color']}\n"
         context += f"   Seat Material: {car['seat_material']} | Interior Trim: {car['interior_trim']} | Seats: {car['seats']} | Doors: {car['doors']} | Keys: {car['number_of_keys']}\n"
+        context += f"   Previous Owners: {car['previous_owners']}\n"
+        context += f"   Fuel Economy Source: {car['fuel_economy_source']} | Fuel Economy: {car['fuel_economy_combined']}\n"
+        context += f"   Value Source: {car['value_source']}\n"
         context += f"   Features: {car['feature_summary']}\n"
         context += f"   Dealership: {car['dealership']} (Rating: {car['dealership_rating']}/5"
         if car['dealership_verified']:
