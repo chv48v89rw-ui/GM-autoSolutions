@@ -283,6 +283,7 @@ CAR_HIERARCHY = {
     ],
 
     'C-Class': [
+        'C200' 'C220d'
         'C300', 'C300e', 'C350', 'C350e',
         'C400', 'C36 AMG', 'C43 AMG',
         'C55 AMG', 'C63 AMG', 'C63 S AMG'
