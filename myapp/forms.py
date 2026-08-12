@@ -4,6 +4,30 @@ from django.utils import timezone
 from .models import (UserProfile, Dealership, Car, Review, DealershipReview, Enquiry, Report, 
                      SavedSearch, CarComparison, Notification, NotificationPreference)
 
+# CAR_HIERARCHY filtered for the Kenya market: KES 5,000,000+ only
+#
+# METHODOLOGY (please read):
+# Kenya's car market is dominated by used/foreign-used Japanese imports, so the
+# same "trim name" can sell anywhere from KES 1.5M to KES 15M+ depending on the
+# model year and condition. Since this data structure has no year field, each
+# trim/variant below was judged on how it typically trades in Kenya today:
+#   - Flagship, large-luxury, AMG/M/RS/GR/S-line/performance trims, large 3-row
+#     SUVs, big pickups/vans, and low-volume specialty imports -> kept (>5M).
+#   - Base/entry trims of mainstream models, older discontinued generations,
+#     compact cars, and budget-positioned Chinese/Korean economy brands were
+#     dropped as they generally trade under 5M in Kenya.
+# I did NOT invent new models/trims that aren't real production variants, and
+# I only added makes/models I'm confident are actually present in the Kenya
+# market (verified against Kenyan classifieds/import-broker sites). A few
+# brands (Suzuki, Daihatsu, Peugeot, Renault, Mini, most Chinese economy
+# brands) end up with zero entries because virtually everything they sell in
+# Kenya trades below 5M -- that's expected, not an error.
+#
+# This is a best-effort categorization, not a guarantee of any single unit's
+# price -- always confirm the specific year/condition before relying on this
+# for a real transaction. Happy to redo any one brand in more depth if you
+# want me to dig deeper on it specifically.
+
 CAR_HIERARCHY = {
    'Toyota': {
     'Alphard': ['240G', '240S', '250S', '350G', '350S', 'Executive Lounge', 'Hybrid'],
@@ -22,27 +46,6 @@ CAR_HIERARCHY = {
     'GR Yaris': ['RC', 'RZ', 'GRMN'],
     'GranAce': ['Premium', 'G'],
     'Granvia': ['Premium', 'VX'],
-    'Harrier': [
-        'S', 'G', 'Elegance',
-        'Premium', 'Progress',
-        'Z', 'Hybrid'
-    ],
-    'Hiace': [
-        'DX', 'GL', 'Super GL',
-        'Commuter', 'Grand Cabin',
-        'High Roof', 'Wide Body'
-    ],
-    'Hilux': [
-        'Single Cab', 'Extra Cab',
-        'Double Cab',
-        'SR', 'SR5',
-        'Invincible',
-        'Rogue',
-        'GR Sport',
-        '2WD', '4WD',
-        'Revo'
-    ],
-    'Highlander': ['LE', 'XLE', 'Limited', 'Platinum', 'Hybrid'],
     'Land Cruiser': [
         '40 Series', '55 Series',
         '60 Series', '70 Series',
@@ -60,17 +63,7 @@ CAR_HIERARCHY = {
         'Kakadu',
         'Altitude'
     ],
-    'Mark X': ['250G', '250S', '300G', '350RDS', 'GRMN'],
     'Mirai': ['XLE', 'Limited'],
-    'RAV4': [
-        'GX', 'GXL', 'Cruiser',
-        'Adventure',
-        'Edge',
-        'Limited',
-        'Hybrid',
-        'Prime',
-        '4WD'
-    ],
     'Sequoia': ['SR5', 'Limited', 'Platinum', 'Capstone', 'TRD Pro'],
     'Sienna': ['LE', 'XLE', 'Limited', 'Platinum', 'Hybrid'],
     'Tacoma': ['SR', 'SR5', 'TRD Sport', 'TRD Off-Road', 'Limited', 'TRD Pro'],
@@ -79,12 +72,8 @@ CAR_HIERARCHY = {
 },
 
     'Honda': {
-        'Accord': ['LX', 'EX', 'Touring', 'Hybrid'],
-        'CR-V': ['LX', 'EX', 'EX-L'],
-        'Odyssey': ['Absolute', 'Hybrid'],
         'Pilot': ['EX-L', 'Touring'],
         'Ridgeline': ['Sport', 'RTL'],
-        'ZR-V': ['Sport', 'e:HEV'],
         },
 
    'BMW': {
@@ -96,19 +85,11 @@ CAR_HIERARCHY = {
     ],
 
     '2 Series': [
-        '216d', '218d', '218i',
-        '220d', '220i',
-        '225d', '225e',
-        '228i', '230i',
         'M235i', 'M240i'
     ],
 
     '3 Series': [
-        '316d', '316i',
-        '318d', '318i',
-        '320d', '320i',
-        '323i', '325d', '325i',
-        '328i', '330d', '330e', '330i',
+        '330d', '330e', '330i',
         '335d', '335i',
         '340d', '340i',
         'M340d', 'M340i',
@@ -298,22 +279,11 @@ CAR_HIERARCHY = {
 },
   'Mercedes-Benz': {
     'A-Class': [
-        'A140', 'A150', 'A160', 'A170', 'A180', 'A190', 'A200',
-        'A210 Evolution', 'A220', 'A250', 'A250e',
         'A35 AMG', 'A45 AMG', 'A45 S AMG'
     ],
 
-    'B-Class': [
-        'B150', 'B160', 'B170', 'B180', 'B200',
-        'B200 CDI', 'B220', 'B250', 'B250e'
-    ],
-
     'C-Class': [
-        'C160', 'C180', 'C180 Kompressor', 'C200',
-        'C200 Kompressor', 'C220d', 'C230',
-        'C230 Kompressor', 'C240', 'C250',
-        'C250 CGI', 'C250d', 'C280', 'C300',
-        'C300e', 'C320', 'C350', 'C350e',
+        'C300', 'C300e', 'C350', 'C350e',
         'C400', 'C36 AMG', 'C43 AMG',
         'C55 AMG', 'C63 AMG', 'C63 S AMG'
     ],
@@ -362,15 +332,10 @@ CAR_HIERARCHY = {
     ],
 
     'GLA': [
-        'GLA180', 'GLA180d', 'GLA200',
-        'GLA200d', 'GLA220', 'GLA220d',
-        'GLA250', 'GLA250e',
         'GLA35 AMG', 'GLA45 AMG'
     ],
 
     'GLB': [
-        'GLB180', 'GLB200', 'GLB200d',
-        'GLB220d', 'GLB250', 'GLB250e',
         'GLB35 AMG'
     ],
 
@@ -1360,46 +1325,6 @@ CAR_HIERARCHY = {
 },
 
    'Mazda': {
-    'Mazda6': [
-        'Sport',
-        'Touring',
-        'Grand Touring',
-        'Signature',
-        '20S',
-        '25S',
-        '2.2D',
-        'Diesel',
-        'Turbo',
-        'Skyactiv-G'
-    ],
-
-    'CX-5': [
-        'Sport',
-        'Touring',
-        'Carbon Edition',
-        'Grand Touring',
-        'Grand Touring Reserve',
-        'Signature',
-        '20S',
-        '25S',
-        '25T',
-        '2.2D',
-        'Turbo',
-        'Skyactiv-G',
-        'Skyactiv-D'
-    ],
-
-    'CX-50': [
-        '2.5 S',
-        'Preferred',
-        'Premium',
-        'Premium Plus',
-        'Turbo',
-        'Turbo Meridian',
-        'Turbo Premium',
-        'Turbo Premium Plus'
-    ],
-
     'CX-7': [
         'Classic',
         'Luxury',
@@ -1448,25 +1373,6 @@ CAR_HIERARCHY = {
         'Turbo',
         'Turbo S',
         'PHEV'
-    ],
-
-    'MX-5': [
-        'Soft Top',
-        'RF',
-        'Sport',
-        'Club',
-        'Grand Touring'
-    ],
-
-    'RX-7': [
-        'Type R',
-        'Spirit R'
-    ],
-
-    'RX-8': [
-        'Type S',
-        'Type E',
-        'Spirit R'
     ],
 
     'BT-50': [
@@ -2831,8 +2737,21 @@ CAR_HIERARCHY = {
         'Aventador': ['S', 'SVJ'],
         'Revuelto': ['Hybrid V12'],
     },
-}
 
+    # --- Additions: confirmed present (though rare) in Kenya's luxury market,
+    # not in the original list, always well above KES 5M. ---
+    'Bentley': {
+        'Bentayga': ['V8', 'S', 'Azure', 'Speed'],
+        'Continental GT': ['V8', 'S', 'Speed', 'GTC'],
+        'Flying Spur': ['V8', 'S', 'W12', 'Speed'],
+    },
+
+    'Rolls-Royce': {
+        'Cullinan': ['Standard', 'Black Badge'],
+        'Ghost': ['Standard', 'Extended', 'Black Badge'],
+        'Phantom': ['Standard', 'Extended'],
+    },
+}
 def get_combined_car_hierarchy():
     hierarchy = {
         make: {model: variants.copy() for model, variants in models.items()}
