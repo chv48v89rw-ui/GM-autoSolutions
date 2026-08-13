@@ -1091,7 +1091,6 @@ def edit_car(request, car_id):
                 
                 # Generate inventory code if not provided
                 if not updated_car.inventory_code:
-                    from myapp.models import Car
                     last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
                     if last_car and last_car.inventory_code:
                         try:
