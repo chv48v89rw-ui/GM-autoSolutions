@@ -29,14 +29,14 @@
 </style>
 {% endblock %}
 
-{% block title %}Home - GM autoSolutions{% endblock %}
+{% block title %}Premium Luxury Cars in Kenya | Executive High-End Vehicles - GM autoSolutions{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="fade-in-up">Find Verified Cars from Trusted Dealers in <span class="accent-text">Kenya</span></h1>
-        <p class="fade-in-up">Browse thousands of vehicles from trusted dealerships across the country</p>
+        <h1 class="fade-in-up">Find Premium Luxury Cars from Trusted Dealers in <span class="accent-text">Kenya</span></h1>
+        <p class="fade-in-up">Browse thousands of executive, high-end vehicles from verified premium dealerships across the country</p>
         
 
         
@@ -44,7 +44,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-lg-10">
                 <form method="get" action="/cars/" class="card p-4" style="background-color: rgba(255,255,255,0.95);">
-                    <h5 class="text-dark mb-4">Search for Your Perfect Car</h5>
+                    <h5 class="text-dark mb-4">Search for Your Perfect Premium Car</h5>
                     <div class="row g-3 align-items-end">
                         <div class="col-6 col-sm-6 col-md-2">
                             {{ form.make }}
@@ -165,8 +165,8 @@
         <div class="container">
             <div class="row mb-5">
                 <div class="col-12">
-                <h2 class="section-title">⭐ Top Picks for You</h2>
-                <p class="text-muted">Handpicked cars selected by our team - don't miss these great deals!</p>
+                <h2 class="section-title">⭐ Top Premium Picks for You</h2>
+                <p class="text-muted">Handpicked luxury and executive cars selected by our team - don't miss these high-spec deals!</p>
                 </div>
             </div>
 
@@ -175,7 +175,7 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="card h-100 shadow-sm border-warning">
                             <a href="{% url 'car_detail' car.id %}" class="home-card-link">
-                                <div class="home-card-image">
+                                <div class="home-card-image"> 
                                     {% if car.main_image %}
                                         <img src="{{ car.main_image.url }}" class="card-img-top" alt="{{ car.title }}" style="width: 100%; height: 100%; object-fit: cover;">
                                     {% else %}
@@ -232,8 +232,8 @@
         <div class="container">
             <div class="row mb-5">
                 <div class="col-12">
-                <h2 class="section-title">🚘 Best Cars to Buy Currently</h2>
-                <p class="text-muted">Top premium cars available for purchase right now.</p>
+                <h2 class="section-title">🚘 Best High-End Cars to Buy Currently</h2>
+                <p class="text-muted">Top premium and luxury cars available for purchase right now.</p>
                 </div>
             </div>
 
@@ -304,8 +304,8 @@
         <div class="container">
             <div class="row mb-5">
                 <div class="col-12">
-                    <h2 class="section-title">🏪 Best Dealerships For You</h2>
-                    <p class="text-muted">Premium-approved dealerships recommended for buyers.</p>
+                    <h2 class="section-title">🏪 Best Premium Dealerships For You</h2>
+                    <p class="text-muted">Verified premium and luxury dealerships recommended for executive buyers.</p>
                 </div>
             </div>
 
@@ -383,8 +383,8 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h2 class="section-title">Browse the Latest Cars</h2>
-                <p>Search the full marketplace and explore every available listing with the filters you selected from the homepage.</p>
+                <h2 class="section-title">Browse the Latest Premium Cars</h2>
+                <p>Search the full luxury marketplace and explore every high-end available listing with the filters you selected from the homepage.</p>
             </div>
             <div class="col-lg-4 text-lg-end">
                 <a href="/cars/" class="btn btn-primary btn-lg">Browse All Cars →</a>
@@ -398,7 +398,7 @@
     <div class="container">
         <div class="row mb-5">
             <div class="col-12">
-                <h2 class="section-title">Why Choose GM autoSolutions?</h2>
+                <h2 class="section-title">Why Choose GM autoSolutions for Premium Cars?</h2>
             </div>
         </div>
 
@@ -406,8 +406,8 @@
             <div class="col-md-3 col-sm-6">
                 <div class="feature-card">
                     <div class="feature-icon">🔒</div>
-                    <h5>Secure Transactions</h5>
-                    <p>Protected buyer and dealership communication and verified dealerships</p>
+                    <h5>Secure Premium Transactions</h5>
+                    <p>Protected buyer and dealership communication for luxury vehicles and verified premium dealerships</p>
                 </div>
             </div>
 
@@ -424,8 +424,8 @@
             <div class="col-md-3 col-sm-6">
                 <div class="feature-card">
                     <div class="feature-icon">⭐</div>
-                    <h5>Verified Dealerships</h5>
-                    <p>All dealerships are verified and approved by our team</p>
+                    <h5>Verified Premium Dealerships</h5>
+                    <p>All luxury dealerships are verified and approved by our team for executive car buyers</p>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
@@ -451,8 +451,8 @@
 <!-- CTA Section -->
 <section class="py-5" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%); color: white;">
     <div class="container text-center">
-        <h2 class="mb-4">Are You a Car Dealership?</h2>
-        <p class="fs-5 mb-4">Join GM autoSolutions and reach thousands of potential buyers. List your inventory in minutes!</p>
+        <h2 class="mb-4">Are You a Premium Car Dealership?</h2>
+        <p class="fs-5 mb-4">Join GM autoSolutions and reach thousands of executive buyers. List your luxury inventory in minutes!</p>
         <a href="/dealership-register/" class="btn btn-primary btn-lg">
             Register Your Dealership Today
         </a>
