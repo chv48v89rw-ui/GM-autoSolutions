@@ -33,6 +33,7 @@ urlpatterns = [
     path('car/<int:car_id>/edit/', views.edit_car, name='edit_car'),
     path('car/<int:car_id>/delete/', views.delete_car, name='delete_car'),
     path('car/<int:car_id>/mark-sold/', views.mark_car_sold, name='mark_car_sold'),
+    path('car/<int:car_id>/delete-image/', views.delete_car_image, name='delete_car_image'),
     
     # Favorites
     path('car/<int:car_id>/favorite/', views.add_to_favorites, name='add_to_favorites'),

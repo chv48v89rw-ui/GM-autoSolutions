@@ -1108,8 +1108,47 @@ def edit_car(request, car_id):
     else:
         form = CarForm(instance=car)
     
-    context = {'form': form, 'car': car}
+    # Get all related CarImage objects
+    car_images = car.images.all()
+    
+    context = {'form': form, 'car': car, 'car_images': car_images}
     return render(request, 'edit_car.html', context)
+
+
+@login_required(login_url='login')
+def delete_car_image(request, car_id):
+    """Delete car image (dealership only)"""
+    car = get_object_or_404(Car, id=car_id)
+    
+    # Check if user owns this car
+    if car.dealership.user != request.user:
+        messages.error(request, 'You cannot edit this car.')
+        return redirect('dealership_dashboard')
+    
+    if request.method == 'POST':
+        image_type = request.POST.get('image_type')
+        image_id = request.POST.get('image_id')
+        
+        if image_type == 'car_image' and image_id:
+            # Delete from CarImage
+            try:
+                car_image = CarImage.objects.get(id=image_id, car=car)
+                car_image.delete()
+                messages.success(request, 'Image deleted successfully!')
+            except CarImage.DoesNotExist:
+                messages.error(request, 'Image not found.')
+        elif image_type in ['main_image', 'image2', 'image3', 'image4']:
+            # Delete individual car image fields
+            setattr(car, image_type, None)
+            car.save()
+            messages.success(request, 'Image deleted successfully!')
+        else:
+            messages.error(request, 'Invalid image type.')
+        
+        return redirect('edit_car', car_id=car.id)
+    
+    messages.error(request, 'Invalid request.')
+    return redirect('edit_car', car_id=car.id)
 
 
 @login_required(login_url='login')

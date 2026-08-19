@@ -2,6 +2,22 @@
 
 {% block title %}Edit Car - GM autoSolutions{% endblock %}
 
+{% block extra_css %}
+<style>
+    .delete-image-form {
+        display: inline;
+    }
+    .delete-image-form button {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .img-thumbnail {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -147,48 +163,114 @@
                             {{ form.features }}
                         </div>
 
-                        <h5 class="mb-4 mt-5 text-accent">Images</h5>
+                        <h5 class="mb-4 mt-5 text-accent">Current Images</h5>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <!-- Main Image -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Main Image</label>
                                 {% if car.main_image %}
-                                    <div class="mb-2">
-                                        <img src="{{ car.main_image.url }}" style="max-width: 200px; height: auto;">
+                                    <div class="mb-2 position-relative d-inline-block">
+                                        <img src="{{ car.main_image.url }}" style="max-width: 200px; height: auto;" class="img-thumbnail">
+                                        <form method="post" action="{% url 'delete_car_image' car.id %}" class="delete-image-form mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="image_type" value="main_image">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
+                                {% else %}
+                                    <p class="text-muted">No main image uploaded</p>
                                 {% endif %}
                                 {{ form.main_image }}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Image 2</label>
                                 {% if car.image2 %}
-                                    <div class="mb-2">
-                                        <img src="{{ car.image2.url }}" style="max-width: 200px; height: auto;">
+                                    <div class="mb-2 position-relative d-inline-block">
+                                        <img src="{{ car.image2.url }}" style="max-width: 200px; height: auto;" class="img-thumbnail">
+                                        <form method="post" action="{% url 'delete_car_image' car.id %}" class="delete-image-form mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="image_type" value="image2">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
+                                {% else %}
+                                    <p class="text-muted">No image uploaded</p>
                                 {% endif %}
                                 {{ form.image2 }}
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Image 3</label>
                                 {% if car.image3 %}
-                                    <div class="mb-2">
-                                        <img src="{{ car.image3.url }}" style="max-width: 200px; height: auto;">
+                                    <div class="mb-2 position-relative d-inline-block">
+                                        <img src="{{ car.image3.url }}" style="max-width: 200px; height: auto;" class="img-thumbnail">
+                                        <form method="post" action="{% url 'delete_car_image' car.id %}" class="delete-image-form mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="image_type" value="image3">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
+                                {% else %}
+                                    <p class="text-muted">No image uploaded</p>
                                 {% endif %}
                                 {{ form.image3 }}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Image 4</label>
                                 {% if car.image4 %}
-                                    <div class="mb-2">
-                                        <img src="{{ car.image4.url }}" style="max-width: 200px; height: auto;">
+                                    <div class="mb-2 position-relative d-inline-block">
+                                        <img src="{{ car.image4.url }}" style="max-width: 200px; height: auto;" class="img-thumbnail">
+                                        <form method="post" action="{% url 'delete_car_image' car.id %}" class="delete-image-form mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="image_type" value="image4">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
+                                {% else %}
+                                    <p class="text-muted">No image uploaded</p>
                                 {% endif %}
                                 {{ form.image4 }}
                             </div>
+                        </div>
+
+                        <!-- Additional Images from CarImage model -->
+                        {% if car_images %}
+                            <h5 class="mb-4 mt-5 text-accent">Additional Images</h5>
+                            <div class="row">
+                                {% for car_image in car_images %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="position-relative d-inline-block">
+                                            <img src="{{ car_image.image.url }}" style="max-width: 150px; height: auto;" class="img-thumbnail">
+                                            <form method="post" action="{% url 'delete_car_image' car.id %}" class="delete-image-form mt-2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="image_type" value="car_image">
+                                                <input type="hidden" name="image_id" value="{{ car_image.id }}">
+                                                <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h5 class="mb-4 mt-5 text-accent">Add New Images</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Upload Additional Images (up to 15 total)</label>
+                            <input type="file" name="images" multiple accept="image/*" class="form-control">
+                            <small class="text-muted">You can select multiple images to upload at once.</small>
                         </div>
 
                         <div class="row g-2 mt-5">
