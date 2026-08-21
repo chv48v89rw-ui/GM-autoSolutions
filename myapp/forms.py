@@ -4014,6 +4014,31 @@ class CarSearchForm(forms.Form):
             self.fields['interior_trim'].choices = self.get_interior_trim_choices()
         except Exception:
             pass  # Method handles its own fallback
+        
+        try:
+            self.fields['number_of_keys'].choices = self.get_number_of_keys_choices()
+        except Exception:
+            pass  # Method handles its own fallback
+        
+        try:
+            self.fields['previous_owners'].choices = self.get_previous_owners_choices()
+        except Exception:
+            pass  # Method handles its own fallback
+        
+        try:
+            self.fields['fuel_economy_source'].choices = self.get_fuel_economy_source_choices()
+        except Exception:
+            pass  # Method handles its own fallback
+        
+        try:
+            self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices()
+        except Exception:
+            pass  # Method handles its own fallback
+        
+        try:
+            self.fields['value_source'].choices = self.get_value_source_choices()
+        except Exception:
+            pass  # Method handles its own fallback
  
     current_year = timezone.now().year
  
@@ -4671,6 +4696,93 @@ class CarSearchForm(forms.Form):
             INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
             return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
 
+    @staticmethod
+    def get_number_of_keys_choices():
+        try:
+            from .models import Car
+            keys_choices = [
+                ('1', '1 Key'),
+                ('2', '2 Keys'),
+                ('3', '3 Keys'),
+                ('4', '4+ Keys'),
+            ]
+            keys_counts = {}
+            for keys, label in keys_choices:
+                count = Car.objects.filter(number_of_keys=int(keys), is_approved=True, is_sold=False).count()
+                if count > 0:
+                    keys_counts[keys] = (label, count)
+            
+            choices = [(keys, f"{label} ({count})") for keys, (label, count) in keys_counts.items()]
+            return [('', '-- All Keys --')] + choices
+        except Exception:
+            return [('', '-- All Keys --')] + [
+                ('1', '1 Key'),
+                ('2', '2 Keys'),
+                ('3', '3 Keys'),
+                ('4', '4+ Keys'),
+            ]
+
+    @staticmethod
+    def get_previous_owners_choices():
+        try:
+            from .models import Car
+            owners_counts = {}
+            for owners, label in Car.OWNERS_CHOICES:
+                count = Car.objects.filter(previous_owners=owners, is_approved=True, is_sold=False).count()
+                if count > 0:
+                    owners_counts[owners] = (label, count)
+            
+            choices = [(owners, f"{label} ({count})") for owners, (label, count) in owners_counts.items()]
+            return [('', '-- All Owners --')] + choices
+        except Exception:
+            return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
+
+    @staticmethod
+    def get_fuel_economy_source_choices():
+        try:
+            from .models import Car
+            fuel_economy_source_counts = {}
+            for source, label in Car.FUEL_ECONOMY_SOURCE_CHOICES:
+                count = Car.objects.filter(fuel_economy_source=source, is_approved=True, is_sold=False).count()
+                if count > 0:
+                    fuel_economy_source_counts[source] = (label, count)
+            
+            choices = [(source, f"{label} ({count})") for source, (label, count) in fuel_economy_source_counts.items()]
+            return [('', '-- All Fuel Economy Sources --')] + choices
+        except Exception:
+            return [('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
+
+    @staticmethod
+    def get_fuel_economy_combined_choices():
+        try:
+            from .models import Car
+            fuel_economy_counts = {}
+            for economy, label in Car.FUEL_ECONOMY_CHOICES:
+                if economy:  # Skip empty value
+                    count = Car.objects.filter(fuel_economy_combined=economy, is_approved=True, is_sold=False).count()
+                    if count > 0:
+                        fuel_economy_counts[economy] = (label, count)
+            
+            choices = [(economy, f"{label} ({count})") for economy, (label, count) in fuel_economy_counts.items()]
+            return [('', '-- All Fuel Economy --')] + choices
+        except Exception:
+            return [('', '-- All Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
+
+    @staticmethod
+    def get_value_source_choices():
+        try:
+            from .models import Car
+            value_source_counts = {}
+            for source, label in Car.VALUE_SOURCE_CHOICES:
+                count = Car.objects.filter(value_source=source, is_approved=True, is_sold=False).count()
+                if count > 0:
+                    value_source_counts[source] = (label, count)
+            
+            choices = [(source, f"{label} ({count})") for source, (label, count) in value_source_counts.items()]
+            return [('', '-- All Value Sources --')] + choices
+        except Exception:
+            return [('', '-- All Value Sources --')] + list(Car.VALUE_SOURCE_CHOICES)
+
     body_type = forms.ChoiceField(
         required=False,
         choices=[],
@@ -4679,7 +4791,7 @@ class CarSearchForm(forms.Form):
  
     previous_owners = forms.ChoiceField(
         required=False,
-        choices=[('', '-- All Owners --')] + list(Car.OWNERS_CHOICES),
+        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
@@ -4856,36 +4968,40 @@ class CarSearchForm(forms.Form):
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
- 
-    color = forms.CharField(required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Color (e.g., Red, Black, White)'
-    }))
- 
-    features = forms.CharField(required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Features (e.g., ABS, AC, Power Steering)'
-    }))
-
-    NUMBER_OF_KEYS_CHOICES = [
-        ('', '-- All Keys --'),
-        ('1', '1 Key'),
-        ('2', '2 Keys'),
-        ('3', '3 Keys'),
-        ('4', '4+ Keys'),
-    ]
 
     number_of_keys = forms.ChoiceField(
         required=False,
-        choices=NUMBER_OF_KEYS_CHOICES,
+        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     fuel_economy_source = forms.ChoiceField(
         required=False,
-        choices=[('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES),
+        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    fuel_economy_combined = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    value_source = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    color = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Color (e.g., Red, Black, White)'
+    }))
+
+    features = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Features (e.g., ABS, AC, Power Steering)'
+    }))
 
     FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + [
         (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
