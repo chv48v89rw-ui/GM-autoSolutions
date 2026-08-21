@@ -181,142 +181,184 @@
                 </div>
                 <div class="card-body">
                     <form method="get" id="filterFormDesktop">
-                        <div class="mb-3">
-                            <label class="form-label">Make</label>
-                            {{ form.make }}
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" name="make" id="hidden_make" value="{{ request.GET.make|default:'' }}">
+                        <input type="hidden" name="model" id="hidden_model" value="{{ request.GET.model|default:'' }}">
+                        <input type="hidden" name="variant" id="hidden_variant" value="{{ request.GET.variant|default:'' }}">
+                        <input type="hidden" name="fuel_type" id="hidden_fuel_type" value="{{ request.GET.fuel_type|default:'' }}">
+                        <input type="hidden" name="transmission" id="hidden_transmission" value="{{ request.GET.transmission|default:'' }}">
+                        <input type="hidden" name="condition" id="hidden_condition" value="{{ request.GET.condition|default:'' }}">
+                        <input type="hidden" name="body_type" id="hidden_body_type" value="{{ request.GET.body_type|default:'' }}">
+                        <input type="hidden" name="exterior_color" id="hidden_exterior_color" value="{{ request.GET.exterior_color|default:'' }}">
+                        <input type="hidden" name="interior_color" id="hidden_interior_color" value="{{ request.GET.interior_color|default:'' }}">
+                        
+                        <!-- Make Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#makeFilter">
+                                Make <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="makeFilter">
+                                <div class="mt-2 filter-options" data-field="make">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Model</label>
-                            {{ form.model }}
+                        <!-- Model Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#modelFilter">
+                                Model <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="modelFilter">
+                                <div class="mt-2 filter-options" data-field="model">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Variant</label>
-                            {{ form.variant }}
+                        <!-- Variant Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#variantFilter">
+                                Variant <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="variantFilter">
+                                <div class="mt-2 filter-options" data-field="variant">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Year From</label>
-                            {{ form.year_from }}
+                        <!-- Price Range Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#priceFilter">
+                                Price Range <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="priceFilter">
+                                <div class="mt-2">
+                                    <div class="mb-2">
+                                        <label class="form-label small">From (KES)</label>
+                                        {{ form.price_from }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">To (KES)</label>
+                                        {{ form.price_to }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Year To</label>
-                            {{ form.year_to }}
+                        <!-- Year Range Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#yearFilter">
+                                Year Range <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="yearFilter">
+                                <div class="mt-2">
+                                    <div class="mb-2">
+                                        <label class="form-label small">From</label>
+                                        {{ form.year_from }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">To</label>
+                                        {{ form.year_to }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Price From (KES)</label>
-                            {{ form.price_from }}
+                        <!-- Fuel Type Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#fuelTypeFilter">
+                                Fuel Type <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="fuelTypeFilter">
+                                <div class="mt-2 filter-options" data-field="fuel_type">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Price To (KES)</label>
-                            {{ form.price_to }}
+                        <!-- Transmission Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#transmissionFilter">
+                                Transmission <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="transmissionFilter">
+                                <div class="mt-2 filter-options" data-field="transmission">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Mileage From (km)</label>
-                            {{ form.mileage_from }}
+                        <!-- Condition Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#conditionFilter">
+                                Condition <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="conditionFilter">
+                                <div class="mt-2 filter-options" data-field="condition">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Mileage To (km)</label>
-                            {{ form.mileage_to }}
+                        <!-- Body Type Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#bodyTypeFilter">
+                                Body Type <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="bodyTypeFilter">
+                                <div class="mt-2 filter-options" data-field="body_type">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Fuel Type</label>
-                            {{ form.fuel_type }}
+                        <!-- Exterior Color Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#exteriorColorFilter">
+                                Exterior Color <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="exteriorColorFilter">
+                                <div class="mt-2 filter-options" data-field="exterior_color">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Transmission</label>
-                            {{ form.transmission }}
+                        <!-- Interior Color Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#interiorColorFilter">
+                                Interior Color <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="interiorColorFilter">
+                                <div class="mt-2 filter-options" data-field="interior_color">
+                                    <!-- Options will be loaded dynamically -->
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Condition</label>
-                            {{ form.condition }}
+                        <!-- Mileage Range Filter -->
+                        <div class="mb-3 filter-section">
+                            <button type="button" class="btn btn-link text-decoration-none w-100 text-start fw-bold" data-bs-toggle="collapse" data-bs-target="#mileageFilter">
+                                Mileage Range <span class="float-end">▼</span>
+                            </button>
+                            <div class="collapse show" id="mileageFilter">
+                                <div class="mt-2">
+                                    <div class="mb-2">
+                                        <label class="form-label small">From (km)</label>
+                                        {{ form.mileage_from }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">To (km)</label>
+                                        {{ form.mileage_to }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Engine Size From</label>
-                            {{ form.engine_size_from }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Engine Size To</label>
-                            {{ form.engine_size_to }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Number of Doors</label>
-                            {{ form.doors }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Body Type</label>
-                            {{ form.body_type }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Exterior Color</label>
-                            {{ form.exterior_color }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Interior Color</label>
-                            {{ form.interior_color }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Previous Owners</label>
-                            {{ form.previous_owners }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Minimum Seats</label>
-                            {{ form.seats }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Seat Material</label>
-                            {{ form.seat_material }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Interior Trim</label>
-                            {{ form.interior_trim }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Features</label>
-                            {{ form.features }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Number of Keys</label>
-                            {{ form.number_of_keys }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Fuel Economy Source</label>
-                            {{ form.fuel_economy_source }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Fuel Economy From (km/L)</label>
-                            {{ form.fuel_economy_from }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Fuel Economy To (km/L)</label>
-                            {{ form.fuel_economy_to }}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Apply Filters</button>
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="clearAllFilters()">Clear All</button>
                     </form>
                 </div>
             </div>
@@ -451,6 +493,50 @@
     margin: 0 auto;
     max-width: 600px;
 }
+
+.filter-options {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.filter-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.filter-option:hover {
+    background-color: #f0f0f0;
+}
+
+.filter-option.selected {
+    background-color: #e3f2fd;
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+.filter-option .count {
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+.filter-option.selected .count {
+    color: #0d6efd;
+}
+
+.filter-section button .float-end {
+    transition: transform 0.2s;
+}
+
+.filter-section button[aria-expanded="true"] .float-end {
+    transform: rotate(180deg);
+}
 </style>
 
 <script>
@@ -482,12 +568,12 @@ function addToComparison(carId) {
         .catch(() => showMessage('Unable to add car to comparison.', 'danger'));
 }
 
-function updateFilterChoices(changedField, formId) {
+function loadFilterOptions(field, formId) {
     const form = document.getElementById(formId);
     if (!form) return;
     
     const formData = new FormData(form);
-    formData.append('field', changedField);
+    formData.append('field', field);
     
     fetch('/api/filter-choices/', {
         method: 'POST',
@@ -499,46 +585,113 @@ function updateFilterChoices(changedField, formId) {
     .then(response => response.json())
     .then(data => {
         if (data.choices) {
-            // Update all filter dropdowns with new choices
-            const fieldsToUpdate = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'doors', 'seats', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'number_of_keys', 'previous_owners', 'fuel_economy_source', 'fuel_economy_combined', 'value_source'];
-            
-            fieldsToUpdate.forEach(field => {
-                const select = form.querySelector(`[name=${field}]`);
-                if (select && data.choices) {
-                    const currentValue = select.value;
-                    select.innerHTML = '';
-                    data.choices.forEach(choice => {
-                        const option = document.createElement('option');
-                        option.value = choice[0];
-                        option.textContent = choice[1];
-                        select.appendChild(option);
+            const optionsContainer = form.querySelector(`.filter-options[data-field="${field}"]`);
+            if (optionsContainer) {
+                optionsContainer.innerHTML = '';
+                
+                // Get current selected value from hidden input
+                const hiddenInput = form.querySelector(`#hidden_${field}`);
+                const currentValue = hiddenInput ? hiddenInput.value : '';
+                
+                data.choices.forEach(choice => {
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.className = 'filter-option';
+                    if (choice[0] === currentValue) {
+                        link.classList.add('selected');
+                    }
+                    
+                    // Extract count from label (e.g., "Porsche (6)" -> "6")
+                    const label = choice[1];
+                    const countMatch = label.match(/\((\d+)\)$/);
+                    const count = countMatch ? countMatch[1] : '';
+                    const labelText = label.replace(/\s*\(\d+\)$/, '');
+                    
+                    link.innerHTML = `
+                        <span>${labelText}</span>
+                        ${count ? `<span class="count">(${count})</span>` : ''}
+                    `;
+                    
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        selectFilterOption(field, choice[0], formId);
                     });
-                    select.value = currentValue;
-                }
-            });
+                    
+                    optionsContainer.appendChild(link);
+                });
+            }
         }
     })
-    .catch(error => console.error('Error updating filter choices:', error));
+    .catch(error => console.error('Error loading filter options:', error));
+}
+
+function selectFilterOption(field, value, formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    // Update the hidden input
+    const hiddenInput = form.querySelector(`#hidden_${field}`);
+    if (hiddenInput) {
+        hiddenInput.value = value;
+    }
+    
+    // Update visual selection
+    const optionsContainer = form.querySelector(`.filter-options[data-field="${field}"]`);
+    if (optionsContainer) {
+        const options = optionsContainer.querySelectorAll('.filter-option');
+        options.forEach(option => {
+            option.classList.remove('selected');
+            const optionValue = option.querySelector('span').textContent;
+            if (optionValue === value || (value === '' && optionValue === 'Any')) {
+                option.classList.add('selected');
+            }
+        });
+    }
+    
+    // Reload all filter options with updated counts
+    const filterFields = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'exterior_color', 'interior_color'];
+    filterFields.forEach(f => {
+        loadFilterOptions(f, formId);
+    });
+    
+    // Auto-submit form for immediate filtering
+    form.submit();
+}
+
+function clearAllFilters() {
+    const form = document.getElementById('filterFormDesktop');
+    if (!form) return;
+    
+    // Reset all hidden inputs
+    const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
+    hiddenInputs.forEach(input => {
+        input.value = '';
+    });
+    
+    // Reset visual selections
+    const options = form.querySelectorAll('.filter-option');
+    options.forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Reload all filter options
+    const filterFields = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'exterior_color', 'interior_color'];
+    filterFields.forEach(field => {
+        loadFilterOptions(field, 'filterFormDesktop');
+    });
+    
+    form.submit();
 }
 
 // Add event listeners to all filter fields
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = ['filterFormMobile', 'filterFormDesktop'];
+    const form = document.getElementById('filterFormDesktop');
+    if (!form) return;
     
-    forms.forEach(formId => {
-        const form = document.getElementById(formId);
-        if (!form) return;
-        
-        const filterFields = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'doors', 'seats', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'number_of_keys', 'previous_owners', 'fuel_economy_source', 'fuel_economy_combined', 'value_source', 'year_from', 'year_to', 'price_from', 'price_to', 'mileage_from', 'mileage_to', 'engine_size_from', 'engine_size_to'];
-        
-        filterFields.forEach(field => {
-            const select = form.querySelector(`[name=${field}]`);
-            if (select) {
-                select.addEventListener('change', function() {
-                    updateFilterChoices(field, formId);
-                });
-            }
-        });
+    // Load initial filter options
+    const filterFields = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'exterior_color', 'interior_color'];
+    filterFields.forEach(field => {
+        loadFilterOptions(field, 'filterFormDesktop');
     });
 
     document.querySelectorAll('.js-add-comparison').forEach(button => {
