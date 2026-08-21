@@ -3087,11 +3087,28 @@ class CarForm(forms.ModelForm):
     @staticmethod
     def get_make_choices():
         try:
+            from .models import Car
             hierarchy = get_combined_car_hierarchy()
             all_makes = sorted(hierarchy.keys())
+            
+            # Get counts for each make from the database
+            make_counts = {}
+            for make in all_makes:
+                count = Car.objects.filter(make=make, is_approved=True, is_sold=False).count()
+                if count > 0:
+                    make_counts[make] = count
+            
+            # Format choices with counts
+            choices = [(make, f"{make} ({make_counts[make]})") for make in all_makes if make in make_counts]
+            return [('', '-- Select Make --')] + choices
         except Exception:
-            all_makes = sorted(set(CAR_HIERARCHY.keys()))
-        return [('', '-- Select Make --')] + [(make, make) for make in all_makes]
+            # Fallback to original behavior if there's an error
+            try:
+                hierarchy = get_combined_car_hierarchy()
+                all_makes = sorted(hierarchy.keys())
+            except Exception:
+                all_makes = sorted(set(CAR_HIERARCHY.keys()))
+            return [('', '-- Select Make --')] + [(make, make) for make in all_makes]
 
     @staticmethod
     def get_model_choices(make=None):
@@ -3105,7 +3122,22 @@ class CarForm(forms.ModelForm):
         except Exception:
             models.update(CAR_HIERARCHY.get(make, {}).keys())
 
-        return [('', '-- Select Model --')] + [(model, model) for model in sorted(models) if model]
+        # Get counts for each model from the database
+        try:
+            from .models import Car
+            model_counts = {}
+            for model in sorted(models):
+                if model:
+                    count = Car.objects.filter(make=make, model=model, is_approved=True, is_sold=False).count()
+                    if count > 0:
+                        model_counts[model] = count
+            
+            # Format choices with counts
+            choices = [(model, f"{model} ({model_counts[model]})") for model in sorted(models) if model in model_counts]
+            return [('', '-- Select Model --')] + choices
+        except Exception:
+            # Fallback to original behavior if there's an error
+            return [('', '-- Select Model --')] + [(model, model) for model in sorted(models) if model]
 
     @staticmethod
     def get_variant_choices(make=None, model=None):
@@ -3121,7 +3153,23 @@ class CarForm(forms.ModelForm):
         except Exception:
             variants = CAR_HIERARCHY.get(make, {}).get(model, [])
         variants = [v for v in sorted(set(v for v in variants if v))]
-        return [('', '-- Select Variant --')] + [(variant, variant) for variant in variants]
+        
+        # Get counts for each variant from the database
+        try:
+            from .models import Car
+            variant_counts = {}
+            for variant in variants:
+                if variant:
+                    count = Car.objects.filter(make=make, model=model, variant=variant, is_approved=True, is_sold=False).count()
+                    if count > 0:
+                        variant_counts[variant] = count
+            
+            # Format choices with counts
+            choices = [(variant, f"{variant} ({variant_counts[variant]})") for variant in variants if variant in variant_counts]
+            return [('', '-- Select Variant --')] + choices
+        except Exception:
+            # Fallback to original behavior if there's an error
+            return [('', '-- Select Variant --')] + [(variant, variant) for variant in variants]
 
 
 class ReviewForm(forms.ModelForm):
@@ -3215,11 +3263,28 @@ class CarSearchForm(forms.Form):
     @staticmethod
     def get_make_choices():
         try:
+            from .models import Car
             hierarchy = get_combined_car_hierarchy()
             all_makes = sorted(hierarchy.keys())
+            
+            # Get counts for each make from the database
+            make_counts = {}
+            for make in all_makes:
+                count = Car.objects.filter(make=make, is_approved=True, is_sold=False).count()
+                if count > 0:
+                    make_counts[make] = count
+            
+            # Format choices with counts
+            choices = [(make, f"{make} ({make_counts[make]})") for make in all_makes if make in make_counts]
+            return [('', '-- All Makes --')] + choices
         except Exception:
-            all_makes = sorted(set(CAR_HIERARCHY.keys()))
-        return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
+            # Fallback to original behavior if there's an error
+            try:
+                hierarchy = get_combined_car_hierarchy()
+                all_makes = sorted(hierarchy.keys())
+            except Exception:
+                all_makes = sorted(set(CAR_HIERARCHY.keys()))
+            return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
 
     @staticmethod
     def get_model_choices(make=None):
@@ -3233,7 +3298,22 @@ class CarSearchForm(forms.Form):
         except Exception:
             models.update(CAR_HIERARCHY.get(make, {}).keys())
 
-        return [('', '-- All Models --')] + [(model, model) for model in sorted(models) if model]
+        # Get counts for each model from the database
+        try:
+            from .models import Car
+            model_counts = {}
+            for model in sorted(models):
+                if model:
+                    count = Car.objects.filter(make=make, model=model, is_approved=True, is_sold=False).count()
+                    if count > 0:
+                        model_counts[model] = count
+            
+            # Format choices with counts
+            choices = [(model, f"{model} ({model_counts[model]})") for model in sorted(models) if model in model_counts]
+            return [('', '-- All Models --')] + choices
+        except Exception:
+            # Fallback to original behavior if there's an error
+            return [('', '-- All Models --')] + [(model, model) for model in sorted(models) if model]
 
     @staticmethod
     def get_variant_choices(make=None, model=None):
@@ -3249,7 +3329,23 @@ class CarSearchForm(forms.Form):
         except Exception:
             variants = CAR_HIERARCHY.get(make, {}).get(model, [])
         variants = [v for v in sorted(set(v for v in variants if v))]
-        return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
+        
+        # Get counts for each variant from the database
+        try:
+            from .models import Car
+            variant_counts = {}
+            for variant in variants:
+                if variant:
+                    count = Car.objects.filter(make=make, model=model, variant=variant, is_approved=True, is_sold=False).count()
+                    if count > 0:
+                        variant_counts[variant] = count
+            
+            # Format choices with counts
+            choices = [(variant, f"{variant} ({variant_counts[variant]})") for variant in variants if variant in variant_counts]
+            return [('', '-- All Variants --')] + choices
+        except Exception:
+            # Fallback to original behavior if there's an error
+            return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
 
     make = forms.ChoiceField(
         required=False,
