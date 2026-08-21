@@ -93,5 +93,8 @@ urlpatterns = [
     path('chat/', views.chat_page, name='chat_page'),
     path('ai-instructions/', views.ai_instructions, name='ai_instructions'),
 
+    # Dynamic Filter Counts
+    path('api/filter-choices/', views.get_filter_choices, name='get_filter_choices'),
+
 ]
 

@@ -2530,3 +2530,101 @@ def ai_instructions(request):
     """AI instructions page"""
     return render(request, "ai_instructions.html")
 
+
+@csrf_exempt
+def get_filter_choices(request):
+    """AJAX endpoint to get filter choices with dynamic counts"""
+    if request.method == 'POST':
+        try:
+            from .forms import CarSearchForm
+            
+            # Get current filters from request
+            filters = {
+                'make': request.POST.get('make'),
+                'model': request.POST.get('model'),
+                'variant': request.POST.get('variant'),
+                'fuel_type': request.POST.get('fuel_type'),
+                'transmission': request.POST.get('transmission'),
+                'condition': request.POST.get('condition'),
+                'body_type': request.POST.get('body_type'),
+                'doors': request.POST.get('doors'),
+                'seats': request.POST.get('seats'),
+                'exterior_color': request.POST.get('exterior_color'),
+                'interior_color': request.POST.get('interior_color'),
+                'seat_material': request.POST.get('seat_material'),
+                'interior_trim': request.POST.get('interior_trim'),
+                'number_of_keys': request.POST.get('number_of_keys'),
+                'previous_owners': request.POST.get('previous_owners'),
+                'fuel_economy_source': request.POST.get('fuel_economy_source'),
+                'fuel_economy_combined': request.POST.get('fuel_economy_combined'),
+                'value_source': request.POST.get('value_source'),
+                'year_from': request.POST.get('year_from'),
+                'year_to': request.POST.get('year_to'),
+                'price_from': request.POST.get('price_from'),
+                'price_to': request.POST.get('price_to'),
+                'mileage_from': request.POST.get('mileage_from'),
+                'mileage_to': request.POST.get('mileage_to'),
+                'engine_size_from': request.POST.get('engine_size_from'),
+                'engine_size_to': request.POST.get('engine_size_to'),
+            }
+            
+            # Remove None/empty values
+            filters = {k: v for k, v in filters.items() if v}
+            
+            # Get the field to update
+            field = request.POST.get('field')
+            
+            if not field:
+                return JsonResponse({'error': 'No field specified'}, status=400)
+            
+            # Get choices for the requested field
+            choices = []
+            if field == 'make':
+                choices = CarSearchForm.get_make_choices(filters)
+            elif field == 'model':
+                make = filters.get('make')
+                choices = CarSearchForm.get_model_choices(make, filters)
+            elif field == 'variant':
+                make = filters.get('make')
+                model = filters.get('model')
+                choices = CarSearchForm.get_variant_choices(make, model, filters)
+            elif field == 'fuel_type':
+                choices = CarSearchForm.get_fuel_type_choices(filters)
+            elif field == 'transmission':
+                choices = CarSearchForm.get_transmission_choices(filters)
+            elif field == 'condition':
+                choices = CarSearchForm.get_condition_choices(filters)
+            elif field == 'body_type':
+                choices = CarSearchForm.get_body_type_choices(filters)
+            elif field == 'doors':
+                choices = CarSearchForm.get_doors_choices(filters)
+            elif field == 'seats':
+                choices = CarSearchForm.get_seats_choices(filters)
+            elif field == 'exterior_color':
+                choices = CarSearchForm.get_exterior_color_choices(filters)
+            elif field == 'interior_color':
+                choices = CarSearchForm.get_interior_color_choices(filters)
+            elif field == 'seat_material':
+                choices = CarSearchForm.get_seat_material_choices(filters)
+            elif field == 'interior_trim':
+                choices = CarSearchForm.get_interior_trim_choices(filters)
+            elif field == 'number_of_keys':
+                choices = CarSearchForm.get_number_of_keys_choices(filters)
+            elif field == 'previous_owners':
+                choices = CarSearchForm.get_previous_owners_choices(filters)
+            elif field == 'fuel_economy_source':
+                choices = CarSearchForm.get_fuel_economy_source_choices(filters)
+            elif field == 'fuel_economy_combined':
+                choices = CarSearchForm.get_fuel_economy_combined_choices(filters)
+            elif field == 'value_source':
+                choices = CarSearchForm.get_value_source_choices(filters)
+            else:
+                return JsonResponse({'error': 'Invalid field'}, status=400)
+            
+            return JsonResponse({'choices': choices})
+        
+        except Exception as e:
+            logger.error(f"Error getting filter choices: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

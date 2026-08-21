@@ -29,6 +29,66 @@
 </style>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+function updateFilterChoices(changedField) {
+    const form = document.querySelector('form[action="/cars/"]');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    formData.append('field', changedField);
+    
+    fetch('/api/filter-choices/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.choices) {
+            // Update all filter dropdowns with new choices
+            const fieldsToUpdate = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'doors', 'seats', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'number_of_keys', 'previous_owners', 'fuel_economy_source', 'fuel_economy_combined', 'value_source'];
+            
+            fieldsToUpdate.forEach(field => {
+                const select = form.querySelector(`[name=${field}]`);
+                if (select && data.choices) {
+                    const currentValue = select.value;
+                    select.innerHTML = '';
+                    data.choices.forEach(choice => {
+                        const option = document.createElement('option');
+                        option.value = choice[0];
+                        option.textContent = choice[1];
+                        select.appendChild(option);
+                    });
+                    select.value = currentValue;
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error updating filter choices:', error));
+}
+
+// Add event listeners to all filter fields
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action="/cars/"]');
+    if (!form) return;
+    
+    const filterFields = ['make', 'model', 'variant', 'fuel_type', 'transmission', 'condition', 'body_type', 'doors', 'seats', 'exterior_color', 'interior_color', 'seat_material', 'interior_trim', 'number_of_keys', 'previous_owners', 'fuel_economy_source', 'fuel_economy_combined', 'value_source', 'year_from', 'year_to', 'price_from', 'price_to', 'mileage_from', 'mileage_to', 'engine_size_from', 'engine_size_to'];
+    
+    filterFields.forEach(field => {
+        const select = form.querySelector(`[name=${field}]`);
+        if (select) {
+            select.addEventListener('change', function() {
+                updateFilterChoices(field);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
+
 {% block title %}Premium Luxury Cars in Kenya | Executive High-End Vehicles - GM autoSolutions{% endblock %}
 
 {% block content %}

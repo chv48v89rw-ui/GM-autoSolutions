@@ -3835,16 +3835,80 @@ class ConversationMessageForm(forms.Form):
 
 class CarSearchForm(forms.Form):
     @staticmethod
-    def get_make_choices():
+    def _apply_filters_to_queryset(queryset, filters):
+        """Helper method to apply filters to a queryset"""
+        if filters:
+            if filters.get('make'):
+                queryset = queryset.filter(make=filters['make'])
+            if filters.get('model'):
+                queryset = queryset.filter(model=filters['model'])
+            if filters.get('variant'):
+                queryset = queryset.filter(variant=filters['variant'])
+            if filters.get('fuel_type'):
+                queryset = queryset.filter(fuel_type=filters['fuel_type'])
+            if filters.get('transmission'):
+                queryset = queryset.filter(transmission=filters['transmission'])
+            if filters.get('condition'):
+                queryset = queryset.filter(condition=filters['condition'])
+            if filters.get('body_type'):
+                queryset = queryset.filter(body_type=filters['body_type'])
+            if filters.get('doors'):
+                queryset = queryset.filter(doors=filters['doors'])
+            if filters.get('seats'):
+                queryset = queryset.filter(seats=filters['seats'])
+            if filters.get('exterior_color'):
+                queryset = queryset.filter(exterior_color=filters['exterior_color'])
+            if filters.get('interior_color'):
+                queryset = queryset.filter(interior_color=filters['interior_color'])
+            if filters.get('seat_material'):
+                queryset = queryset.filter(seat_material=filters['seat_material'])
+            if filters.get('interior_trim'):
+                queryset = queryset.filter(interior_trim=filters['interior_trim'])
+            if filters.get('number_of_keys'):
+                queryset = queryset.filter(number_of_keys=filters['number_of_keys'])
+            if filters.get('previous_owners'):
+                queryset = queryset.filter(previous_owners=filters['previous_owners'])
+            if filters.get('fuel_economy_source'):
+                queryset = queryset.filter(fuel_economy_source=filters['fuel_economy_source'])
+            if filters.get('fuel_economy_combined'):
+                queryset = queryset.filter(fuel_economy_combined=filters['fuel_economy_combined'])
+            if filters.get('value_source'):
+                queryset = queryset.filter(value_source=filters['value_source'])
+            if filters.get('year_from'):
+                queryset = queryset.filter(year__gte=filters['year_from'])
+            if filters.get('year_to'):
+                queryset = queryset.filter(year__lte=filters['year_to'])
+            if filters.get('price_from'):
+                queryset = queryset.filter(price__gte=filters['price_from'])
+            if filters.get('price_to'):
+                queryset = queryset.filter(price__lte=filters['price_to'])
+            if filters.get('mileage_from'):
+                queryset = queryset.filter(mileage__gte=filters['mileage_from'])
+            if filters.get('mileage_to'):
+                queryset = queryset.filter(mileage__lte=filters['mileage_to'])
+            if filters.get('engine_size_from'):
+                queryset = queryset.filter(engine_size=filters['engine_size_from'])
+            if filters.get('engine_size_to'):
+                queryset = queryset.filter(engine_size=filters['engine_size_to'])
+        return queryset
+
+    @staticmethod
+    def get_make_choices(filters=None):
         try:
             from .models import Car
             hierarchy = get_combined_car_hierarchy()
             all_makes = sorted(hierarchy.keys())
             
+            # Build base queryset with filters (excluding make itself)
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_make = {k: v for k, v in filters.items() if k != 'make'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_make)
+            
             # Get counts for each make from the database
             make_counts = {}
             for make in all_makes:
-                count = Car.objects.filter(make=make, is_approved=True, is_sold=False).count()
+                count = queryset.filter(make=make).count()
                 if count > 0:
                     make_counts[make] = count
             
@@ -3861,7 +3925,7 @@ class CarSearchForm(forms.Form):
             return [('', 'Any')] + [(make, make) for make in all_makes]
 
     @staticmethod
-    def get_model_choices(make=None):
+    def get_model_choices(make=None, filters=None):
         if not make:
             return [('', 'Any')]
 
@@ -3872,13 +3936,23 @@ class CarSearchForm(forms.Form):
         except Exception:
             models.update(CAR_HIERARCHY.get(make, {}).keys())
 
-        # Get counts for each model from the database
+        # Build base queryset with filters
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            
+            # Apply make filter
+            queryset = queryset.filter(make=make)
+            
+            # Apply other filters (excluding model itself)
+            if filters:
+                filters_without_model = {k: v for k, v in filters.items() if k != 'model'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_model)
+            
             model_counts = {}
             for model in sorted(models):
                 if model:
-                    count = Car.objects.filter(make=make, model=model, is_approved=True, is_sold=False).count()
+                    count = queryset.filter(model=model).count()
                     if count > 0:
                         model_counts[model] = count
             
@@ -3890,7 +3964,7 @@ class CarSearchForm(forms.Form):
             return [('', 'Any')] + [(model, model) for model in sorted(models) if model]
 
     @staticmethod
-    def get_variant_choices(make=None, model=None):
+    def get_variant_choices(make=None, model=None, filters=None):
         if not make:
             return [('', '-- Select Make First --')]
         if not model:
@@ -3907,10 +3981,20 @@ class CarSearchForm(forms.Form):
         # Get counts for each variant from the database
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            
+            # Apply make and model filters
+            queryset = queryset.filter(make=make, model=model)
+            
+            # Apply other filters (excluding variant itself)
+            if filters:
+                filters_without_variant = {k: v for k, v in filters.items() if k != 'variant'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_variant)
+            
             variant_counts = {}
             for variant in variants:
                 if variant:
-                    count = Car.objects.filter(make=make, model=model, variant=variant, is_approved=True, is_sold=False).count()
+                    count = queryset.filter(variant=variant).count()
                     if count > 0:
                         variant_counts[variant] = count
             
@@ -3947,45 +4031,110 @@ class CarSearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Build filters dictionary from current form data
+        filters = {}
+        if self.data:
+            filters = {
+                'make': self.data.get('make'),
+                'model': self.data.get('model'),
+                'variant': self.data.get('variant'),
+                'fuel_type': self.data.get('fuel_type'),
+                'transmission': self.data.get('transmission'),
+                'condition': self.data.get('condition'),
+                'body_type': self.data.get('body_type'),
+                'doors': self.data.get('doors'),
+                'seats': self.data.get('seats'),
+                'exterior_color': self.data.get('exterior_color'),
+                'interior_color': self.data.get('interior_color'),
+                'seat_material': self.data.get('seat_material'),
+                'interior_trim': self.data.get('interior_trim'),
+                'number_of_keys': self.data.get('number_of_keys'),
+                'previous_owners': self.data.get('previous_owners'),
+                'fuel_economy_source': self.data.get('fuel_economy_source'),
+                'fuel_economy_combined': self.data.get('fuel_economy_combined'),
+                'value_source': self.data.get('value_source'),
+                'year_from': self.data.get('year_from'),
+                'year_to': self.data.get('year_to'),
+                'price_from': self.data.get('price_from'),
+                'price_to': self.data.get('price_to'),
+                'mileage_from': self.data.get('mileage_from'),
+                'mileage_to': self.data.get('mileage_to'),
+                'engine_size_from': self.data.get('engine_size_from'),
+                'engine_size_to': self.data.get('engine_size_to'),
+            }
+        elif self.initial:
+            filters = {
+                'make': self.initial.get('make'),
+                'model': self.initial.get('model'),
+                'variant': self.initial.get('variant'),
+                'fuel_type': self.initial.get('fuel_type'),
+                'transmission': self.initial.get('transmission'),
+                'condition': self.initial.get('condition'),
+                'body_type': self.initial.get('body_type'),
+                'doors': self.initial.get('doors'),
+                'seats': self.initial.get('seats'),
+                'exterior_color': self.initial.get('exterior_color'),
+                'interior_color': self.initial.get('interior_color'),
+                'seat_material': self.initial.get('seat_material'),
+                'interior_trim': self.initial.get('interior_trim'),
+                'number_of_keys': self.initial.get('number_of_keys'),
+                'previous_owners': self.initial.get('previous_owners'),
+                'fuel_economy_source': self.initial.get('fuel_economy_source'),
+                'fuel_economy_combined': self.initial.get('fuel_economy_combined'),
+                'value_source': self.initial.get('value_source'),
+                'year_from': self.initial.get('year_from'),
+                'year_to': self.initial.get('year_to'),
+                'price_from': self.initial.get('price_from'),
+                'price_to': self.initial.get('price_to'),
+                'mileage_from': self.initial.get('mileage_from'),
+                'mileage_to': self.initial.get('mileage_to'),
+                'engine_size_from': self.initial.get('engine_size_from'),
+                'engine_size_to': self.initial.get('engine_size_to'),
+            }
+        
+        # Remove None values from filters
+        filters = {k: v for k, v in filters.items() if v}
+        
         try:
-            self.fields['make'].choices = self.get_make_choices()
+            self.fields['make'].choices = self.get_make_choices(filters)
         except Exception:
             self.fields['make'].choices = [('', '-- All Makes --')]
 
-        selected_make = self.data.get('make') or self.initial.get('make')
-        selected_model = self.data.get('model') or self.initial.get('model')
+        selected_make = filters.get('make')
+        selected_model = filters.get('model')
 
-        self.fields['model'].choices = self.get_model_choices(selected_make)
-        self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
+        self.fields['model'].choices = self.get_model_choices(selected_make, filters)
+        self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model, filters)
         
         # Initialize dynamic choices for other filters
         try:
-            self.fields['fuel_type'].choices = self.get_fuel_type_choices()
+            self.fields['fuel_type'].choices = self.get_fuel_type_choices(filters)
         except Exception:
             self.fields['fuel_type'].choices = [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
         
         try:
-            self.fields['transmission'].choices = self.get_transmission_choices()
+            self.fields['transmission'].choices = self.get_transmission_choices(filters)
         except Exception:
             self.fields['transmission'].choices = [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
         
         try:
-            self.fields['condition'].choices = self.get_condition_choices()
+            self.fields['condition'].choices = self.get_condition_choices(filters)
         except Exception:
             self.fields['condition'].choices = [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
         
         try:
-            self.fields['body_type'].choices = self.get_body_type_choices()
+            self.fields['body_type'].choices = self.get_body_type_choices(filters)
         except Exception:
             self.fields['body_type'].choices = [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
         
         try:
-            self.fields['doors'].choices = self.get_doors_choices()
+            self.fields['doors'].choices = self.get_doors_choices(filters)
         except Exception:
             self.fields['doors'].choices = [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
         
         try:
-            self.fields['seats'].choices = self.get_seats_choices()
+            self.fields['seats'].choices = self.get_seats_choices(filters)
         except Exception:
             self.fields['seats'].choices = [('', '-- All Seats --')] + [
                 ('2', '2 Seats'),
@@ -3996,47 +4145,47 @@ class CarSearchForm(forms.Form):
             ]
         
         try:
-            self.fields['exterior_color'].choices = self.get_exterior_color_choices()
+            self.fields['exterior_color'].choices = self.get_exterior_color_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['interior_color'].choices = self.get_interior_color_choices()
+            self.fields['interior_color'].choices = self.get_interior_color_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['seat_material'].choices = self.get_seat_material_choices()
+            self.fields['seat_material'].choices = self.get_seat_material_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['interior_trim'].choices = self.get_interior_trim_choices()
+            self.fields['interior_trim'].choices = self.get_interior_trim_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['number_of_keys'].choices = self.get_number_of_keys_choices()
+            self.fields['number_of_keys'].choices = self.get_number_of_keys_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['previous_owners'].choices = self.get_previous_owners_choices()
+            self.fields['previous_owners'].choices = self.get_previous_owners_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['fuel_economy_source'].choices = self.get_fuel_economy_source_choices()
+            self.fields['fuel_economy_source'].choices = self.get_fuel_economy_source_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices()
+            self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
         
         try:
-            self.fields['value_source'].choices = self.get_value_source_choices()
+            self.fields['value_source'].choices = self.get_value_source_choices(filters)
         except Exception:
             pass  # Method handles its own fallback
  
@@ -4213,12 +4362,17 @@ class CarSearchForm(forms.Form):
     }))
  
     @staticmethod
-    def get_fuel_type_choices():
+    def get_fuel_type_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_fuel_type = {k: v for k, v in filters.items() if k != 'fuel_type'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_fuel_type)
+            
             fuel_type_counts = {}
             for fuel_type, label in Car.FUEL_CHOICES:
-                count = Car.objects.filter(fuel_type=fuel_type, is_approved=True, is_sold=False).count()
+                count = queryset.filter(fuel_type=fuel_type).count()
                 if count > 0:
                     fuel_type_counts[fuel_type] = (label, count)
             
@@ -4228,12 +4382,17 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
 
     @staticmethod
-    def get_transmission_choices():
+    def get_transmission_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_transmission = {k: v for k, v in filters.items() if k != 'transmission'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_transmission)
+            
             transmission_counts = {}
             for transmission, label in Car.TRANSMISSION_CHOICES:
-                count = Car.objects.filter(transmission=transmission, is_approved=True, is_sold=False).count()
+                count = queryset.filter(transmission=transmission).count()
                 if count > 0:
                     transmission_counts[transmission] = (label, count)
             
@@ -4243,12 +4402,17 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
 
     @staticmethod
-    def get_condition_choices():
+    def get_condition_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_condition = {k: v for k, v in filters.items() if k != 'condition'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_condition)
+            
             condition_counts = {}
             for condition, label in Car.CONDITION_CHOICES:
-                count = Car.objects.filter(condition=condition, is_approved=True, is_sold=False).count()
+                count = queryset.filter(condition=condition).count()
                 if count > 0:
                     condition_counts[condition] = (label, count)
             
@@ -4294,12 +4458,17 @@ class CarSearchForm(forms.Form):
     )
  
     @staticmethod
-    def get_body_type_choices():
+    def get_body_type_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_body_type = {k: v for k, v in filters.items() if k != 'body_type'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_body_type)
+            
             body_type_counts = {}
             for body_type, label in Car.BODY_TYPE_CHOICES:
-                count = Car.objects.filter(body_type=body_type, is_approved=True, is_sold=False).count()
+                count = queryset.filter(body_type=body_type).count()
                 if count > 0:
                     body_type_counts[body_type] = (label, count)
             
@@ -4309,12 +4478,17 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
 
     @staticmethod
-    def get_doors_choices():
+    def get_doors_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_doors = {k: v for k, v in filters.items() if k != 'doors'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_doors)
+            
             doors_counts = {}
             for doors, label in Car.DOORS_CHOICES:
-                count = Car.objects.filter(doors=doors, is_approved=True, is_sold=False).count()
+                count = queryset.filter(doors=doors).count()
                 if count > 0:
                     doors_counts[doors] = (label, count)
             
@@ -4324,9 +4498,14 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
 
     @staticmethod
-    def get_seats_choices():
+    def get_seats_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_seats = {k: v for k, v in filters.items() if k != 'seats'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_seats)
+            
             seats_choices = [
                 ('2', '2 Seats'),
                 ('4', '4 Seats'),
@@ -4336,7 +4515,7 @@ class CarSearchForm(forms.Form):
             ]
             seats_counts = {}
             for seats, label in seats_choices:
-                count = Car.objects.filter(seats=int(seats), is_approved=True, is_sold=False).count()
+                count = queryset.filter(seats=int(seats)).count()
                 if count > 0:
                     seats_counts[seats] = (label, count)
             
@@ -4352,9 +4531,14 @@ class CarSearchForm(forms.Form):
             ]
 
     @staticmethod
-    def get_exterior_color_choices():
+    def get_exterior_color_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_exterior_color = {k: v for k, v in filters.items() if k != 'exterior_color'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_exterior_color)
+            
             exterior_color_counts = {}
             # Get the EXTERIOR_COLOR_CHOICES from the class
             EXTERIOR_COLOR_CHOICES = sorted([
@@ -4423,7 +4607,7 @@ class CarSearchForm(forms.Form):
             EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
             
             for color in EXTERIOR_COLOR_CHOICES:
-                count = Car.objects.filter(exterior_color=color[0], is_approved=True, is_sold=False).count()
+                count = queryset.filter(exterior_color=color[0]).count()
                 if count > 0:
                     exterior_color_counts[color[0]] = (color[1], count)
             
@@ -4497,9 +4681,14 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES
 
     @staticmethod
-    def get_interior_color_choices():
+    def get_interior_color_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_interior_color = {k: v for k, v in filters.items() if k != 'interior_color'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_interior_color)
+            
             interior_color_counts = {}
             INTERIOR_COLOR_CHOICES = sorted([
                 ('Anthracite', 'Anthracite'),
@@ -4545,7 +4734,7 @@ class CarSearchForm(forms.Form):
             INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
             
             for color in INTERIOR_COLOR_CHOICES:
-                count = Car.objects.filter(interior_color=color[0], is_approved=True, is_sold=False).count()
+                count = queryset.filter(interior_color=color[0]).count()
                 if count > 0:
                     interior_color_counts[color[0]] = (color[1], count)
             
@@ -4597,9 +4786,14 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES
 
     @staticmethod
-    def get_seat_material_choices():
+    def get_seat_material_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_seat_material = {k: v for k, v in filters.items() if k != 'seat_material'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_seat_material)
+            
             seat_material_counts = {}
             SEAT_MATERIAL_CHOICES = sorted([
                 ('Alcantara', 'Alcantara'),
@@ -4620,7 +4814,7 @@ class CarSearchForm(forms.Form):
             SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
             
             for material in SEAT_MATERIAL_CHOICES:
-                count = Car.objects.filter(seat_material=material[0], is_approved=True, is_sold=False).count()
+                count = queryset.filter(seat_material=material[0]).count()
                 if count > 0:
                     seat_material_counts[material[0]] = (material[1], count)
             
@@ -4647,9 +4841,14 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES
 
     @staticmethod
-    def get_interior_trim_choices():
+    def get_interior_trim_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_interior_trim = {k: v for k, v in filters.items() if k != 'interior_trim'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_interior_trim)
+            
             interior_trim_counts = {}
             INTERIOR_TRIM_CHOICES = sorted([
                 ('Aluminum', 'Aluminum'),
@@ -4670,7 +4869,7 @@ class CarSearchForm(forms.Form):
             INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
             
             for trim in INTERIOR_TRIM_CHOICES:
-                count = Car.objects.filter(interior_trim=trim[0], is_approved=True, is_sold=False).count()
+                count = queryset.filter(interior_trim=trim[0]).count()
                 if count > 0:
                     interior_trim_counts[trim[0]] = (trim[1], count)
             
@@ -4697,9 +4896,14 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
 
     @staticmethod
-    def get_number_of_keys_choices():
+    def get_number_of_keys_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_number_of_keys = {k: v for k, v in filters.items() if k != 'number_of_keys'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_number_of_keys)
+            
             keys_choices = [
                 ('1', '1 Key'),
                 ('2', '2 Keys'),
@@ -4708,7 +4912,7 @@ class CarSearchForm(forms.Form):
             ]
             keys_counts = {}
             for keys, label in keys_choices:
-                count = Car.objects.filter(number_of_keys=int(keys), is_approved=True, is_sold=False).count()
+                count = queryset.filter(number_of_keys=int(keys)).count()
                 if count > 0:
                     keys_counts[keys] = (label, count)
             
@@ -4723,12 +4927,17 @@ class CarSearchForm(forms.Form):
             ]
 
     @staticmethod
-    def get_previous_owners_choices():
+    def get_previous_owners_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_previous_owners = {k: v for k, v in filters.items() if k != 'previous_owners'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_previous_owners)
+            
             owners_counts = {}
             for owners, label in Car.OWNERS_CHOICES:
-                count = Car.objects.filter(previous_owners=owners, is_approved=True, is_sold=False).count()
+                count = queryset.filter(previous_owners=owners).count()
                 if count > 0:
                     owners_counts[owners] = (label, count)
             
@@ -4738,12 +4947,17 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
 
     @staticmethod
-    def get_fuel_economy_source_choices():
+    def get_fuel_economy_source_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_fuel_economy_source = {k: v for k, v in filters.items() if k != 'fuel_economy_source'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_fuel_economy_source)
+            
             fuel_economy_source_counts = {}
             for source, label in Car.FUEL_ECONOMY_SOURCE_CHOICES:
-                count = Car.objects.filter(fuel_economy_source=source, is_approved=True, is_sold=False).count()
+                count = queryset.filter(fuel_economy_source=source).count()
                 if count > 0:
                     fuel_economy_source_counts[source] = (label, count)
             
@@ -4753,13 +4967,18 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
 
     @staticmethod
-    def get_fuel_economy_combined_choices():
+    def get_fuel_economy_combined_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_fuel_economy_combined = {k: v for k, v in filters.items() if k != 'fuel_economy_combined'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_fuel_economy_combined)
+            
             fuel_economy_counts = {}
             for economy, label in Car.FUEL_ECONOMY_CHOICES:
                 if economy:  # Skip empty value
-                    count = Car.objects.filter(fuel_economy_combined=economy, is_approved=True, is_sold=False).count()
+                    count = queryset.filter(fuel_economy_combined=economy).count()
                     if count > 0:
                         fuel_economy_counts[economy] = (label, count)
             
@@ -4769,12 +4988,17 @@ class CarSearchForm(forms.Form):
             return [('', '-- All Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
     @staticmethod
-    def get_value_source_choices():
+    def get_value_source_choices(filters=None):
         try:
             from .models import Car
+            queryset = Car.objects.filter(is_approved=True, is_sold=False)
+            if filters:
+                filters_without_value_source = {k: v for k, v in filters.items() if k != 'value_source'}
+                queryset = CarSearchForm._apply_filters_to_queryset(queryset, filters_without_value_source)
+            
             value_source_counts = {}
             for source, label in Car.VALUE_SOURCE_CHOICES:
-                count = Car.objects.filter(value_source=source, is_approved=True, is_sold=False).count()
+                count = queryset.filter(value_source=source).count()
                 if count > 0:
                     value_source_counts[source] = (label, count)
             
