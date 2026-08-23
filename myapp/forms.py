@@ -2967,61 +2967,21 @@ class CarForm(forms.ModelForm):
     )
     @staticmethod
     def get_body_type_choices():
-        try:
-            from .models import Car
-            body_type_counts = {}
-            for body_type, label in Car.BODY_TYPE_CHOICES:
-                count = Car.objects.filter(body_type=body_type, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    body_type_counts[body_type] = (label, count)
-            
-            choices = [(body_type, f"{label} ({count})") for body_type, (label, count) in body_type_counts.items()]
-            return [('', '-- Select Body Type --')] + choices
-        except Exception:
-            return [('', '-- Select Body Type --')] + list(Car.BODY_TYPE_CHOICES)
+        return [('', '-- Select Body Type --')] + list(Car.BODY_TYPE_CHOICES)
 
     @staticmethod
     def get_doors_choices():
-        try:
-            from .models import Car
-            doors_counts = {}
-            for doors, label in Car.DOORS_CHOICES:
-                count = Car.objects.filter(doors=doors, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    doors_counts[doors] = (label, count)
-            
-            choices = [(doors, f"{label} ({count})") for doors, (label, count) in doors_counts.items()]
-            return [('', '-- Select Doors --')] + choices
-        except Exception:
-            return [('', '-- Select Doors --')] + list(Car.DOORS_CHOICES)
+        return [('', '-- Select Doors --')] + list(Car.DOORS_CHOICES)
 
     @staticmethod
     def get_seats_choices():
-        try:
-            from .models import Car
-            seats_choices = [
-                ('2', '2 Seats'),
-                ('4', '4 Seats'),
-                ('5', '5 Seats'),
-                ('7', '7 Seats'),
-                ('8', '8+ Seats'),
-            ]
-            seats_counts = {}
-            for seats, label in seats_choices:
-                count = Car.objects.filter(seats=int(seats), is_approved=True, is_sold=False).count()
-                if count > 0:
-                    seats_counts[seats] = (label, count)
-            
-            choices = [(seats, f"{label} ({count})") for seats, (label, count) in seats_counts.items()]
-            return [('', '-- Select Seats --')] + choices
-        except Exception:
-            return [('', '-- Select Seats --')] + [
-                ('2', '2 Seats'),
-                ('4', '4 Seats'),
-                ('5', '5 Seats'),
-                ('7', '7 Seats'),
-                ('8', '8+ Seats'),
-            ]
+        return [('', '-- Select Seats --')] + [
+            ('2', '2 Seats'),
+            ('4', '4 Seats'),
+            ('5', '5 Seats'),
+            ('7', '7 Seats'),
+            ('8', '8+ Seats'),
+        ]
 
     variant = forms.ChoiceField(
         required=False,
@@ -3048,147 +3008,71 @@ class CarForm(forms.ModelForm):
     )
     @staticmethod
     def get_exterior_color_choices():
-        try:
-            from .models import Car
-            exterior_color_counts = {}
-            EXTERIOR_COLOR_CHOICES = sorted([
-                ('Arctic White', 'Arctic White'),
-                ('Black', 'Black'),
-                ('Blue', 'Blue'),
-                ('Bright Red', 'Bright Red'),
-                ('Bronze', 'Bronze'),
-                ('Brown', 'Brown'),
-                ('Burgundy', 'Burgundy'),
-                ('Candy Red', 'Candy Red'),
-                ('Champagne Gold', 'Champagne Gold'),
-                ('Charcoal Grey', 'Charcoal Grey'),
-                ('Cherry Red', 'Cherry Red'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Copper', 'Copper'),
-                ('Copper Orange', 'Copper Orange'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Electric Blue', 'Electric Blue'),
-                ('Emerald Green', 'Emerald Green'),
-                ('Forest Green', 'Forest Green'),
-                ('Gold', 'Gold'),
-                ('Grey', 'Grey'),
-                ('Gunmetal Grey', 'Gunmetal Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Blue', 'Light Blue'),
-                ('Light Grey', 'Light Grey'),
-                ('Lime Green', 'Lime Green'),
-                ('Matte Black', 'Matte Black'),
-                ('Matte Blue', 'Matte Blue'),
-                ('Matte Green', 'Matte Green'),
-                ('Matte Grey', 'Matte Grey'),
-                ('Matte Silver', 'Matte Silver'),
-                ('Metallic Silver', 'Metallic Silver'),
-                ('Midnight Blue', 'Midnight Blue'),
-                ('Mocha', 'Mocha'),
-                ('Multi-Color', 'Multi-Color'),
-                ('Mustard Yellow', 'Mustard Yellow'),
-                ('Nardo Grey', 'Nardo Grey'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Olive Green', 'Olive Green'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Pearl White', 'Pearl White'),
-                ('Pink', 'Pink'),
-                ('Purple', 'Purple'),
-                ('Red', 'Red'),
-                ('Royal Blue', 'Royal Blue'),
-                ('Ruby Red', 'Ruby Red'),
-                ('Slate Grey', 'Slate Grey'),
-                ('Sky Blue', 'Sky Blue'),
-                ('Steel Blue', 'Steel Blue'),
-                ('Sunflower Yellow', 'Sunflower Yellow'),
-                ('Teal', 'Teal'),
-                ('Titanium Silver', 'Titanium Silver'),
-                ('Turquoise', 'Turquoise'),
-                ('Two-Tone', 'Two-Tone'),
-                ('Violet', 'Violet'),
-                ('White', 'White'),
-                ('Wine Red', 'Wine Red'),
-                ('Yellow', 'Yellow'),
-            ])
-            EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            
-            for color in EXTERIOR_COLOR_CHOICES:
-                count = Car.objects.filter(exterior_color=color[0], is_approved=True, is_sold=False).count()
-                if count > 0:
-                    exterior_color_counts[color[0]] = (color[1], count)
-            
-            choices = [(color, f"{label} ({count})") for color, (label, count) in exterior_color_counts.items()]
-            return [('', '-- Select Exterior Color --')] + choices
-        except Exception:
-            EXTERIOR_COLOR_CHOICES = sorted([
-                ('Arctic White', 'Arctic White'),
-                ('Black', 'Black'),
-                ('Blue', 'Blue'),
-                ('Bright Red', 'Bright Red'),
-                ('Bronze', 'Bronze'),
-                ('Brown', 'Brown'),
-                ('Burgundy', 'Burgundy'),
-                ('Candy Red', 'Candy Red'),
-                ('Champagne Gold', 'Champagne Gold'),
-                ('Charcoal Grey', 'Charcoal Grey'),
-                ('Cherry Red', 'Cherry Red'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Copper', 'Copper'),
-                ('Copper Orange', 'Copper Orange'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Electric Blue', 'Electric Blue'),
-                ('Emerald Green', 'Emerald Green'),
-                ('Forest Green', 'Forest Green'),
-                ('Gold', 'Gold'),
-                ('Grey', 'Grey'),
-                ('Gunmetal Grey', 'Gunmetal Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Blue', 'Light Blue'),
-                ('Light Grey', 'Light Grey'),
-                ('Lime Green', 'Lime Green'),
-                ('Matte Black', 'Matte Black'),
-                ('Matte Blue', 'Matte Blue'),
-                ('Matte Green', 'Matte Green'),
-                ('Matte Grey', 'Matte Grey'),
-                ('Matte Silver', 'Matte Silver'),
-                ('Metallic Silver', 'Metallic Silver'),
-                ('Midnight Blue', 'Midnight Blue'),
-                ('Mocha', 'Mocha'),
-                ('Multi-Color', 'Multi-Color'),
-                ('Mustard Yellow', 'Mustard Yellow'),
-                ('Nardo Grey', 'Nardo Grey'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Olive Green', 'Olive Green'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Pearl White', 'Pearl White'),
-                ('Pink', 'Pink'),
-                ('Purple', 'Purple'),
-                ('Red', 'Red'),
-                ('Royal Blue', 'Royal Blue'),
-                ('Ruby Red', 'Ruby Red'),
-                ('Slate Grey', 'Slate Grey'),
-                ('Sky Blue', 'Sky Blue'),
-                ('Steel Blue', 'Steel Blue'),
-                ('Sunflower Yellow', 'Sunflower Yellow'),
-                ('Teal', 'Teal'),
-                ('Titanium Silver', 'Titanium Silver'),
-                ('Turquoise', 'Turquoise'),
-                ('Two-Tone', 'Two-Tone'),
-                ('Violet', 'Violet'),
-                ('White', 'White'),
-                ('Wine Red', 'Wine Red'),
-                ('Yellow', 'Yellow'),
-            ])
-            EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            return [('', '-- Select Exterior Color --')] + EXTERIOR_COLOR_CHOICES
+        EXTERIOR_COLOR_CHOICES = sorted([
+            ('Arctic White', 'Arctic White'),
+            ('Black', 'Black'),
+            ('Blue', 'Blue'),
+            ('Bright Red', 'Bright Red'),
+            ('Bronze', 'Bronze'),
+            ('Brown', 'Brown'),
+            ('Burgundy', 'Burgundy'),
+            ('Candy Red', 'Candy Red'),
+            ('Champagne Gold', 'Champagne Gold'),
+            ('Charcoal Grey', 'Charcoal Grey'),
+            ('Cherry Red', 'Cherry Red'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Copper', 'Copper'),
+            ('Copper Orange', 'Copper Orange'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Electric Blue', 'Electric Blue'),
+            ('Emerald Green', 'Emerald Green'),
+            ('Forest Green', 'Forest Green'),
+            ('Gold', 'Gold'),
+            ('Grey', 'Grey'),
+            ('Gunmetal Grey', 'Gunmetal Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Blue', 'Light Blue'),
+            ('Light Grey', 'Light Grey'),
+            ('Lime Green', 'Lime Green'),
+            ('Matte Black', 'Matte Black'),
+            ('Matte Blue', 'Matte Blue'),
+            ('Matte Green', 'Matte Green'),
+            ('Matte Grey', 'Matte Grey'),
+            ('Matte Silver', 'Matte Silver'),
+            ('Metallic Silver', 'Metallic Silver'),
+            ('Midnight Blue', 'Midnight Blue'),
+            ('Mocha', 'Mocha'),
+            ('Multi-Color', 'Multi-Color'),
+            ('Mustard Yellow', 'Mustard Yellow'),
+            ('Nardo Grey', 'Nardo Grey'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Olive Green', 'Olive Green'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Pearl White', 'Pearl White'),
+            ('Pink', 'Pink'),
+            ('Purple', 'Purple'),
+            ('Red', 'Red'),
+            ('Royal Blue', 'Royal Blue'),
+            ('Ruby Red', 'Ruby Red'),
+            ('Slate Grey', 'Slate Grey'),
+            ('Sky Blue', 'Sky Blue'),
+            ('Steel Blue', 'Steel Blue'),
+            ('Sunflower Yellow', 'Sunflower Yellow'),
+            ('Teal', 'Teal'),
+            ('Titanium Silver', 'Titanium Silver'),
+            ('Turquoise', 'Turquoise'),
+            ('Two-Tone', 'Two-Tone'),
+            ('Violet', 'Violet'),
+            ('White', 'White'),
+            ('Wine Red', 'Wine Red'),
+            ('Yellow', 'Yellow'),
+        ])
+        EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- Select Exterior Color --')] + EXTERIOR_COLOR_CHOICES
 
     exterior_color = forms.ChoiceField(
         required=False,
@@ -3197,103 +3081,49 @@ class CarForm(forms.ModelForm):
     )
     @staticmethod
     def get_interior_color_choices():
-        try:
-            from .models import Car
-            interior_color_counts = {}
-            INTERIOR_COLOR_CHOICES = sorted([
-                ('Anthracite', 'Anthracite'),
-                ('Beige', 'Beige'),
-                ('Black', 'Black'),
-                ('Black / Beige', 'Black / Beige'),
-                ('Black / Blue', 'Black / Blue'),
-                ('Black / Brown', 'Black / Brown'),
-                ('Black / Grey', 'Black / Grey'),
-                ('Black / Red', 'Black / Red'),
-                ('Black / White', 'Black / White'),
-                ('Blue', 'Blue'),
-                ('Brown', 'Brown'),
-                ('Brown / Beige', 'Brown / Beige'),
-                ('Burgundy', 'Burgundy'),
-                ('Camel', 'Camel'),
-                ('Charcoal', 'Charcoal'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Espresso Brown', 'Espresso Brown'),
-                ('Green', 'Green'),
-                ('Grey', 'Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Grey', 'Light Grey'),
-                ('Mocha', 'Mocha'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Oyster', 'Oyster'),
-                ('Red', 'Red'),
-                ('Red / Black', 'Red / Black'),
-                ('Saddle Tan', 'Saddle Tan'),
-                ('Sand Beige', 'Sand Beige'),
-                ('Tan', 'Tan'),
-                ('Tan / Black', 'Tan / Black'),
-                ('Taupe', 'Taupe'),
-                ('White', 'White'),
-                ('White / Black', 'White / Black'),
-            ])
-            INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            
-            for color in INTERIOR_COLOR_CHOICES:
-                count = Car.objects.filter(interior_color=color[0], is_approved=True, is_sold=False).count()
-                if count > 0:
-                    interior_color_counts[color[0]] = (color[1], count)
-            
-            choices = [(color, f"{label} ({count})") for color, (label, count) in interior_color_counts.items()]
-            return [('', '-- Select Interior Color --')] + choices
-        except Exception:
-            INTERIOR_COLOR_CHOICES = sorted([
-                ('Anthracite', 'Anthracite'),
-                ('Beige', 'Beige'),
-                ('Black', 'Black'),
-                ('Black / Beige', 'Black / Beige'),
-                ('Black / Blue', 'Black / Blue'),
-                ('Black / Brown', 'Black / Brown'),
-                ('Black / Grey', 'Black / Grey'),
-                ('Black / Red', 'Black / Red'),
-                ('Black / White', 'Black / White'),
-                ('Blue', 'Blue'),
-                ('Brown', 'Brown'),
-                ('Brown / Beige', 'Brown / Beige'),
-                ('Burgundy', 'Burgundy'),
-                ('Camel', 'Camel'),
-                ('Charcoal', 'Charcoal'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Espresso Brown', 'Espresso Brown'),
-                ('Green', 'Green'),
-                ('Grey', 'Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Grey', 'Light Grey'),
-                ('Mocha', 'Mocha'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Oyster', 'Oyster'),
-                ('Red', 'Red'),
-                ('Red / Black', 'Red / Black'),
-                ('Saddle Tan', 'Saddle Tan'),
-                ('Sand Beige', 'Sand Beige'),
-                ('Tan', 'Tan'),
-                ('Tan / Black', 'Tan / Black'),
-                ('Taupe', 'Taupe'),
-                ('White', 'White'),
-                ('White / Black', 'White / Black'),
-            ])
-            INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            return [('', '-- Select Interior Color --')] + INTERIOR_COLOR_CHOICES
+        INTERIOR_COLOR_CHOICES = sorted([
+            ('Anthracite', 'Anthracite'),
+            ('Beige', 'Beige'),
+            ('Black', 'Black'),
+            ('Black / Beige', 'Black / Beige'),
+            ('Black / Blue', 'Black / Blue'),
+            ('Black / Brown', 'Black / Brown'),
+            ('Black / Grey', 'Black / Grey'),
+            ('Black / Red', 'Black / Red'),
+            ('Black / White', 'Black / White'),
+            ('Blue', 'Blue'),
+            ('Brown', 'Brown'),
+            ('Brown / Beige', 'Brown / Beige'),
+            ('Burgundy', 'Burgundy'),
+            ('Camel', 'Camel'),
+            ('Charcoal', 'Charcoal'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Espresso Brown', 'Espresso Brown'),
+            ('Green', 'Green'),
+            ('Grey', 'Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Grey', 'Light Grey'),
+            ('Mocha', 'Mocha'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Oyster', 'Oyster'),
+            ('Red', 'Red'),
+            ('Red / Black', 'Red / Black'),
+            ('Saddle Tan', 'Saddle Tan'),
+            ('Sand Beige', 'Sand Beige'),
+            ('Tan', 'Tan'),
+            ('Tan / Black', 'Tan / Black'),
+            ('Taupe', 'Taupe'),
+            ('White', 'White'),
+            ('White / Black', 'White / Black'),
+        ])
+        INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- Select Interior Color --')] + INTERIOR_COLOR_CHOICES
 
     interior_color = forms.ChoiceField(
         required=False,
@@ -3302,53 +3132,24 @@ class CarForm(forms.ModelForm):
     )
     @staticmethod
     def get_seat_material_choices():
-        try:
-            from .models import Car
-            seat_material_counts = {}
-            SEAT_MATERIAL_CHOICES = sorted([
-                ('Alcantara', 'Alcantara'),
-                ('Cloth', 'Cloth'),
-                ('Fabric', 'Fabric'),
-                ('Leather', 'Leather'),
-                ('Leatherette', 'Leatherette'),
-                ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
-                ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
-                ('Nappa Leather', 'Nappa Leather'),
-                ('Other', 'Other'),
-                ('Premium Leather', 'Premium Leather'),
-                ('Suede', 'Suede'),
-                ('Synthetic Leather', 'Synthetic Leather'),
-                ('Velour', 'Velour'),
-                ('Vinyl', 'Vinyl'),
-            ])
-            SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
-            
-            for material in SEAT_MATERIAL_CHOICES:
-                count = Car.objects.filter(seat_material=material[0], is_approved=True, is_sold=False).count()
-                if count > 0:
-                    seat_material_counts[material[0]] = (material[1], count)
-            
-            choices = [(material, f"{label} ({count})") for material, (label, count) in seat_material_counts.items()]
-            return [('', '-- Select Seat Material --')] + choices
-        except Exception:
-            SEAT_MATERIAL_CHOICES = sorted([
-                ('Alcantara', 'Alcantara'),
-                ('Cloth', 'Cloth'),
-                ('Fabric', 'Fabric'),
-                ('Leather', 'Leather'),
-                ('Leatherette', 'Leatherette'),
-                ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
-                ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
-                ('Nappa Leather', 'Nappa Leather'),
-                ('Other', 'Other'),
-                ('Premium Leather', 'Premium Leather'),
-                ('Suede', 'Suede'),
-                ('Synthetic Leather', 'Synthetic Leather'),
-                ('Velour', 'Velour'),
-                ('Vinyl', 'Vinyl'),
-            ])
-            SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
-            return [('', '-- Select Seat Material --')] + SEAT_MATERIAL_CHOICES
+        SEAT_MATERIAL_CHOICES = sorted([
+            ('Alcantara', 'Alcantara'),
+            ('Cloth', 'Cloth'),
+            ('Fabric', 'Fabric'),
+            ('Leather', 'Leather'),
+            ('Leatherette', 'Leatherette'),
+            ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
+            ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
+            ('Nappa Leather', 'Nappa Leather'),
+            ('Other', 'Other'),
+            ('Premium Leather', 'Premium Leather'),
+            ('Suede', 'Suede'),
+            ('Synthetic Leather', 'Synthetic Leather'),
+            ('Velour', 'Velour'),
+            ('Vinyl', 'Vinyl'),
+        ])
+        SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
+        return [('', '-- Select Seat Material --')] + SEAT_MATERIAL_CHOICES
 
     seat_material = forms.ChoiceField(
         required=False,
@@ -3357,98 +3158,36 @@ class CarForm(forms.ModelForm):
     )
     @staticmethod
     def get_interior_trim_choices():
-        try:
-            from .models import Car
-            interior_trim_counts = {}
-            INTERIOR_TRIM_CHOICES = sorted([
-                ('Aluminum', 'Aluminum'),
-                ('Brushed Aluminum', 'Brushed Aluminum'),
-                ('Carbon Fiber', 'Carbon Fiber'),
-                ('Carbon Fiber Look', 'Carbon Fiber Look'),
-                ('Chrome', 'Chrome'),
-                ('Gloss Wood', 'Gloss Wood'),
-                ('Leather Wrapped', 'Leather Wrapped'),
-                ('Matte Wood', 'Matte Wood'),
-                ('Mixed Materials', 'Mixed Materials'),
-                ('Open-Pore Wood', 'Open-Pore Wood'),
-                ('Other', 'Other'),
-                ('Piano Black', 'Piano Black'),
-                ('Satin Chrome', 'Satin Chrome'),
-                ('Wood Trim', 'Wood Trim'),
-            ])
-            INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
-            
-            for trim in INTERIOR_TRIM_CHOICES:
-                count = Car.objects.filter(interior_trim=trim[0], is_approved=True, is_sold=False).count()
-                if count > 0:
-                    interior_trim_counts[trim[0]] = (trim[1], count)
-            
-            choices = [(trim, f"{label} ({count})") for trim, (label, count) in interior_trim_counts.items()]
-            return [('', '-- Select Interior Trim --')] + choices
-        except Exception:
-            INTERIOR_TRIM_CHOICES = sorted([
-                ('Aluminum', 'Aluminum'),
-                ('Brushed Aluminum', 'Brushed Aluminum'),
-                ('Carbon Fiber', 'Carbon Fiber'),
-                ('Carbon Fiber Look', 'Carbon Fiber Look'),
-                ('Chrome', 'Chrome'),
-                ('Gloss Wood', 'Gloss Wood'),
-                ('Leather Wrapped', 'Leather Wrapped'),
-                ('Matte Wood', 'Matte Wood'),
-                ('Mixed Materials', 'Mixed Materials'),
-                ('Open-Pore Wood', 'Open-Pore Wood'),
-                ('Other', 'Other'),
-                ('Piano Black', 'Piano Black'),
-                ('Satin Chrome', 'Satin Chrome'),
-                ('Wood Trim', 'Wood Trim'),
-            ])
-            INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
-            return [('', '-- Select Interior Trim --')] + INTERIOR_TRIM_CHOICES
+        INTERIOR_TRIM_CHOICES = sorted([
+            ('Aluminum', 'Aluminum'),
+            ('Brushed Aluminum', 'Brushed Aluminum'),
+            ('Carbon Fiber', 'Carbon Fiber'),
+            ('Carbon Fiber Look', 'Carbon Fiber Look'),
+            ('Chrome', 'Chrome'),
+            ('Gloss Wood', 'Gloss Wood'),
+            ('Leather Wrapped', 'Leather Wrapped'),
+            ('Matte Wood', 'Matte Wood'),
+            ('Mixed Materials', 'Mixed Materials'),
+            ('Open-Pore Wood', 'Open-Pore Wood'),
+            ('Other', 'Other'),
+            ('Piano Black', 'Piano Black'),
+            ('Satin Chrome', 'Satin Chrome'),
+            ('Wood Trim', 'Wood Trim'),
+        ])
+        INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
+        return [('', '-- Select Interior Trim --')] + INTERIOR_TRIM_CHOICES
 
     @staticmethod
     def get_fuel_type_choices():
-        try:
-            from .models import Car
-            fuel_type_counts = {}
-            for fuel_type, label in Car.FUEL_CHOICES:
-                count = Car.objects.filter(fuel_type=fuel_type, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    fuel_type_counts[fuel_type] = (label, count)
-            
-            choices = [(fuel_type, f"{label} ({count})") for fuel_type, (label, count) in fuel_type_counts.items()]
-            return [('', '-- Select Fuel Type --')] + choices
-        except Exception:
-            return [('', '-- Select Fuel Type --')] + list(Car.FUEL_CHOICES)
+        return [('', '-- Select Fuel Type --')] + list(Car.FUEL_CHOICES)
 
     @staticmethod
     def get_transmission_choices():
-        try:
-            from .models import Car
-            transmission_counts = {}
-            for transmission, label in Car.TRANSMISSION_CHOICES:
-                count = Car.objects.filter(transmission=transmission, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    transmission_counts[transmission] = (label, count)
-            
-            choices = [(transmission, f"{label} ({count})") for transmission, (label, count) in transmission_counts.items()]
-            return [('', '-- Select Transmission --')] + choices
-        except Exception:
-            return [('', '-- Select Transmission --')] + list(Car.TRANSMISSION_CHOICES)
+        return [('', '-- Select Transmission --')] + list(Car.TRANSMISSION_CHOICES)
 
     @staticmethod
     def get_condition_choices():
-        try:
-            from .models import Car
-            condition_counts = {}
-            for condition, label in Car.CONDITION_CHOICES:
-                count = Car.objects.filter(condition=condition, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    condition_counts[condition] = (label, count)
-            
-            choices = [(condition, f"{label} ({count})") for condition, (label, count) in condition_counts.items()]
-            return [('', '-- Select Condition --')] + choices
-        except Exception:
-            return [('', '-- Select Condition --')] + list(Car.CONDITION_CHOICES)
+        return [('', '-- Select Condition --')] + list(Car.CONDITION_CHOICES)
 
     fuel_type = forms.ChoiceField(
         required=True,
@@ -3476,33 +3215,11 @@ class CarForm(forms.ModelForm):
     
     @staticmethod
     def get_fuel_economy_source_choices():
-        try:
-            from .models import Car
-            fuel_economy_source_counts = {}
-            for source, label in Car.FUEL_ECONOMY_SOURCE_CHOICES:
-                count = Car.objects.filter(fuel_economy_source=source, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    fuel_economy_source_counts[source] = (label, count)
-            
-            choices = [(source, f"{label} ({count})") for source, (label, count) in fuel_economy_source_counts.items()]
-            return [('', '-- Select Fuel Economy Source --')] + choices
-        except Exception:
-            return [('', '-- Select Fuel Economy Source --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
+        return [('', '-- Select Fuel Economy Source --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
 
     @staticmethod
     def get_fuel_economy_choices():
-        try:
-            from .models import Car
-            fuel_economy_counts = {}
-            for economy, label in Car.FUEL_ECONOMY_CHOICES:
-                count = Car.objects.filter(fuel_economy_combined=economy, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    fuel_economy_counts[economy] = (label, count)
-            
-            choices = [(economy, f"{label} ({count})") for economy, (label, count) in fuel_economy_counts.items()]
-            return [('', '-- Select Fuel Economy --')] + choices
-        except Exception:
-            return [('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
+        return [('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
     fuel_economy_source = forms.ChoiceField(
         required=False,
@@ -3661,28 +3378,12 @@ class CarForm(forms.ModelForm):
     @staticmethod
     def get_make_choices():
         try:
-            from .models import Car
             hierarchy = get_combined_car_hierarchy()
             all_makes = sorted(hierarchy.keys())
-            
-            # Get counts for each make from the database
-            make_counts = {}
-            for make in all_makes:
-                count = Car.objects.filter(make=make, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    make_counts[make] = count
-            
-            # Format choices with counts
-            choices = [(make, f"{make} ({make_counts[make]})") for make in all_makes if make in make_counts]
-            return [('', 'Any')] + choices
+            return [('', '-- Select Make --')] + [(make, make) for make in all_makes]
         except Exception:
-            # Fallback to original behavior if there's an error
-            try:
-                hierarchy = get_combined_car_hierarchy()
-                all_makes = sorted(hierarchy.keys())
-            except Exception:
-                all_makes = sorted(set(CAR_HIERARCHY.keys()))
-            return [('', 'Any')] + [(make, make) for make in all_makes]
+            all_makes = sorted(set(CAR_HIERARCHY.keys()))
+            return [('', '-- Select Make --')] + [(make, make) for make in all_makes]
 
     @staticmethod
     def get_model_choices(make=None):
@@ -3837,33 +3538,17 @@ class CarSearchForm(forms.Form):
     @staticmethod
     def get_make_choices():
         try:
-            from .models import Car
             hierarchy = get_combined_car_hierarchy()
             all_makes = sorted(hierarchy.keys())
-            
-            # Get counts for each make from the database
-            make_counts = {}
-            for make in all_makes:
-                count = Car.objects.filter(make=make, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    make_counts[make] = count
-            
-            # Format choices with counts
-            choices = [(make, f"{make} ({make_counts[make]})") for make in all_makes if make in make_counts]
-            return [('', 'Any')] + choices
+            return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
         except Exception:
-            # Fallback to original behavior if there's an error
-            try:
-                hierarchy = get_combined_car_hierarchy()
-                all_makes = sorted(hierarchy.keys())
-            except Exception:
-                all_makes = sorted(set(CAR_HIERARCHY.keys()))
-            return [('', 'Any')] + [(make, make) for make in all_makes]
+            all_makes = sorted(set(CAR_HIERARCHY.keys()))
+            return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
 
     @staticmethod
     def get_model_choices(make=None):
         if not make:
-            return [('', 'Any')]
+            return [('', '-- All Models --')]
 
         models = set()
         try:
@@ -3872,29 +3557,14 @@ class CarSearchForm(forms.Form):
         except Exception:
             models.update(CAR_HIERARCHY.get(make, {}).keys())
 
-        # Get counts for each model from the database
-        try:
-            from .models import Car
-            model_counts = {}
-            for model in sorted(models):
-                if model:
-                    count = Car.objects.filter(make=make, model=model, is_approved=True, is_sold=False).count()
-                    if count > 0:
-                        model_counts[model] = count
-            
-            # Format choices with counts
-            choices = [(model, f"{model} ({model_counts[model]})") for model in sorted(models) if model in model_counts]
-            return [('', 'Any')] + choices
-        except Exception:
-            # Fallback to original behavior if there's an error
-            return [('', 'Any')] + [(model, model) for model in sorted(models) if model]
+        return [('', '-- All Models --')] + [(model, model) for model in sorted(models) if model]
 
     @staticmethod
     def get_variant_choices(make=None, model=None):
         if not make:
-            return [('', '-- Select Make First --')]
+            return [('', '-- All Variants --')]
         if not model:
-            return [('', '-- Select Model First --')]
+            return [('', '-- All Variants --')]
 
         variants = []
         try:
@@ -3904,22 +3574,7 @@ class CarSearchForm(forms.Form):
             variants = CAR_HIERARCHY.get(make, {}).get(model, [])
         variants = [v for v in sorted(set(v for v in variants if v))]
         
-        # Get counts for each variant from the database
-        try:
-            from .models import Car
-            variant_counts = {}
-            for variant in variants:
-                if variant:
-                    count = Car.objects.filter(make=make, model=model, variant=variant, is_approved=True, is_sold=False).count()
-                    if count > 0:
-                        variant_counts[variant] = count
-            
-            # Format choices with counts
-            choices = [(variant, f"{variant} ({variant_counts[variant]})") for variant in variants if variant in variant_counts]
-            return [('', 'Any')] + choices
-        except Exception:
-            # Fallback to original behavior if there's an error
-            return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
+        return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
 
     make = forms.ChoiceField(
         required=False,
@@ -3947,10 +3602,7 @@ class CarSearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        try:
-            self.fields['make'].choices = self.get_make_choices()
-        except Exception:
-            self.fields['make'].choices = [('', '-- All Makes --')]
+        self.fields['make'].choices = self.get_make_choices()
 
         selected_make = self.data.get('make') or self.initial.get('make')
         selected_model = self.data.get('model') or self.initial.get('model')
@@ -3959,61 +3611,16 @@ class CarSearchForm(forms.Form):
         self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
         
         # Initialize dynamic choices for other filters
-        try:
-            self.fields['fuel_type'].choices = self.get_fuel_type_choices()
-        except Exception:
-            self.fields['fuel_type'].choices = [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
-        
-        try:
-            self.fields['transmission'].choices = self.get_transmission_choices()
-        except Exception:
-            self.fields['transmission'].choices = [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
-        
-        try:
-            self.fields['condition'].choices = self.get_condition_choices()
-        except Exception:
-            self.fields['condition'].choices = [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
-        
-        try:
-            self.fields['body_type'].choices = self.get_body_type_choices()
-        except Exception:
-            self.fields['body_type'].choices = [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
-        
-        try:
-            self.fields['doors'].choices = self.get_doors_choices()
-        except Exception:
-            self.fields['doors'].choices = [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
-        
-        try:
-            self.fields['seats'].choices = self.get_seats_choices()
-        except Exception:
-            self.fields['seats'].choices = [('', '-- All Seats --')] + [
-                ('2', '2 Seats'),
-                ('4', '4 Seats'),
-                ('5', '5 Seats'),
-                ('7', '7 Seats'),
-                ('8', '8+ Seats'),
-            ]
-        
-        try:
-            self.fields['exterior_color'].choices = self.get_exterior_color_choices()
-        except Exception:
-            pass  # Method handles its own fallback
-        
-        try:
-            self.fields['interior_color'].choices = self.get_interior_color_choices()
-        except Exception:
-            pass  # Method handles its own fallback
-        
-        try:
-            self.fields['seat_material'].choices = self.get_seat_material_choices()
-        except Exception:
-            pass  # Method handles its own fallback
-        
-        try:
-            self.fields['interior_trim'].choices = self.get_interior_trim_choices()
-        except Exception:
-            pass  # Method handles its own fallback
+        self.fields['fuel_type'].choices = self.get_fuel_type_choices()
+        self.fields['transmission'].choices = self.get_transmission_choices()
+        self.fields['condition'].choices = self.get_condition_choices()
+        self.fields['body_type'].choices = self.get_body_type_choices()
+        self.fields['doors'].choices = self.get_doors_choices()
+        self.fields['seats'].choices = self.get_seats_choices()
+        self.fields['exterior_color'].choices = self.get_exterior_color_choices()
+        self.fields['interior_color'].choices = self.get_interior_color_choices()
+        self.fields['seat_material'].choices = self.get_seat_material_choices()
+        self.fields['interior_trim'].choices = self.get_interior_trim_choices()
         
         try:
             self.fields['number_of_keys'].choices = self.get_number_of_keys_choices()
@@ -4214,48 +3821,15 @@ class CarSearchForm(forms.Form):
  
     @staticmethod
     def get_fuel_type_choices():
-        try:
-            from .models import Car
-            fuel_type_counts = {}
-            for fuel_type, label in Car.FUEL_CHOICES:
-                count = Car.objects.filter(fuel_type=fuel_type, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    fuel_type_counts[fuel_type] = (label, count)
-            
-            choices = [(fuel_type, f"{label} ({count})") for fuel_type, (label, count) in fuel_type_counts.items()]
-            return [('', '-- All Fuel Types --')] + choices
-        except Exception:
-            return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
+        return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
 
     @staticmethod
     def get_transmission_choices():
-        try:
-            from .models import Car
-            transmission_counts = {}
-            for transmission, label in Car.TRANSMISSION_CHOICES:
-                count = Car.objects.filter(transmission=transmission, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    transmission_counts[transmission] = (label, count)
-            
-            choices = [(transmission, f"{label} ({count})") for transmission, (label, count) in transmission_counts.items()]
-            return [('', '-- All Transmissions --')] + choices
-        except Exception:
-            return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
+        return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
 
     @staticmethod
     def get_condition_choices():
-        try:
-            from .models import Car
-            condition_counts = {}
-            for condition, label in Car.CONDITION_CHOICES:
-                count = Car.objects.filter(condition=condition, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    condition_counts[condition] = (label, count)
-            
-            choices = [(condition, f"{label} ({count})") for condition, (label, count) in condition_counts.items()]
-            return [('', '-- All Conditions --')] + choices
-        except Exception:
-            return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
+        return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
 
     fuel_type = forms.ChoiceField(
         required=False,
@@ -4295,206 +3869,89 @@ class CarSearchForm(forms.Form):
  
     @staticmethod
     def get_body_type_choices():
-        try:
-            from .models import Car
-            body_type_counts = {}
-            for body_type, label in Car.BODY_TYPE_CHOICES:
-                count = Car.objects.filter(body_type=body_type, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    body_type_counts[body_type] = (label, count)
-            
-            choices = [(body_type, f"{label} ({count})") for body_type, (label, count) in body_type_counts.items()]
-            return [('', '-- All Body Types --')] + choices
-        except Exception:
-            return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
+        return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
 
     @staticmethod
     def get_doors_choices():
-        try:
-            from .models import Car
-            doors_counts = {}
-            for doors, label in Car.DOORS_CHOICES:
-                count = Car.objects.filter(doors=doors, is_approved=True, is_sold=False).count()
-                if count > 0:
-                    doors_counts[doors] = (label, count)
-            
-            choices = [(doors, f"{label} ({count})") for doors, (label, count) in doors_counts.items()]
-            return [('', '-- All Doors --')] + choices
-        except Exception:
-            return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
+        return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
 
     @staticmethod
     def get_seats_choices():
-        try:
-            from .models import Car
-            seats_choices = [
-                ('2', '2 Seats'),
-                ('4', '4 Seats'),
-                ('5', '5 Seats'),
-                ('7', '7 Seats'),
-                ('8', '8+ Seats'),
-            ]
-            seats_counts = {}
-            for seats, label in seats_choices:
-                count = Car.objects.filter(seats=int(seats), is_approved=True, is_sold=False).count()
-                if count > 0:
-                    seats_counts[seats] = (label, count)
-            
-            choices = [(seats, f"{label} ({count})") for seats, (label, count) in seats_counts.items()]
-            return [('', '-- All Seats --')] + choices
-        except Exception:
-            return [('', '-- All Seats --')] + [
-                ('2', '2 Seats'),
-                ('4', '4 Seats'),
-                ('5', '5 Seats'),
-                ('7', '7 Seats'),
-                ('8', '8+ Seats'),
-            ]
+        return [('', '-- All Seats --')] + [
+            ('2', '2 Seats'),
+            ('4', '4 Seats'),
+            ('5', '5 Seats'),
+            ('7', '7 Seats'),
+            ('8', '8+ Seats'),
+        ]
 
     @staticmethod
     def get_exterior_color_choices():
-        try:
-            from .models import Car
-            exterior_color_counts = {}
-            # Get the EXTERIOR_COLOR_CHOICES from the class
-            EXTERIOR_COLOR_CHOICES = sorted([
-                ('Arctic White', 'Arctic White'),
-                ('Black', 'Black'),
-                ('Blue', 'Blue'),
-                ('Bright Red', 'Bright Red'),
-                ('Bronze', 'Bronze'),
-                ('Brown', 'Brown'),
-                ('Burgundy', 'Burgundy'),
-                ('Candy Red', 'Candy Red'),
-                ('Champagne Gold', 'Champagne Gold'),
-                ('Charcoal Grey', 'Charcoal Grey'),
-                ('Cherry Red', 'Cherry Red'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Copper', 'Copper'),
-                ('Copper Orange', 'Copper Orange'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Electric Blue', 'Electric Blue'),
-                ('Emerald Green', 'Emerald Green'),
-                ('Forest Green', 'Forest Green'),
-                ('Gold', 'Gold'),
-                ('Grey', 'Grey'),
-                ('Gunmetal Grey', 'Gunmetal Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Blue', 'Light Blue'),
-                ('Light Grey', 'Light Grey'),
-                ('Lime Green', 'Lime Green'),
-                ('Matte Black', 'Matte Black'),
-                ('Matte Blue', 'Matte Blue'),
-                ('Matte Green', 'Matte Green'),
-                ('Matte Grey', 'Matte Grey'),
-                ('Matte Silver', 'Matte Silver'),
-                ('Metallic Silver', 'Metallic Silver'),
-                ('Midnight Blue', 'Midnight Blue'),
-                ('Mocha', 'Mocha'),
-                ('Multi-Color', 'Multi-Color'),
-                ('Mustard Yellow', 'Mustard Yellow'),
-                ('Nardo Grey', 'Nardo Grey'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Olive Green', 'Olive Green'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Pearl White', 'Pearl White'),
-                ('Pink', 'Pink'),
-                ('Purple', 'Purple'),
-                ('Red', 'Red'),
-                ('Royal Blue', 'Royal Blue'),
-                ('Ruby Red', 'Ruby Red'),
-                ('Slate Grey', 'Slate Grey'),
-                ('Sky Blue', 'Sky Blue'),
-                ('Steel Blue', 'Steel Blue'),
-                ('Sunflower Yellow', 'Sunflower Yellow'),
-                ('Teal', 'Teal'),
-                ('Titanium Silver', 'Titanium Silver'),
-                ('Turquoise', 'Turquoise'),
-                ('Two-Tone', 'Two-Tone'),
-                ('Violet', 'Violet'),
-                ('White', 'White'),
-                ('Wine Red', 'Wine Red'),
-                ('Yellow', 'Yellow'),
-            ])
-            EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            
-            for color in EXTERIOR_COLOR_CHOICES:
-                count = Car.objects.filter(exterior_color=color[0], is_approved=True, is_sold=False).count()
-                if count > 0:
-                    exterior_color_counts[color[0]] = (color[1], count)
-            
-            choices = [(color, f"{label} ({count})") for color, (label, count) in exterior_color_counts.items()]
-            return [('', '-- All Exterior Colors --')] + choices
-        except Exception:
-            EXTERIOR_COLOR_CHOICES = sorted([
-                ('Arctic White', 'Arctic White'),
-                ('Black', 'Black'),
-                ('Blue', 'Blue'),
-                ('Bright Red', 'Bright Red'),
-                ('Bronze', 'Bronze'),
-                ('Brown', 'Brown'),
-                ('Burgundy', 'Burgundy'),
-                ('Candy Red', 'Candy Red'),
-                ('Champagne Gold', 'Champagne Gold'),
-                ('Charcoal Grey', 'Charcoal Grey'),
-                ('Cherry Red', 'Cherry Red'),
-                ('Chocolate Brown', 'Chocolate Brown'),
-                ('Copper', 'Copper'),
-                ('Copper Orange', 'Copper Orange'),
-                ('Cream', 'Cream'),
-                ('Dark Brown', 'Dark Brown'),
-                ('Dark Grey', 'Dark Grey'),
-                ('Electric Blue', 'Electric Blue'),
-                ('Emerald Green', 'Emerald Green'),
-                ('Forest Green', 'Forest Green'),
-                ('Gold', 'Gold'),
-                ('Grey', 'Grey'),
-                ('Gunmetal Grey', 'Gunmetal Grey'),
-                ('Ivory', 'Ivory'),
-                ('Jet Black', 'Jet Black'),
-                ('Light Blue', 'Light Blue'),
-                ('Light Grey', 'Light Grey'),
-                ('Lime Green', 'Lime Green'),
-                ('Matte Black', 'Matte Black'),
-                ('Matte Blue', 'Matte Blue'),
-                ('Matte Green', 'Matte Green'),
-                ('Matte Grey', 'Matte Grey'),
-                ('Matte Silver', 'Matte Silver'),
-                ('Metallic Silver', 'Metallic Silver'),
-                ('Midnight Blue', 'Midnight Blue'),
-                ('Mocha', 'Mocha'),
-                ('Multi-Color', 'Multi-Color'),
-                ('Mustard Yellow', 'Mustard Yellow'),
-                ('Nardo Grey', 'Nardo Grey'),
-                ('Navy Blue', 'Navy Blue'),
-                ('Olive Green', 'Olive Green'),
-                ('Orange', 'Orange'),
-                ('Other', 'Other'),
-                ('Pearl White', 'Pearl White'),
-                ('Pink', 'Pink'),
-                ('Purple', 'Purple'),
-                ('Red', 'Red'),
-                ('Royal Blue', 'Royal Blue'),
-                ('Ruby Red', 'Ruby Red'),
-                ('Slate Grey', 'Slate Grey'),
-                ('Sky Blue', 'Sky Blue'),
-                ('Steel Blue', 'Steel Blue'),
-                ('Sunflower Yellow', 'Sunflower Yellow'),
-                ('Teal', 'Teal'),
-                ('Titanium Silver', 'Titanium Silver'),
-                ('Turquoise', 'Turquoise'),
-                ('Two-Tone', 'Two-Tone'),
-                ('Violet', 'Violet'),
-                ('White', 'White'),
-                ('Wine Red', 'Wine Red'),
-                ('Yellow', 'Yellow'),
-            ])
-            EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-            return [('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES
+        EXTERIOR_COLOR_CHOICES = sorted([
+            ('Arctic White', 'Arctic White'),
+            ('Black', 'Black'),
+            ('Blue', 'Blue'),
+            ('Bright Red', 'Bright Red'),
+            ('Bronze', 'Bronze'),
+            ('Brown', 'Brown'),
+            ('Burgundy', 'Burgundy'),
+            ('Candy Red', 'Candy Red'),
+            ('Champagne Gold', 'Champagne Gold'),
+            ('Charcoal Grey', 'Charcoal Grey'),
+            ('Cherry Red', 'Cherry Red'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Copper', 'Copper'),
+            ('Copper Orange', 'Copper Orange'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Electric Blue', 'Electric Blue'),
+            ('Emerald Green', 'Emerald Green'),
+            ('Forest Green', 'Forest Green'),
+            ('Gold', 'Gold'),
+            ('Grey', 'Grey'),
+            ('Gunmetal Grey', 'Gunmetal Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Blue', 'Light Blue'),
+            ('Light Grey', 'Light Grey'),
+            ('Lime Green', 'Lime Green'),
+            ('Matte Black', 'Matte Black'),
+            ('Matte Blue', 'Matte Blue'),
+            ('Matte Green', 'Matte Green'),
+            ('Matte Grey', 'Matte Grey'),
+            ('Matte Silver', 'Matte Silver'),
+            ('Metallic Silver', 'Metallic Silver'),
+            ('Midnight Blue', 'Midnight Blue'),
+            ('Mocha', 'Mocha'),
+            ('Multi-Color', 'Multi-Color'),
+            ('Mustard Yellow', 'Mustard Yellow'),
+            ('Nardo Grey', 'Nardo Grey'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Olive Green', 'Olive Green'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Pearl White', 'Pearl White'),
+            ('Pink', 'Pink'),
+            ('Purple', 'Purple'),
+            ('Red', 'Red'),
+            ('Royal Blue', 'Royal Blue'),
+            ('Ruby Red', 'Ruby Red'),
+            ('Slate Grey', 'Slate Grey'),
+            ('Sky Blue', 'Sky Blue'),
+            ('Steel Blue', 'Steel Blue'),
+            ('Sunflower Yellow', 'Sunflower Yellow'),
+            ('Teal', 'Teal'),
+            ('Titanium Silver', 'Titanium Silver'),
+            ('Turquoise', 'Turquoise'),
+            ('Two-Tone', 'Two-Tone'),
+            ('Violet', 'Violet'),
+            ('White', 'White'),
+            ('Wine Red', 'Wine Red'),
+            ('Yellow', 'Yellow'),
+        ])
+        EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES
 
     @staticmethod
     def get_interior_color_choices():
