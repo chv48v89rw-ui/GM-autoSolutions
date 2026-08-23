@@ -278,6 +278,12 @@ def apply_car_filters(cars, form):
         if form.cleaned_data.get('fuel_economy_to'):
             cars = cars.filter(fuel_economy_value__lte=float(form.cleaned_data['fuel_economy_to']))
 
+    if form.cleaned_data.get('fuel_economy_combined'):
+        cars = cars.filter(fuel_economy_combined=form.cleaned_data['fuel_economy_combined'])
+
+    if form.cleaned_data.get('value_source'):
+        cars = cars.filter(value_source=form.cleaned_data['value_source'])
+
     return cars
 
 
