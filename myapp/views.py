@@ -256,16 +256,14 @@ def apply_car_filters(cars, form):
     if form.cleaned_data.get('interior_trim'):
         cars = cars.filter(interior_trim=form.cleaned_data['interior_trim'])
 
-    if form.cleaned_data.get('color'):
-        cars = cars.filter(color__iexact=form.cleaned_data['color'])
+    if form.cleaned_data.get('exterior_color'):
+        cars = cars.filter(exterior_color__iexact=form.cleaned_data['exterior_color'])
+
+    if form.cleaned_data.get('interior_color'):
+        cars = cars.filter(interior_color__iexact=form.cleaned_data['interior_color'])
 
     if form.cleaned_data.get('features'):
-        feature_terms = [feature.strip() for feature in form.cleaned_data['features'].split(',') if feature.strip()]
-        if feature_terms:
-            feature_query = Q()
-            for feature in feature_terms:
-                feature_query |= Q(features__icontains=feature)
-            cars = cars.filter(feature_query)
+        cars = cars.filter(features__icontains=form.cleaned_data['features'])
 
     if form.cleaned_data.get('number_of_keys'):
         cars = cars.filter(number_of_keys=form.cleaned_data['number_of_keys'])
@@ -1245,7 +1243,8 @@ def get_filter_counts(request):
         interior_color = request.GET.get('interior_color')
         seat_material = request.GET.get('seat_material')
         interior_trim = request.GET.get('interior_trim')
-        color = request.GET.get('color')
+        exterior_color = request.GET.get('exterior_color')
+        interior_color = request.GET.get('interior_color')
         features = request.GET.get('features')
         number_of_keys = request.GET.get('number_of_keys')
         fuel_economy_source = request.GET.get('fuel_economy_source')
@@ -1327,15 +1326,12 @@ def get_filter_counts(request):
             cars = cars.filter(seat_material=seat_material)
         if interior_trim:
             cars = cars.filter(interior_trim=interior_trim)
-        if color:
-            cars = cars.filter(color__icontains=color)
+        if exterior_color:
+            cars = cars.filter(exterior_color__icontains=exterior_color)
+        if interior_color:
+            cars = cars.filter(interior_color__icontains=interior_color)
         if features:
-            feature_terms = [feature.strip() for feature in features.split(',') if feature.strip()]
-            if feature_terms:
-                feature_query = Q()
-                for feature in feature_terms:
-                    feature_query |= Q(features__icontains=feature)
-                cars = cars.filter(feature_query)
+            cars = cars.filter(features__icontains=features)
         if number_of_keys:
             cars = cars.filter(number_of_keys=number_of_keys)
         if fuel_economy_source:
@@ -2708,6 +2704,10 @@ def apply_saved_search(request, search_id):
         params.append(f'fuel_type={search.fuel_type}')
     if search.color:
         params.append(f'color={search.color}')
+    if search.exterior_color:
+        params.append(f'exterior_color={search.exterior_color}')
+    if search.interior_color:
+        params.append(f'interior_color={search.interior_color}')
     if search.body_type:
         params.append(f'body_type={search.body_type}')
     if search.features:

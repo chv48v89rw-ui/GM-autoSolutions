@@ -3580,6 +3580,7 @@ class CarSearchForm(forms.Form):
         self.fields['fuel_economy_source'].choices = self.get_fuel_economy_source_choices()
         self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices()
         self.fields['value_source'].choices = self.get_value_source_choices()
+        self.fields['features'].choices = self.get_features_choices()
  
     current_year = timezone.now().year
  
@@ -4076,45 +4077,6 @@ class CarSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    features = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Features (comma-separated): ABS, Power Steering, AC, etc.',
-            'rows': 3
-        })
-    )
-    
-    color = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Color'
-        })
-    )
-    
-    FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + list(Car.FUEL_ECONOMY_CHOICES)
-
-    fuel_economy_from = forms.ChoiceField(required=False, choices=FUEL_ECONOMY_FROM_CHOICES, widget=forms.Select(attrs={
-        'class': 'form-control',
-    }))
-
-    FUEL_ECONOMY_TO_CHOICES = [('', '--- Fuel Economy to ---')] + list(Car.FUEL_ECONOMY_CHOICES)
-
-    fuel_economy_to = forms.ChoiceField(required=False, choices=FUEL_ECONOMY_TO_CHOICES, widget=forms.Select(attrs={
-        'class': 'form-control',
-    }))
-    
-    color = forms.CharField(required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Color (e.g., Red, Black, White)'
-    }))
-
-    features = forms.CharField(required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Features (e.g., ABS, AC, Power Steering)'
-    }))
-
     FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + [
         (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
     ]
@@ -4134,6 +4096,36 @@ class CarSearchForm(forms.Form):
         choices=FUEL_ECONOMY_TO_CHOICES,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    
+    @staticmethod
+    def get_features_choices():
+        """Static features choices for common car features"""
+        FEATURES_CHOICES = sorted([
+            ('ABS', 'ABS (Anti-lock Braking System)'),
+            ('Air Conditioning', 'Air Conditioning'),
+            ('Alloy Wheels', 'Alloy Wheels'),
+            ('Android Auto', 'Android Auto'),
+            ('Apple CarPlay', 'Apple CarPlay'),
+            ('Bluetooth', 'Bluetooth'),
+            ('Cruise Control', 'Cruise Control'),
+            ('Electric Windows', 'Electric Windows'),
+            ('GPS Navigation', 'GPS Navigation'),
+            ('Heated Seats', 'Heated Seats'),
+            ('Keyless Entry', 'Keyless Entry'),
+            ('Leather Seats', 'Leather Seats'),
+            ('Parking Sensors', 'Parking Sensors'),
+            ('Power Steering', 'Power Steering'),
+            ('Rear View Camera', 'Rear View Camera'),
+            ('Sunroof', 'Sunroof'),
+            ('USB Port', 'USB Port'),
+        ])
+        return [('', '-- All Features --')] + FEATURES_CHOICES
+
+    features = forms.ChoiceField(
+        required=False,
+        choices=get_features_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
    
 
@@ -4151,6 +4143,85 @@ class ReportForm(forms.ModelForm):
 # New Forms for Features #5, #6, #7, #8
 
 class SavedSearchForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Set choices for dropdown fields using the same logic as CarSearchForm
+        all_makes = sorted(CAR_HIERARCHY.keys())
+        self.fields['make'].choices = [('', '-- All Makes --')] + [(make, make) for make in all_makes]
+        self.fields['fuel_type'].choices = [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
+        self.fields['transmission'].choices = [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
+        self.fields['condition'].choices = [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
+        self.fields['body_type'].choices = [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
+        
+        # Set features choices
+        FEATURES_CHOICES = sorted([
+            ('ABS', 'ABS (Anti-lock Braking System)'),
+            ('Air Conditioning', 'Air Conditioning'),
+            ('Alloy Wheels', 'Alloy Wheels'),
+            ('Android Auto', 'Android Auto'),
+            ('Apple CarPlay', 'Apple CarPlay'),
+            ('Bluetooth', 'Bluetooth'),
+            ('Cruise Control', 'Cruise Control'),
+            ('Electric Windows', 'Electric Windows'),
+            ('GPS Navigation', 'GPS Navigation'),
+            ('Heated Seats', 'Heated Seats'),
+            ('Keyless Entry', 'Keyless Entry'),
+            ('Leather Seats', 'Leather Seats'),
+            ('Parking Sensors', 'Parking Sensors'),
+            ('Power Steering', 'Power Steering'),
+            ('Rear View Camera', 'Rear View Camera'),
+            ('Sunroof', 'Sunroof'),
+            ('USB Port', 'USB Port'),
+        ])
+        self.fields['features'].choices = [('', '-- All Features --')] + FEATURES_CHOICES
+        
+        # Set year choices
+        current_year = timezone.now().year
+        self.fields['year_from'].choices = [('', '--- Year from ---')] + [(year, str(year)) for year in range(current_year, 1989, -1)]
+        self.fields['year_to'].choices = [('', '--- Year to ---')] + [(year, str(year)) for year in range(current_year, 1989, -1)]
+        
+        # Set price choices
+        price_choices = [
+            ('', '--- Price ---'),
+            ('5000000', '5,000,000'),
+            ('5500000', '5,500,000'),
+            ('6000000', '6,000,000'),
+            ('6500000', '6,500,000'),
+            ('7000000', '7,000,000'),
+            ('7500000', '7,500,000'),
+            ('8000000', '8,000,000'),
+            ('8500000', '8,500,000'),
+            ('9000000', '9,000,000'),
+            ('9500000', '9,500,000'),
+            ('10000000', '10,000,000'),
+            ('15000000', '15,000,000'),
+            ('20000000', '20,000,000'),
+            ('25000000', '25,000,000'),
+            ('30000000', '30,000,000'),
+        ]
+        self.fields['price_from'].choices = price_choices
+        self.fields['price_to'].choices = price_choices
+        
+        # Set mileage choices
+        mileage_choices = [
+            ('', '--- Mileage ---'),
+            ('10000', '10,000 km'),
+            ('20000', '20,000 km'),
+            ('30000', '30,000 km'),
+            ('40000', '40,000 km'),
+            ('50000', '50,000 km'),
+            ('60000', '60,000 km'),
+            ('70000', '70,000 km'),
+            ('80000', '80,000 km'),
+            ('90000', '90,000 km'),
+            ('100000', '100,000 km'),
+            ('150000', '150,000 km'),
+            ('200000', '200,000 km'),
+        ]
+        self.fields['mileage_from'].choices = mileage_choices
+        self.fields['mileage_to'].choices = mileage_choices
+
     class Meta:
         model = SavedSearch
         fields = ('name', 'make', 'model', 'year_from', 'year_to', 'price_from', 'price_to',
@@ -4162,20 +4233,20 @@ class SavedSearchForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Name your search (e.g., Toyota under 500k)'
             }),
-            'make': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Make'}),
+            'make': forms.Select(attrs={'class': 'form-select'}),
             'model': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Model'}),
-            'year_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From year'}),
-            'year_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To year'}),
-            'price_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From price'}),
-            'price_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To price'}),
-            'mileage_from': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'From mileage'}),
-            'mileage_to': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'To mileage'}),
+            'year_from': forms.Select(attrs={'class': 'form-select'}),
+            'year_to': forms.Select(attrs={'class': 'form-select'}),
+            'price_from': forms.Select(attrs={'class': 'form-select'}),
+            'price_to': forms.Select(attrs={'class': 'form-select'}),
+            'mileage_from': forms.Select(attrs={'class': 'form-select'}),
+            'mileage_to': forms.Select(attrs={'class': 'form-select'}),
             'fuel_type': forms.Select(attrs={'class': 'form-select'}),
             'transmission': forms.Select(attrs={'class': 'form-select'}),
             'condition': forms.Select(attrs={'class': 'form-select'}),
             'color': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Color'}),
             'body_type': forms.Select(attrs={'class': 'form-select'}),
-            'features': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Comma-separated features'}),
+            'features': forms.Select(attrs={'class': 'form-select'}),
             'alert_on_new': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'alert_on_price_drop': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'price_drop_percentage': forms.NumberInput(attrs={'class': 'form-control'}),
