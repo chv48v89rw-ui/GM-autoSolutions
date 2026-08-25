@@ -205,23 +205,86 @@ def apply_car_filters(cars, form):
         return cars
 
     if form.cleaned_data.get('make'):
-        cars = cars.filter(make__icontains=form.cleaned_data['make'])
+        cars = cars.filter(make__iexact=form.cleaned_data['make'])
     if form.cleaned_data.get('model'):
-        cars = cars.filter(model__icontains=form.cleaned_data['model'])
+        cars = cars.filter(model__iexact=form.cleaned_data['model'])
     if form.cleaned_data.get('variant'):
-        cars = cars.filter(variant__icontains=form.cleaned_data['variant'])
+        cars = cars.filter(variant__iexact=form.cleaned_data['variant'])
     if form.cleaned_data.get('year_from'):
-        cars = cars.filter(year__gte=form.cleaned_data['year_from'])
+        year_from = form.cleaned_data['year_from']
+        # Handle AutoTrader-style range format
+        if '_' in year_from:
+            parts = year_from.split('_')
+            cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
+        else:
+            cars = cars.filter(year__gte=int(year_from))
+            
     if form.cleaned_data.get('year_to'):
-        cars = cars.filter(year__lte=form.cleaned_data['year_to'])
+        year_to = form.cleaned_data['year_to']
+        # Handle AutoTrader-style range format
+        if '_' in year_to:
+            parts = year_to.split('_')
+            cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
+        else:
+            cars = cars.filter(year__lte=int(year_to))
     if form.cleaned_data.get('price_from'):
-        cars = cars.filter(price__gte=form.cleaned_data['price_from'])
+        price_from = form.cleaned_data['price_from']
+        # Handle AutoTrader-style range format
+        if price_from.startswith('under_'):
+            threshold = float(price_from.split('_')[1])
+            cars = cars.filter(price__lt=threshold)
+        elif price_from.startswith('over_'):
+            threshold = float(price_from.split('_')[1])
+            cars = cars.filter(price__gte=threshold)
+        elif '_' in price_from:
+            parts = price_from.split('_')
+            cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
+        else:
+            cars = cars.filter(price__gte=float(price_from))
+            
     if form.cleaned_data.get('price_to'):
-        cars = cars.filter(price__lte=form.cleaned_data['price_to'])
+        price_to = form.cleaned_data['price_to']
+        # Handle AutoTrader-style range format
+        if price_to.startswith('under_'):
+            threshold = float(price_to.split('_')[1])
+            cars = cars.filter(price__lt=threshold)
+        elif price_to.startswith('over_'):
+            threshold = float(price_to.split('_')[1])
+            cars = cars.filter(price__gte=threshold)
+        elif '_' in price_to:
+            parts = price_to.split('_')
+            cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
+        else:
+            cars = cars.filter(price__lte=float(price_to))
     if form.cleaned_data.get('mileage_from'):
-        cars = cars.filter(mileage__gte=form.cleaned_data['mileage_from'])
+        mileage_from = form.cleaned_data['mileage_from']
+        # Handle AutoTrader-style range format
+        if mileage_from.startswith('under_'):
+            threshold = float(mileage_from.split('_')[1])
+            cars = cars.filter(mileage__lt=threshold)
+        elif mileage_from.startswith('over_'):
+            threshold = float(mileage_from.split('_')[1])
+            cars = cars.filter(mileage__gte=threshold)
+        elif '_' in mileage_from:
+            parts = mileage_from.split('_')
+            cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
+        else:
+            cars = cars.filter(mileage__gte=float(mileage_from))
+            
     if form.cleaned_data.get('mileage_to'):
-        cars = cars.filter(mileage__lte=form.cleaned_data['mileage_to'])
+        mileage_to = form.cleaned_data['mileage_to']
+        # Handle AutoTrader-style range format
+        if mileage_to.startswith('under_'):
+            threshold = float(mileage_to.split('_')[1])
+            cars = cars.filter(mileage__lt=threshold)
+        elif mileage_to.startswith('over_'):
+            threshold = float(mileage_to.split('_')[1])
+            cars = cars.filter(mileage__gte=threshold)
+        elif '_' in mileage_to:
+            parts = mileage_to.split('_')
+            cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
+        else:
+            cars = cars.filter(mileage__lte=float(mileage_to))
     if form.cleaned_data.get('fuel_type'):
         cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
     if form.cleaned_data.get('transmission'):
@@ -231,10 +294,36 @@ def apply_car_filters(cars, form):
 
     if form.cleaned_data.get('engine_size_from') or form.cleaned_data.get('engine_size_to'):
         cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
+        
         if form.cleaned_data.get('engine_size_from'):
-            cars = cars.filter(engine_size_value__gte=float(form.cleaned_data['engine_size_from']))
+            engine_size_from = form.cleaned_data['engine_size_from']
+            # Handle AutoTrader-style range format
+            if engine_size_from.startswith('under_'):
+                threshold = float(engine_size_from.split('_')[1])
+                cars = cars.filter(engine_size_value__lt=threshold)
+            elif engine_size_from.startswith('over_'):
+                threshold = float(engine_size_from.split('_')[1])
+                cars = cars.filter(engine_size_value__gte=threshold)
+            elif '_' in engine_size_from:
+                parts = engine_size_from.split('_')
+                cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
+            else:
+                cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+                
         if form.cleaned_data.get('engine_size_to'):
-            cars = cars.filter(engine_size_value__lte=float(form.cleaned_data['engine_size_to']))
+            engine_size_to = form.cleaned_data['engine_size_to']
+            # Handle AutoTrader-style range format
+            if engine_size_to.startswith('under_'):
+                threshold = float(engine_size_to.split('_')[1])
+                cars = cars.filter(engine_size_value__lt=threshold)
+            elif engine_size_to.startswith('over_'):
+                threshold = float(engine_size_to.split('_')[1])
+                cars = cars.filter(engine_size_value__gte=threshold)
+            elif '_' in engine_size_to:
+                parts = engine_size_to.split('_')
+                cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
+            else:
+                cars = cars.filter(engine_size_value__lte=float(engine_size_to))
 
     if form.cleaned_data.get('doors'):
         cars = cars.filter(doors=form.cleaned_data['doors'])
@@ -255,7 +344,7 @@ def apply_car_filters(cars, form):
         cars = cars.filter(interior_trim=form.cleaned_data['interior_trim'])
 
     if form.cleaned_data.get('color'):
-        cars = cars.filter(color__icontains=form.cleaned_data['color'])
+        cars = cars.filter(color__iexact=form.cleaned_data['color'])
 
     if form.cleaned_data.get('features'):
         feature_terms = [feature.strip() for feature in form.cleaned_data['features'].split(',') if feature.strip()]
@@ -273,10 +362,36 @@ def apply_car_filters(cars, form):
 
     if form.cleaned_data.get('fuel_economy_from') or form.cleaned_data.get('fuel_economy_to'):
         cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
+        
         if form.cleaned_data.get('fuel_economy_from'):
-            cars = cars.filter(fuel_economy_value__gte=float(form.cleaned_data['fuel_economy_from']))
+            fuel_economy_from = form.cleaned_data['fuel_economy_from']
+            # Handle AutoTrader-style range format
+            if fuel_economy_from and fuel_economy_from.startswith('under_'):
+                threshold = float(fuel_economy_from.split('_')[1])
+                cars = cars.filter(fuel_economy_value__lt=threshold)
+            elif fuel_economy_from and fuel_economy_from.startswith('over_'):
+                threshold = float(fuel_economy_from.split('_')[1])
+                cars = cars.filter(fuel_economy_value__gte=threshold)
+            elif fuel_economy_from and '_' in fuel_economy_from:
+                parts = fuel_economy_from.split('_')
+                cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
+            elif fuel_economy_from:
+                cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+                
         if form.cleaned_data.get('fuel_economy_to'):
-            cars = cars.filter(fuel_economy_value__lte=float(form.cleaned_data['fuel_economy_to']))
+            fuel_economy_to = form.cleaned_data['fuel_economy_to']
+            # Handle AutoTrader-style range format
+            if fuel_economy_to and fuel_economy_to.startswith('under_'):
+                threshold = float(fuel_economy_to.split('_')[1])
+                cars = cars.filter(fuel_economy_value__lt=threshold)
+            elif fuel_economy_to and fuel_economy_to.startswith('over_'):
+                threshold = float(fuel_economy_to.split('_')[1])
+                cars = cars.filter(fuel_economy_value__gte=threshold)
+            elif fuel_economy_to and '_' in fuel_economy_to:
+                parts = fuel_economy_to.split('_')
+                cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
+            elif fuel_economy_to:
+                cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
 
     if form.cleaned_data.get('fuel_economy_combined'):
         cars = cars.filter(fuel_economy_combined=form.cleaned_data['fuel_economy_combined'])
@@ -1252,35 +1367,120 @@ def get_filter_counts(request):
         
         # Apply current filters (excluding the one we're counting for)
         if make:
-            cars = cars.filter(make__icontains=make)
+            cars = cars.filter(make__iexact=make)
         if model:
-            cars = cars.filter(model__icontains=model)
+            cars = cars.filter(model__iexact=model)
         if variant:
-            cars = cars.filter(variant__icontains=variant)
+            cars = cars.filter(variant__iexact=variant)
+            
         if year_from:
-            cars = cars.filter(year__gte=year_from)
+            # Handle AutoTrader-style range format
+            if '_' in year_from:
+                parts = year_from.split('_')
+                cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
+            else:
+                cars = cars.filter(year__gte=int(year_from))
+                
         if year_to:
-            cars = cars.filter(year__lte=year_to)
+            # Handle AutoTrader-style range format
+            if '_' in year_to:
+                parts = year_to.split('_')
+                cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
+            else:
+                cars = cars.filter(year__lte=int(year_to))
+                
         if price_from:
-            cars = cars.filter(price__gte=price_from)
+            # Handle AutoTrader-style range format
+            if price_from.startswith('under_'):
+                threshold = float(price_from.split('_')[1])
+                cars = cars.filter(price__lt=threshold)
+            elif price_from.startswith('over_'):
+                threshold = float(price_from.split('_')[1])
+                cars = cars.filter(price__gte=threshold)
+            elif '_' in price_from:
+                parts = price_from.split('_')
+                cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
+            else:
+                cars = cars.filter(price__gte=float(price_from))
+                
         if price_to:
-            cars = cars.filter(price__lte=price_to)
+            # Handle AutoTrader-style range format
+            if price_to.startswith('under_'):
+                threshold = float(price_to.split('_')[1])
+                cars = cars.filter(price__lt=threshold)
+            elif price_to.startswith('over_'):
+                threshold = float(price_to.split('_')[1])
+                cars = cars.filter(price__gte=threshold)
+            elif '_' in price_to:
+                parts = price_to.split('_')
+                cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
+            else:
+                cars = cars.filter(price__lte=float(price_to))
+                
         if mileage_from:
-            cars = cars.filter(mileage__gte=mileage_from)
+            # Handle AutoTrader-style range format
+            if mileage_from.startswith('under_'):
+                threshold = float(mileage_from.split('_')[1])
+                cars = cars.filter(mileage__lt=threshold)
+            elif mileage_from.startswith('over_'):
+                threshold = float(mileage_from.split('_')[1])
+                cars = cars.filter(mileage__gte=threshold)
+            elif '_' in mileage_from:
+                parts = mileage_from.split('_')
+                cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
+            else:
+                cars = cars.filter(mileage__gte=float(mileage_from))
+                
         if mileage_to:
-            cars = cars.filter(mileage__lte=mileage_to)
+            # Handle AutoTrader-style range format
+            if mileage_to.startswith('under_'):
+                threshold = float(mileage_to.split('_')[1])
+                cars = cars.filter(mileage__lt=threshold)
+            elif mileage_to.startswith('over_'):
+                threshold = float(mileage_to.split('_')[1])
+                cars = cars.filter(mileage__gte=threshold)
+            elif '_' in mileage_to:
+                parts = mileage_to.split('_')
+                cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
+            else:
+                cars = cars.filter(mileage__lte=float(mileage_to))
         if fuel_type:
             cars = cars.filter(fuel_type=fuel_type)
         if transmission:
             cars = cars.filter(transmission=transmission)
         if condition:
             cars = cars.filter(condition=condition)
+            
         if engine_size_from or engine_size_to:
             cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
+            
             if engine_size_from:
-                cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+                # Handle AutoTrader-style range format
+                if engine_size_from.startswith('under_'):
+                    threshold = float(engine_size_from.split('_')[1])
+                    cars = cars.filter(engine_size_value__lt=threshold)
+                elif engine_size_from.startswith('over_'):
+                    threshold = float(engine_size_from.split('_')[1])
+                    cars = cars.filter(engine_size_value__gte=threshold)
+                elif '_' in engine_size_from:
+                    parts = engine_size_from.split('_')
+                    cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
+                else:
+                    cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+                    
             if engine_size_to:
-                cars = cars.filter(engine_size_value__lte=float(engine_size_to))
+                # Handle AutoTrader-style range format
+                if engine_size_to.startswith('under_'):
+                    threshold = float(engine_size_to.split('_')[1])
+                    cars = cars.filter(engine_size_value__lt=threshold)
+                elif engine_size_to.startswith('over_'):
+                    threshold = float(engine_size_to.split('_')[1])
+                    cars = cars.filter(engine_size_value__gte=threshold)
+                elif '_' in engine_size_to:
+                    parts = engine_size_to.split('_')
+                    cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
+                else:
+                    cars = cars.filter(engine_size_value__lte=float(engine_size_to))
         if doors:
             cars = cars.filter(doors=doors)
         if body_type:
@@ -1310,12 +1510,37 @@ def get_filter_counts(request):
             cars = cars.filter(number_of_keys=number_of_keys)
         if fuel_economy_source:
             cars = cars.filter(fuel_economy_source=fuel_economy_source)
+            
         if fuel_economy_from or fuel_economy_to:
             cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
+            
             if fuel_economy_from:
-                cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+                # Handle AutoTrader-style range format
+                if fuel_economy_from and fuel_economy_from.startswith('under_'):
+                    threshold = float(fuel_economy_from.split('_')[1])
+                    cars = cars.filter(fuel_economy_value__lt=threshold)
+                elif fuel_economy_from and fuel_economy_from.startswith('over_'):
+                    threshold = float(fuel_economy_from.split('_')[1])
+                    cars = cars.filter(fuel_economy_value__gte=threshold)
+                elif fuel_economy_from and '_' in fuel_economy_from:
+                    parts = fuel_economy_from.split('_')
+                    cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
+                elif fuel_economy_from:
+                    cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+                    
             if fuel_economy_to:
-                cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
+                # Handle AutoTrader-style range format
+                if fuel_economy_to and fuel_economy_to.startswith('under_'):
+                    threshold = float(fuel_economy_to.split('_')[1])
+                    cars = cars.filter(fuel_economy_value__lt=threshold)
+                elif fuel_economy_to and fuel_economy_to.startswith('over_'):
+                    threshold = float(fuel_economy_to.split('_')[1])
+                    cars = cars.filter(fuel_economy_value__gte=threshold)
+                elif fuel_economy_to and '_' in fuel_economy_to:
+                    parts = fuel_economy_to.split('_')
+                    cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
+                elif fuel_economy_to:
+                    cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
         if fuel_economy_combined:
             cars = cars.filter(fuel_economy_combined=fuel_economy_combined)
         if value_source:
@@ -1339,9 +1564,49 @@ def get_filter_counts(request):
         variants = base_cars.values('variant').annotate(count=Count('id')).order_by('-count')
         filter_data['variant'] = [{'value': variant['variant'], 'label': variant['variant'], 'count': variant['count']} for variant in variants if variant['variant']]
         
-        # Year counts
+        # Year counts - AutoTrader-style with separate min/max options
         years = base_cars.values('year').annotate(count=Count('id')).order_by('-year')
-        filter_data['year'] = [{'value': str(year['year']), 'label': str(year['year']), 'count': year['count']} for year in years]
+        year_list = [{'value': str(year['year']), 'label': str(year['year']), 'count': year['count']} for year in years]
+        filter_data['year'] = year_list
+        
+        # Also provide year ranges for broader filtering
+        if year_list:
+            min_year = min(int(y['value']) for y in year_list)
+            max_year = max(int(y['value']) for y in year_list)
+            year_range = max_year - min_year
+            
+            year_buckets = []
+            
+            # Create year range buckets
+            if year_range <= 3:  # Small range: individual years
+                for year_data in year_list:
+                    year_buckets.append(year_data)
+            elif year_range <= 10:  # Medium range: 2-year buckets
+                current = min_year
+                while current <= max_year:
+                    next_year = current + 2
+                    count = base_cars.filter(year__gte=current, year__lt=next_year).count()
+                    if count > 0:
+                        year_buckets.append({
+                            'value': f'{current}_{next_year-1}',
+                            'label': f'{current}-{next_year-1}',
+                            'count': count
+                        })
+                    current = next_year
+            else:  # Large range: 5-year buckets
+                current = min_year
+                while current <= max_year:
+                    next_year = current + 5
+                    count = base_cars.filter(year__gte=current, year__lt=next_year).count()
+                    if count > 0:
+                        year_buckets.append({
+                            'value': f'{current}_{next_year-1}',
+                            'label': f'{current}-{next_year-1}',
+                            'count': count
+                        })
+                    current = next_year
+            
+            filter_data['year_range'] = year_buckets
         
         # Price ranges - optimized to use database aggregation instead of Python loops
         price_stats = base_cars.aggregate(min_price=Min('price'), max_price=Max('price'))
@@ -1349,38 +1614,106 @@ def get_filter_counts(request):
             min_price = price_stats['min_price']
             max_price = price_stats['max_price']
             price_buckets = []
-            bucket_size = 5000000  # 5M KES buckets
+            
+            # Generate intelligent price ranges based on data distribution
+            price_range = max_price - min_price
+            
+            # Determine appropriate bucket size based on price range
+            if price_range <= 1000000:  # Small range: 100K buckets
+                bucket_size = 100000
+            elif price_range <= 5000000:  # Medium range: 500K buckets
+                bucket_size = 500000
+            elif price_range <= 20000000:  # Large range: 1M buckets
+                bucket_size = 1000000
+            else:  # Very large range: 5M buckets
+                bucket_size = 5000000
+            
+            # Add "Under" bucket
+            under_count = base_cars.filter(price__lt=min_price + bucket_size).count()
+            if under_count > 0:
+                price_buckets.append({
+                    'value': f'under_{int(min_price + bucket_size)}',
+                    'label': f'Under {int(min_price + bucket_size):,}',
+                    'count': under_count
+                })
+            
+            # Add range buckets
             current = min_price
-            while current <= max_price:
+            while current < max_price:
                 next_bucket = current + bucket_size
                 count = base_cars.filter(price__gte=current, price__lt=next_bucket).count()
                 if count > 0:
                     price_buckets.append({
-                        'value': str(int(current)),
+                        'value': f'{int(current)}_{int(next_bucket)}',
                         'label': f'{int(current):,} - {int(next_bucket):,}',
                         'count': count
                     })
                 current = next_bucket
+            
+            # Add "Over" bucket
+            over_threshold = max_price - bucket_size
+            over_count = base_cars.filter(price__gte=over_threshold).count()
+            if over_count > 0:
+                price_buckets.append({
+                    'value': f'over_{int(over_threshold)}',
+                    'label': f'{int(over_threshold):,}+',
+                    'count': over_count
+                })
+            
             filter_data['price'] = price_buckets
         
-        # Mileage ranges - optimized to use database aggregation
+        # Mileage ranges - AutoTrader-style intelligent range generation
         mileage_stats = base_cars.aggregate(min_mileage=Min('mileage'), max_mileage=Max('mileage'))
         if mileage_stats['min_mileage'] and mileage_stats['max_mileage']:
             min_mileage = mileage_stats['min_mileage']
             max_mileage = mileage_stats['max_mileage']
             mileage_buckets = []
-            bucket_size = 50000  # 50,000 km buckets
+            
+            # Generate intelligent mileage ranges based on data distribution
+            mileage_range = max_mileage - min_mileage
+            
+            # Determine appropriate bucket size based on mileage range
+            if mileage_range <= 20000:  # Small range: 5K buckets
+                bucket_size = 5000
+            elif mileage_range <= 100000:  # Medium range: 10K buckets
+                bucket_size = 10000
+            elif mileage_range <= 200000:  # Large range: 25K buckets
+                bucket_size = 25000
+            else:  # Very large range: 50K buckets
+                bucket_size = 50000
+            
+            # Add "Under" bucket
+            under_count = base_cars.filter(mileage__lt=min_mileage + bucket_size).count()
+            if under_count > 0:
+                mileage_buckets.append({
+                    'value': f'under_{int(min_mileage + bucket_size)}',
+                    'label': f'Under {int(min_mileage + bucket_size):,} km',
+                    'count': under_count
+                })
+            
+            # Add range buckets
             current = min_mileage
-            while current <= max_mileage:
+            while current < max_mileage:
                 next_bucket = current + bucket_size
                 count = base_cars.filter(mileage__gte=current, mileage__lt=next_bucket).count()
                 if count > 0:
                     mileage_buckets.append({
-                        'value': str(int(current)),
+                        'value': f'{int(current)}_{int(next_bucket)}',
                         'label': f'{int(current):,} - {int(next_bucket):,} km',
                         'count': count
                     })
                 current = next_bucket
+            
+            # Add "Over" bucket
+            over_threshold = max_mileage - bucket_size
+            over_count = base_cars.filter(mileage__gte=over_threshold).count()
+            if over_count > 0:
+                mileage_buckets.append({
+                    'value': f'over_{int(over_threshold)}',
+                    'label': f'{int(over_threshold):,}+ km',
+                    'count': over_count
+                })
+            
             filter_data['mileage'] = mileage_buckets
         
         # Fuel type counts
@@ -1395,9 +1728,77 @@ def get_filter_counts(request):
         conditions = base_cars.values('condition').annotate(count=Count('id')).order_by('-count')
         filter_data['condition'] = [{'value': c['condition'], 'label': dict(Car.CONDITION_CHOICES).get(c['condition'], c['condition']), 'count': c['count']} for c in conditions if c['condition']]
         
-        # Engine size counts
+        # Engine size counts - AutoTrader-style with intelligent ranges
         engine_sizes = base_cars.values('engine_size').annotate(count=Count('id')).order_by('-count')
-        filter_data['engine_size'] = [{'value': es['engine_size'], 'label': es['engine_size'], 'count': es['count']} for es in engine_sizes if es['engine_size']]
+        engine_size_list = [{'value': es['engine_size'], 'label': es['engine_size'], 'count': es['count']} for es in engine_sizes if es['engine_size']]
+        filter_data['engine_size'] = engine_size_list
+        
+        # Also provide engine size ranges for broader filtering
+        if engine_size_list:
+            # Convert engine sizes to float for range calculation
+            size_values = []
+            for es in engine_size_list:
+                try:
+                    size_values.append(float(es['value']))
+                except (ValueError, TypeError):
+                    pass
+            
+            if size_values:
+                min_size = min(size_values)
+                max_size = max(size_values)
+                size_range = max_size - min_size
+                
+                size_buckets = []
+                
+                # Create intelligent size buckets
+                if size_range <= 1.0:  # Small range: 0.1L buckets
+                    bucket_size = 0.1
+                elif size_range <= 2.0:  # Medium range: 0.2L buckets
+                    bucket_size = 0.2
+                elif size_range <= 4.0:  # Large range: 0.5L buckets
+                    bucket_size = 0.5
+                else:  # Very large range: 1.0L buckets
+                    bucket_size = 1.0
+                
+                # Add "Under" bucket
+                under_count = base_cars.annotate(
+                    size_value=Cast('engine_size', output_field=FloatField())
+                ).filter(size_value__lt=min_size + bucket_size).count()
+                if under_count > 0:
+                    size_buckets.append({
+                        'value': f'under_{min_size + bucket_size}',
+                        'label': f'Under {min_size + bucket_size}L',
+                        'count': under_count
+                    })
+                
+                # Add range buckets
+                current = min_size
+                while current < max_size:
+                    next_bucket = current + bucket_size
+                    count = base_cars.annotate(
+                        size_value=Cast('engine_size', output_field=FloatField())
+                    ).filter(size_value__gte=current, size_value__lt=next_bucket).count()
+                    if count > 0:
+                        size_buckets.append({
+                            'value': f'{current}_{next_bucket}',
+                            'label': f'{current}L - {next_bucket}L',
+                            'count': count
+                        })
+                    current = next_bucket
+                
+                # Add "Over" bucket
+                over_threshold = max_size - bucket_size
+                over_count = base_cars.annotate(
+                    size_value=Cast('engine_size', output_field=FloatField())
+                ).filter(size_value__gte=over_threshold).count()
+                if over_count > 0:
+                    size_buckets.append({
+                        'value': f'over_{over_threshold}',
+                        'label': f'{over_threshold}L+',
+                        'count': over_count
+                    })
+                
+                filter_data['engine_size_range'] = size_buckets
         
         # Doors counts
         doors_list = base_cars.values('doors').annotate(count=Count('id')).order_by('doors')
@@ -1439,9 +1840,77 @@ def get_filter_counts(request):
         fuel_economy_sources = base_cars.values('fuel_economy_source').annotate(count=Count('id')).order_by('-count')
         filter_data['fuel_economy_source'] = [{'value': fes['fuel_economy_source'], 'label': dict(Car.FUEL_ECONOMY_SOURCE_CHOICES).get(fes['fuel_economy_source'], fes['fuel_economy_source']), 'count': fes['count']} for fes in fuel_economy_sources if fes['fuel_economy_source']]
         
-        # Fuel economy combined counts
+        # Fuel economy combined counts - AutoTrader-style with intelligent ranges
         fuel_economies = base_cars.values('fuel_economy_combined').annotate(count=Count('id')).order_by('-count')
-        filter_data['fuel_economy_combined'] = [{'value': fe['fuel_economy_combined'], 'label': f'{fe["fuel_economy_combined"]} km/L', 'count': fe['count']} for fe in fuel_economies if fe['fuel_economy_combined']]
+        fuel_economy_list = [{'value': fe['fuel_economy_combined'], 'label': f'{fe["fuel_economy_combined"]} km/L', 'count': fe['count']} for fe in fuel_economies if fe['fuel_economy_combined']]
+        filter_data['fuel_economy_combined'] = fuel_economy_list
+        
+        # Also provide fuel economy ranges for broader filtering
+        if fuel_economy_list:
+            # Convert fuel economy to float for range calculation
+            economy_values = []
+            for fe in fuel_economy_list:
+                try:
+                    economy_values.append(float(fe['value']))
+                except (ValueError, TypeError):
+                    pass
+            
+            if economy_values:
+                min_economy = min(economy_values)
+                max_economy = max(economy_values)
+                economy_range = max_economy - min_economy
+                
+                economy_buckets = []
+                
+                # Create intelligent economy buckets
+                if economy_range <= 5:  # Small range: 1 km/L buckets
+                    bucket_size = 1
+                elif economy_range <= 15:  # Medium range: 2 km/L buckets
+                    bucket_size = 2
+                elif economy_range <= 25:  # Large range: 5 km/L buckets
+                    bucket_size = 5
+                else:  # Very large range: 10 km/L buckets
+                    bucket_size = 10
+                
+                # Add "Under" bucket
+                under_count = base_cars.annotate(
+                    economy_value=Cast('fuel_economy_combined', output_field=FloatField())
+                ).filter(economy_value__lt=min_economy + bucket_size).count()
+                if under_count > 0:
+                    economy_buckets.append({
+                        'value': f'under_{min_economy + bucket_size}',
+                        'label': f'Under {min_economy + bucket_size} km/L',
+                        'count': under_count
+                    })
+                
+                # Add range buckets
+                current = min_economy
+                while current < max_economy:
+                    next_bucket = current + bucket_size
+                    count = base_cars.annotate(
+                        economy_value=Cast('fuel_economy_combined', output_field=FloatField())
+                    ).filter(economy_value__gte=current, economy_value__lt=next_bucket).count()
+                    if count > 0:
+                        economy_buckets.append({
+                            'value': f'{current}_{next_bucket}',
+                            'label': f'{current} - {next_bucket} km/L',
+                            'count': count
+                        })
+                    current = next_bucket
+                
+                # Add "Over" bucket
+                over_threshold = max_economy - bucket_size
+                over_count = base_cars.annotate(
+                    economy_value=Cast('fuel_economy_combined', output_field=FloatField())
+                ).filter(economy_value__gte=over_threshold).count()
+                if over_count > 0:
+                    economy_buckets.append({
+                        'value': f'over_{over_threshold}',
+                        'label': f'{over_threshold}+ km/L',
+                        'count': over_count
+                    })
+                
+                filter_data['fuel_economy_range'] = economy_buckets
         
         # Value source counts
         value_sources = base_cars.values('value_source').annotate(count=Count('id')).order_by('-count')

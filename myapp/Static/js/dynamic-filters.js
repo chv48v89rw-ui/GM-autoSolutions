@@ -108,12 +108,14 @@ class DynamicFilters {
             'model': 'model',
             'variant': 'variant',
             'year': 'year_from', // Will update both year_from and year_to
+            'year_range': 'year_from', // Will update both year_from and year_to
             'price': 'price_from', // Will update both price_from and price_to
             'mileage': 'mileage_from', // Will update both mileage_from and mileage_to
             'fuel_type': 'fuel_type',
             'transmission': 'transmission',
             'condition': 'condition',
             'engine_size': 'engine_size_from', // Will update both engine_size_from and engine_size_to
+            'engine_size_range': 'engine_size_from', // Will update both engine_size_from and engine_size_to
             'doors': 'doors',
             'body_type': 'body_type',
             'previous_owners': 'previous_owners',
@@ -125,6 +127,7 @@ class DynamicFilters {
             'number_of_keys': 'number_of_keys',
             'fuel_economy_source': 'fuel_economy_source',
             'fuel_economy_combined': 'fuel_economy_combined',
+            'fuel_economy_range': 'fuel_economy_from', // Will update both fuel_economy_from and fuel_economy_to
             'value_source': 'value_source'
         };
 
@@ -134,12 +137,15 @@ class DynamicFilters {
             const selectElement = form ? form.querySelector(`[name="${formField}"]`) : document.querySelector(`[name="${formField}"]`);
             
             if (selectElement && data[apiField]) {
-                this.updateSelectOptions(selectElement, data[apiField], formField);
+                this.updateSelectOptions(selectElement, data[apiField], formField, apiField);
             }
         });
+        
+        // Handle min/max field pairs for ranges
+        this.updateRangeFieldPairs(data, form);
     }
 
-    updateSelectOptions(selectElement, options, fieldName) {
+    updateSelectOptions(selectElement, options, fieldName, apiField) {
         // Store current selection
         const currentValue = selectElement.value;
         
@@ -174,6 +180,115 @@ class DynamicFilters {
         } else {
             selectElement.value = '';
         }
+    }
+
+    updateRangeFieldPairs(data, form = null) {
+        // Handle min/max field pairs for ranges
+        const rangePairs = [
+            { min: 'year_from', max: 'year_to', data: 'year' },
+            { min: 'price_from', max: 'price_to', data: 'price' },
+            { min: 'mileage_from', max: 'mileage_to', data: 'mileage' },
+            { min: 'engine_size_from', max: 'engine_size_to', data: 'engine_size' },
+            { min: 'fuel_economy_from', max: 'fuel_economy_to', data: 'fuel_economy_range' }
+        ];
+
+        rangePairs.forEach(pair => {
+            const minElement = form ? form.querySelector(`[name="${pair.min}"]`) : document.querySelector(`[name="${pair.min}"]`);
+            const maxElement = form ? form.querySelector(`[name="${pair.max}"]`) : document.querySelector(`[name="${pair.max}"]`);
+            
+            if (minElement && maxElement && data[pair.data]) {
+                this.updateRangeOptions(minElement, maxElement, data[pair.data], pair);
+            }
+        });
+    }
+
+    updateRangeOptions(minElement, maxElement, options, pair) {
+        // Store current selections
+        const currentMin = minElement.value;
+        const currentMax = maxElement.value;
+        
+        // Update min element with range options
+        this.updateSelectOptions(minElement, options, pair.min, pair.data);
+        
+        // Update max element with the same options but filtered based on min selection
+        if (currentMin) {
+            // Filter options to only show values >= current min
+            const filteredOptions = this.filterOptionsByMin(options, currentMin, pair.data);
+            this.updateSelectOptions(maxElement, filteredOptions, pair.max, pair.data);
+        } else {
+            this.updateSelectOptions(maxElement, options, pair.max, pair.data);
+        }
+        
+        // Restore selections if they still exist
+        const minExists = Array.from(minElement.options).some(option => option.value === currentMin);
+        if (minExists) {
+            minElement.value = currentMin;
+        }
+        
+        const maxExists = Array.from(maxElement.options).some(option => option.value === currentMax);
+        if (maxExists) {
+            maxElement.value = currentMax;
+        }
+    }
+
+    filterOptionsByMin(options, minValue, dataType) {
+        // Filter options based on the selected minimum value
+        if (!minValue) return options;
+        
+        let minNumeric = 0;
+        
+        // Parse the minimum value based on data type
+        if (dataType === 'price' || dataType === 'mileage') {
+            // Handle range format like "1000000_2000000" or "under_1000000" or "over_5000000"
+            if (minValue.includes('_')) {
+                const parts = minValue.split('_');
+                if (parts[0] === 'under') {
+                    minNumeric = parseFloat(parts[1]);
+                } else if (parts[0] === 'over') {
+                    minNumeric = parseFloat(parts[1]);
+                } else {
+                    minNumeric = parseFloat(parts[0]);
+                }
+            } else {
+                minNumeric = parseFloat(minValue);
+            }
+        } else if (dataType === 'year') {
+            // Handle year format like "2018_2020" or single year
+            if (minValue.includes('_')) {
+                const parts = minValue.split('_');
+                minNumeric = parseInt(parts[0]);
+            } else {
+                minNumeric = parseInt(minValue);
+            }
+        } else if (dataType === 'engine_size') {
+            // Handle engine size format like "2.0_2.5"
+            if (minValue.includes('_')) {
+                const parts = minValue.split('_');
+                minNumeric = parseFloat(parts[0]);
+            } else {
+                minNumeric = parseFloat(minValue);
+            }
+        }
+        
+        // Filter options to only show those >= min value
+        return options.filter(option => {
+            let optionValue = 0;
+            
+            if (option.value.includes('_')) {
+                const parts = option.value.split('_');
+                if (parts[0] === 'under') {
+                    optionValue = parseFloat(parts[1]);
+                } else if (parts[0] === 'over') {
+                    optionValue = parseFloat(parts[1]);
+                } else {
+                    optionValue = parseFloat(parts[0]);
+                }
+            } else {
+                optionValue = parseFloat(option.value);
+            }
+            
+            return optionValue >= minNumeric;
+        });
     }
 
     getDefaultLabel(fieldName) {
