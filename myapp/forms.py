@@ -3530,6 +3530,251 @@ class CarSearchForm(forms.Form):
         variants = [v for v in sorted(set(v for v in variants if v))]
         return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
 
+    @staticmethod
+    def get_fuel_type_choices():
+        """Static fuel type choices"""
+        return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
+
+    @staticmethod
+    def get_transmission_choices():
+        """Static transmission choices"""
+        return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
+
+    @staticmethod
+    def get_condition_choices():
+        """Static condition choices"""
+        return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
+
+    @staticmethod
+    def get_body_type_choices():
+        """Static body type choices"""
+        return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
+
+    @staticmethod
+    def get_doors_choices():
+        """Static doors choices"""
+        return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
+
+    @staticmethod
+    def get_seats_choices():
+        """Static seats choices"""
+        return [('', '-- All Seats --')] + [
+            ('2', '2 Seats'),
+            ('4', '4 Seats'),
+            ('5', '5 Seats'),
+            ('7', '7 Seats'),
+            ('8', '8+ Seats'),
+        ]
+
+    @staticmethod
+    def get_exterior_color_choices():
+        """Static exterior color choices"""
+        EXTERIOR_COLOR_CHOICES = sorted([
+            ('Arctic White', 'Arctic White'),
+            ('Black', 'Black'),
+            ('Blue', 'Blue'),
+            ('Bright Red', 'Bright Red'),
+            ('Bronze', 'Bronze'),
+            ('Brown', 'Brown'),
+            ('Burgundy', 'Burgundy'),
+            ('Candy Red', 'Candy Red'),
+            ('Champagne Gold', 'Champagne Gold'),
+            ('Charcoal Grey', 'Charcoal Grey'),
+            ('Cherry Red', 'Cherry Red'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Copper', 'Copper'),
+            ('Copper Orange', 'Copper Orange'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Electric Blue', 'Electric Blue'),
+            ('Emerald Green', 'Emerald Green'),
+            ('Forest Green', 'Forest Green'),
+            ('Gold', 'Gold'),
+            ('Grey', 'Grey'),
+            ('Gunmetal Grey', 'Gunmetal Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Blue', 'Light Blue'),
+            ('Light Grey', 'Light Grey'),
+            ('Lime Green', 'Lime Green'),
+            ('Matte Black', 'Matte Black'),
+            ('Matte Blue', 'Matte Blue'),
+            ('Matte Green', 'Matte Green'),
+            ('Matte Grey', 'Matte Grey'),
+            ('Matte Silver', 'Matte Silver'),
+            ('Metallic Silver', 'Metallic Silver'),
+            ('Midnight Blue', 'Midnight Blue'),
+            ('Mocha', 'Mocha'),
+            ('Multi-Color', 'Multi-Color'),
+            ('Mustard Yellow', 'Mustard Yellow'),
+            ('Nardo Grey', 'Nardo Grey'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Olive Green', 'Olive Green'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Pearl White', 'Pearl White'),
+            ('Pink', 'Pink'),
+            ('Purple', 'Purple'),
+            ('Red', 'Red'),
+            ('Royal Blue', 'Royal Blue'),
+            ('Ruby Red', 'Ruby Red'),
+            ('Slate Grey', 'Slate Grey'),
+            ('Sky Blue', 'Sky Blue'),
+            ('Steel Blue', 'Steel Blue'),
+            ('Sunflower Yellow', 'Sunflower Yellow'),
+            ('Teal', 'Teal'),
+            ('Titanium Silver', 'Titanium Silver'),
+            ('Turquoise', 'Turquoise'),
+            ('Two-Tone', 'Two-Tone'),
+            ('Violet', 'Violet'),
+            ('White', 'White'),
+            ('Wine Red', 'Wine Red'),
+            ('Yellow', 'Yellow'),
+        ])
+        EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES
+
+    @staticmethod
+    def get_interior_color_choices():
+        """Static interior color choices"""
+        INTERIOR_COLOR_CHOICES = sorted([
+            ('Anthracite', 'Anthracite'),
+            ('Beige', 'Beige'),
+            ('Black', 'Black'),
+            ('Black / Beige', 'Black / Beige'),
+            ('Black / Blue', 'Black / Blue'),
+            ('Black / Brown', 'Black / Brown'),
+            ('Black / Grey', 'Black / Grey'),
+            ('Black / Red', 'Black / Red'),
+            ('Black / White', 'Black / White'),
+            ('Blue', 'Blue'),
+            ('Brown', 'Brown'),
+            ('Brown / Beige', 'Brown / Beige'),
+            ('Burgundy', 'Burgundy'),
+            ('Camel', 'Camel'),
+            ('Charcoal', 'Charcoal'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Espresso Brown', 'Espresso Brown'),
+            ('Green', 'Green'),
+            ('Grey', 'Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Grey', 'Light Grey'),
+            ('Mocha', 'Mocha'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Oyster', 'Oyster'),
+            ('Red', 'Red'),
+            ('Red / Black', 'Red / Black'),
+            ('Saddle Tan', 'Saddle Tan'),
+            ('Sand Beige', 'Sand Beige'),
+            ('Tan', 'Tan'),
+            ('Tan / Black', 'Tan / Black'),
+            ('Taupe', 'Taupe'),
+            ('White', 'White'),
+            ('White / Black', 'White / Black'),
+        ])
+        INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES
+
+    @staticmethod
+    def get_seat_material_choices():
+        """Static seat material choices"""
+        SEAT_MATERIAL_CHOICES = sorted([
+            ('Alcantara', 'Alcantara'),
+            ('Cloth', 'Cloth'),
+            ('Fabric', 'Fabric'),
+            ('Leather', 'Leather'),
+            ('Leatherette', 'Leatherette'),
+            ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
+            ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
+            ('Nappa Leather', 'Nappa Leather'),
+            ('Other', 'Other'),
+            ('Premium Leather', 'Premium Leather'),
+            ('Suede', 'Suede'),
+            ('Synthetic Leather', 'Synthetic Leather'),
+            ('Velour', 'Velour'),
+            ('Vinyl', 'Vinyl'),
+        ])
+        SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES
+
+    @staticmethod
+    def get_interior_trim_choices():
+        """Static interior trim choices"""
+        INTERIOR_TRIM_CHOICES = sorted([
+            ('Aluminum', 'Aluminum'),
+            ('Brushed Aluminum', 'Brushed Aluminum'),
+            ('Carbon Fiber', 'Carbon Fiber'),
+            ('Carbon Fiber Look', 'Carbon Fiber Look'),
+            ('Chrome', 'Chrome'),
+            ('Gloss Wood', 'Gloss Wood'),
+            ('Leather Wrapped', 'Leather Wrapped'),
+            ('Matte Wood', 'Matte Wood'),
+            ('Mixed Materials', 'Mixed Materials'),
+            ('Open-Pore Wood', 'Open-Pore Wood'),
+            ('Other', 'Other'),
+            ('Piano Black', 'Piano Black'),
+            ('Satin Chrome', 'Satin Chrome'),
+            ('Wood Trim', 'Wood Trim'),
+        ])
+        INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
+
+    @staticmethod
+    def get_number_of_keys_choices():
+        """Static number of keys choices"""
+        return [('', '-- All Keys --'), ('1', '1 Key'), ('2', '2 Keys'), ('3', '3 Keys'), ('4+)', '4+ Keys')]
+
+    @staticmethod
+    def get_previous_owners_choices():
+        """Static previous owners choices"""
+        return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
+
+    @staticmethod
+    def get_fuel_economy_source_choices():
+        """Static fuel economy source choices"""
+        return [('', '-- All Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
+
+    @staticmethod
+    def get_fuel_economy_combined_choices():
+        """Static fuel economy combined choices"""
+        return [('', '-- All Economies --')] + list(Car.FUEL_ECONOMY_CHOICES)
+
+    @staticmethod
+    def get_value_source_choices():
+        """Static value source choices"""
+        return [('', '-- All Value Sources --')] + list(Car.VALUE_SOURCE_CHOICES)
+
+    @staticmethod
+    def get_features_choices():
+        """Static features choices for common car features"""
+        FEATURES_CHOICES = sorted([
+            ('ABS', 'ABS (Anti-lock Braking System)'),
+            ('Air Conditioning', 'Air Conditioning'),
+            ('Alloy Wheels', 'Alloy Wheels'),
+            ('Android Auto', 'Android Auto'),
+            ('Apple CarPlay', 'Apple CarPlay'),
+            ('Bluetooth', 'Bluetooth'),
+            ('Cruise Control', 'Cruise Control'),
+            ('Electric Windows', 'Electric Windows'),
+            ('GPS Navigation', 'GPS Navigation'),
+            ('Heated Seats', 'Heated Seats'),
+            ('Keyless Entry', 'Keyless Entry'),
+            ('Leather Seats', 'Leather Seats'),
+            ('Parking Sensors', 'Parking Sensors'),
+            ('Power Steering', 'Power Steering'),
+            ('Rear View Camera', 'Rear View Camera'),
+            ('Sunroof', 'Sunroof'),
+            ('USB Port', 'USB Port'),
+        ])
+        return [('', '-- All Features --')] + FEATURES_CHOICES
+
     make = forms.ChoiceField(
         required=False,
         choices=get_make_choices.__func__(),
@@ -3805,212 +4050,6 @@ class CarSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    @staticmethod
-    def get_body_type_choices():
-        """Static body type choices"""
-        return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
-
-    @staticmethod
-    def get_doors_choices():
-        """Static doors choices"""
-        return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
-
-    @staticmethod
-    def get_seats_choices():
-        """Static seats choices"""
-        return [('', '-- All Seats --')] + [
-            ('2', '2 Seats'),
-            ('4', '4 Seats'),
-            ('5', '5 Seats'),
-            ('7', '7 Seats'),
-            ('8', '8+ Seats'),
-        ]
-
-    @staticmethod
-    def get_exterior_color_choices():
-        """Static exterior color choices"""
-        EXTERIOR_COLOR_CHOICES = sorted([
-            ('Arctic White', 'Arctic White'),
-            ('Black', 'Black'),
-            ('Blue', 'Blue'),
-            ('Bright Red', 'Bright Red'),
-            ('Bronze', 'Bronze'),
-            ('Brown', 'Brown'),
-            ('Burgundy', 'Burgundy'),
-            ('Candy Red', 'Candy Red'),
-            ('Champagne Gold', 'Champagne Gold'),
-            ('Charcoal Grey', 'Charcoal Grey'),
-            ('Cherry Red', 'Cherry Red'),
-            ('Chocolate Brown', 'Chocolate Brown'),
-            ('Copper', 'Copper'),
-            ('Copper Orange', 'Copper Orange'),
-            ('Cream', 'Cream'),
-            ('Dark Brown', 'Dark Brown'),
-            ('Dark Grey', 'Dark Grey'),
-            ('Electric Blue', 'Electric Blue'),
-            ('Emerald Green', 'Emerald Green'),
-            ('Forest Green', 'Forest Green'),
-            ('Gold', 'Gold'),
-            ('Grey', 'Grey'),
-            ('Gunmetal Grey', 'Gunmetal Grey'),
-            ('Ivory', 'Ivory'),
-            ('Jet Black', 'Jet Black'),
-            ('Light Blue', 'Light Blue'),
-            ('Light Grey', 'Light Grey'),
-            ('Lime Green', 'Lime Green'),
-            ('Matte Black', 'Matte Black'),
-            ('Matte Blue', 'Matte Blue'),
-            ('Matte Green', 'Matte Green'),
-            ('Matte Grey', 'Matte Grey'),
-            ('Matte Silver', 'Matte Silver'),
-            ('Metallic Silver', 'Metallic Silver'),
-            ('Midnight Blue', 'Midnight Blue'),
-            ('Mocha', 'Mocha'),
-            ('Multi-Color', 'Multi-Color'),
-            ('Mustard Yellow', 'Mustard Yellow'),
-            ('Nardo Grey', 'Nardo Grey'),
-            ('Navy Blue', 'Navy Blue'),
-            ('Olive Green', 'Olive Green'),
-            ('Orange', 'Orange'),
-            ('Other', 'Other'),
-            ('Pearl White', 'Pearl White'),
-            ('Pink', 'Pink'),
-            ('Purple', 'Purple'),
-            ('Red', 'Red'),
-            ('Royal Blue', 'Royal Blue'),
-            ('Ruby Red', 'Ruby Red'),
-            ('Slate Grey', 'Slate Grey'),
-            ('Sky Blue', 'Sky Blue'),
-            ('Steel Blue', 'Steel Blue'),
-            ('Sunflower Yellow', 'Sunflower Yellow'),
-            ('Teal', 'Teal'),
-            ('Titanium Silver', 'Titanium Silver'),
-            ('Turquoise', 'Turquoise'),
-            ('Two-Tone', 'Two-Tone'),
-            ('Violet', 'Violet'),
-            ('White', 'White'),
-            ('Wine Red', 'Wine Red'),
-            ('Yellow', 'Yellow'),
-        ])
-        EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Exterior Colors --')] + EXTERIOR_COLOR_CHOICES
-
-    @staticmethod
-    def get_interior_color_choices():
-        """Static interior color choices"""
-        INTERIOR_COLOR_CHOICES = sorted([
-            ('Anthracite', 'Anthracite'),
-            ('Beige', 'Beige'),
-            ('Black', 'Black'),
-            ('Black / Beige', 'Black / Beige'),
-            ('Black / Blue', 'Black / Blue'),
-            ('Black / Brown', 'Black / Brown'),
-            ('Black / Grey', 'Black / Grey'),
-            ('Black / Red', 'Black / Red'),
-            ('Black / White', 'Black / White'),
-            ('Blue', 'Blue'),
-            ('Brown', 'Brown'),
-            ('Brown / Beige', 'Brown / Beige'),
-            ('Burgundy', 'Burgundy'),
-            ('Camel', 'Camel'),
-            ('Charcoal', 'Charcoal'),
-            ('Chocolate Brown', 'Chocolate Brown'),
-            ('Cream', 'Cream'),
-            ('Dark Brown', 'Dark Brown'),
-            ('Dark Grey', 'Dark Grey'),
-            ('Espresso Brown', 'Espresso Brown'),
-            ('Green', 'Green'),
-            ('Grey', 'Grey'),
-            ('Ivory', 'Ivory'),
-            ('Jet Black', 'Jet Black'),
-            ('Light Grey', 'Light Grey'),
-            ('Mocha', 'Mocha'),
-            ('Navy Blue', 'Navy Blue'),
-            ('Orange', 'Orange'),
-            ('Other', 'Other'),
-            ('Oyster', 'Oyster'),
-            ('Red', 'Red'),
-            ('Red / Black', 'Red / Black'),
-            ('Saddle Tan', 'Saddle Tan'),
-            ('Sand Beige', 'Sand Beige'),
-            ('Tan', 'Tan'),
-            ('Tan / Black', 'Tan / Black'),
-            ('Taupe', 'Taupe'),
-            ('White', 'White'),
-            ('White / Black', 'White / Black'),
-        ])
-        INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES
-
-    @staticmethod
-    def get_seat_material_choices():
-        """Static seat material choices"""
-        SEAT_MATERIAL_CHOICES = sorted([
-            ('Alcantara', 'Alcantara'),
-            ('Cloth', 'Cloth'),
-            ('Fabric', 'Fabric'),
-            ('Leather', 'Leather'),
-            ('Leatherette', 'Leatherette'),
-            ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
-            ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
-            ('Nappa Leather', 'Nappa Leather'),
-            ('Other', 'Other'),
-            ('Premium Leather', 'Premium Leather'),
-            ('Suede', 'Suede'),
-            ('Synthetic Leather', 'Synthetic Leather'),
-            ('Velour', 'Velour'),
-            ('Vinyl', 'Vinyl'),
-        ])
-        SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES
-
-    @staticmethod
-    def get_interior_trim_choices():
-        """Static interior trim choices"""
-        INTERIOR_TRIM_CHOICES = sorted([
-            ('Aluminum', 'Aluminum'),
-            ('Brushed Aluminum', 'Brushed Aluminum'),
-            ('Carbon Fiber', 'Carbon Fiber'),
-            ('Carbon Fiber Look', 'Carbon Fiber Look'),
-            ('Chrome', 'Chrome'),
-            ('Gloss Wood', 'Gloss Wood'),
-            ('Leather Wrapped', 'Leather Wrapped'),
-            ('Matte Wood', 'Matte Wood'),
-            ('Mixed Materials', 'Mixed Materials'),
-            ('Open-Pore Wood', 'Open-Pore Wood'),
-            ('Other', 'Other'),
-            ('Piano Black', 'Piano Black'),
-            ('Satin Chrome', 'Satin Chrome'),
-            ('Wood Trim', 'Wood Trim'),
-        ])
-        INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
-
-    @staticmethod
-    def get_number_of_keys_choices():
-        """Static number of keys choices"""
-        return [('', '-- All Keys --'), ('1', '1 Key'), ('2', '2 Keys'), ('3', '3 Keys'), ('4+)', '4+ Keys')]
-
-    @staticmethod
-    def get_previous_owners_choices():
-        """Static previous owners choices"""
-        return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
-
-    @staticmethod
-    def get_fuel_economy_source_choices():
-        """Static fuel economy source choices"""
-        return [('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
-
-    @staticmethod
-    def get_fuel_economy_combined_choices():
-        """Static fuel economy combined choices"""
-        return [('', '-- All Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
-
-    @staticmethod
-    def get_value_source_choices():
-        """Static value source choices"""
-        return [('', '-- All Value Sources --')] + list(Car.VALUE_SOURCE_CHOICES)
-
     body_type = forms.ChoiceField(
         required=False,
         choices=get_body_type_choices.__func__(),
@@ -4147,34 +4186,12 @@ class SavedSearchForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Set choices for dropdown fields using the same logic as CarSearchForm
-        all_makes = sorted(CAR_HIERARCHY.keys())
-        self.fields['make'].choices = [('', '-- All Makes --')] + [(make, make) for make in all_makes]
-        self.fields['fuel_type'].choices = [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
-        self.fields['transmission'].choices = [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
-        self.fields['condition'].choices = [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
-        self.fields['body_type'].choices = [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
-        
-        # Set features choices
-        FEATURES_CHOICES = sorted([
-            ('ABS', 'ABS (Anti-lock Braking System)'),
-            ('Air Conditioning', 'Air Conditioning'),
-            ('Alloy Wheels', 'Alloy Wheels'),
-            ('Android Auto', 'Android Auto'),
-            ('Apple CarPlay', 'Apple CarPlay'),
-            ('Bluetooth', 'Bluetooth'),
-            ('Cruise Control', 'Cruise Control'),
-            ('Electric Windows', 'Electric Windows'),
-            ('GPS Navigation', 'GPS Navigation'),
-            ('Heated Seats', 'Heated Seats'),
-            ('Keyless Entry', 'Keyless Entry'),
-            ('Leather Seats', 'Leather Seats'),
-            ('Parking Sensors', 'Parking Sensors'),
-            ('Power Steering', 'Power Steering'),
-            ('Rear View Camera', 'Rear View Camera'),
-            ('Sunroof', 'Sunroof'),
-            ('USB Port', 'USB Port'),
-        ])
-        self.fields['features'].choices = [('', '-- All Features --')] + FEATURES_CHOICES
+        self.fields['make'].choices = CarSearchForm.get_make_choices()
+        self.fields['fuel_type'].choices = CarSearchForm.get_fuel_type_choices()
+        self.fields['transmission'].choices = CarSearchForm.get_transmission_choices()
+        self.fields['condition'].choices = CarSearchForm.get_condition_choices()
+        self.fields['body_type'].choices = CarSearchForm.get_body_type_choices()
+        self.fields['features'].choices = CarSearchForm.get_features_choices()
         
         # Set year choices
         current_year = timezone.now().year
