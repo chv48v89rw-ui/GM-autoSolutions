@@ -62,6 +62,7 @@ urlpatterns = [
     path('api/subscription-request/', views.subscription_request, name='subscription_request'),
     path('api/models-for-make/', views.get_models_for_make, name='api_models_for_make'),
     path('api/dealerships/', views.get_dealerships_json, name='api_dealerships'),
+    path('api/filter-counts/', views.get_filter_counts, name='api_filter_counts'),
     
     # Admin
     path('admin/', views.admin_dashboard, name='admin_dashboard'),

@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.db.models import Q, Avg, Exists, OuterRef, FloatField, Count, Sum
+from django.db.models import Q, Avg, Exists, OuterRef, FloatField, Count, Sum, Min, Max
 from django.db.models.functions import Cast
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
@@ -1206,6 +1206,252 @@ def terms(request):
 
 def privacy(request):
     return render(request, 'privacy.html')
+
+
+@csrf_exempt
+def get_filter_counts(request):
+    """API endpoint to get dynamic filter counts based on current selections - optimized for performance"""
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Only GET requests allowed'}, status=405)
+    
+    try:
+        # Start with base queryset with select_related for better performance
+        cars = Car.objects.filter(is_sold=False, is_approved=True).select_related('dealership')
+        
+        # Get current filter selections from request
+        make = request.GET.get('make')
+        model = request.GET.get('model')
+        variant = request.GET.get('variant')
+        year_from = request.GET.get('year_from')
+        year_to = request.GET.get('year_to')
+        price_from = request.GET.get('price_from')
+        price_to = request.GET.get('price_to')
+        mileage_from = request.GET.get('mileage_from')
+        mileage_to = request.GET.get('mileage_to')
+        fuel_type = request.GET.get('fuel_type')
+        transmission = request.GET.get('transmission')
+        condition = request.GET.get('condition')
+        engine_size_from = request.GET.get('engine_size_from')
+        engine_size_to = request.GET.get('engine_size_to')
+        doors = request.GET.get('doors')
+        body_type = request.GET.get('body_type')
+        previous_owners = request.GET.get('previous_owners')
+        seats = request.GET.get('seats')
+        exterior_color = request.GET.get('exterior_color')
+        interior_color = request.GET.get('interior_color')
+        seat_material = request.GET.get('seat_material')
+        interior_trim = request.GET.get('interior_trim')
+        color = request.GET.get('color')
+        features = request.GET.get('features')
+        number_of_keys = request.GET.get('number_of_keys')
+        fuel_economy_source = request.GET.get('fuel_economy_source')
+        fuel_economy_from = request.GET.get('fuel_economy_from')
+        fuel_economy_to = request.GET.get('fuel_economy_to')
+        fuel_economy_combined = request.GET.get('fuel_economy_combined')
+        value_source = request.GET.get('value_source')
+        
+        # Apply current filters (excluding the one we're counting for)
+        if make:
+            cars = cars.filter(make__icontains=make)
+        if model:
+            cars = cars.filter(model__icontains=model)
+        if variant:
+            cars = cars.filter(variant__icontains=variant)
+        if year_from:
+            cars = cars.filter(year__gte=year_from)
+        if year_to:
+            cars = cars.filter(year__lte=year_to)
+        if price_from:
+            cars = cars.filter(price__gte=price_from)
+        if price_to:
+            cars = cars.filter(price__lte=price_to)
+        if mileage_from:
+            cars = cars.filter(mileage__gte=mileage_from)
+        if mileage_to:
+            cars = cars.filter(mileage__lte=mileage_to)
+        if fuel_type:
+            cars = cars.filter(fuel_type=fuel_type)
+        if transmission:
+            cars = cars.filter(transmission=transmission)
+        if condition:
+            cars = cars.filter(condition=condition)
+        if engine_size_from or engine_size_to:
+            cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
+            if engine_size_from:
+                cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+            if engine_size_to:
+                cars = cars.filter(engine_size_value__lte=float(engine_size_to))
+        if doors:
+            cars = cars.filter(doors=doors)
+        if body_type:
+            cars = cars.filter(body_type=body_type)
+        if previous_owners:
+            cars = cars.filter(previous_owners=previous_owners)
+        if seats:
+            cars = cars.filter(seats__gte=seats)
+        if exterior_color:
+            cars = cars.filter(exterior_color=exterior_color)
+        if interior_color:
+            cars = cars.filter(interior_color=interior_color)
+        if seat_material:
+            cars = cars.filter(seat_material=seat_material)
+        if interior_trim:
+            cars = cars.filter(interior_trim=interior_trim)
+        if color:
+            cars = cars.filter(color__icontains=color)
+        if features:
+            feature_terms = [feature.strip() for feature in features.split(',') if feature.strip()]
+            if feature_terms:
+                feature_query = Q()
+                for feature in feature_terms:
+                    feature_query |= Q(features__icontains=feature)
+                cars = cars.filter(feature_query)
+        if number_of_keys:
+            cars = cars.filter(number_of_keys=number_of_keys)
+        if fuel_economy_source:
+            cars = cars.filter(fuel_economy_source=fuel_economy_source)
+        if fuel_economy_from or fuel_economy_to:
+            cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
+            if fuel_economy_from:
+                cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+            if fuel_economy_to:
+                cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
+        if fuel_economy_combined:
+            cars = cars.filter(fuel_economy_combined=fuel_economy_combined)
+        if value_source:
+            cars = cars.filter(value_source=value_source)
+        
+        # Get counts for each filter field - optimized to use single queries where possible
+        filter_data = {}
+        
+        # Use a single base queryset for all aggregations to avoid repeated filtering
+        base_cars = cars
+        
+        # Make counts
+        makes = base_cars.values('make').annotate(count=Count('id')).order_by('-count')
+        filter_data['make'] = [{'value': make['make'], 'label': make['make'], 'count': make['count']} for make in makes if make['make']]
+        
+        # Model counts (use the base queryset, Django will handle the filtering efficiently)
+        models = base_cars.values('model').annotate(count=Count('id')).order_by('-count')
+        filter_data['model'] = [{'value': model['model'], 'label': model['model'], 'count': model['count']} for model in models if model['model']]
+        
+        # Variant counts
+        variants = base_cars.values('variant').annotate(count=Count('id')).order_by('-count')
+        filter_data['variant'] = [{'value': variant['variant'], 'label': variant['variant'], 'count': variant['count']} for variant in variants if variant['variant']]
+        
+        # Year counts
+        years = base_cars.values('year').annotate(count=Count('id')).order_by('-year')
+        filter_data['year'] = [{'value': str(year['year']), 'label': str(year['year']), 'count': year['count']} for year in years]
+        
+        # Price ranges - optimized to use database aggregation instead of Python loops
+        price_stats = base_cars.aggregate(min_price=Min('price'), max_price=Max('price'))
+        if price_stats['min_price'] and price_stats['max_price']:
+            min_price = price_stats['min_price']
+            max_price = price_stats['max_price']
+            price_buckets = []
+            bucket_size = 5000000  # 5M KES buckets
+            current = min_price
+            while current <= max_price:
+                next_bucket = current + bucket_size
+                count = base_cars.filter(price__gte=current, price__lt=next_bucket).count()
+                if count > 0:
+                    price_buckets.append({
+                        'value': str(int(current)),
+                        'label': f'{int(current):,} - {int(next_bucket):,}',
+                        'count': count
+                    })
+                current = next_bucket
+            filter_data['price'] = price_buckets
+        
+        # Mileage ranges - optimized to use database aggregation
+        mileage_stats = base_cars.aggregate(min_mileage=Min('mileage'), max_mileage=Max('mileage'))
+        if mileage_stats['min_mileage'] and mileage_stats['max_mileage']:
+            min_mileage = mileage_stats['min_mileage']
+            max_mileage = mileage_stats['max_mileage']
+            mileage_buckets = []
+            bucket_size = 50000  # 50,000 km buckets
+            current = min_mileage
+            while current <= max_mileage:
+                next_bucket = current + bucket_size
+                count = base_cars.filter(mileage__gte=current, mileage__lt=next_bucket).count()
+                if count > 0:
+                    mileage_buckets.append({
+                        'value': str(int(current)),
+                        'label': f'{int(current):,} - {int(next_bucket):,} km',
+                        'count': count
+                    })
+                current = next_bucket
+            filter_data['mileage'] = mileage_buckets
+        
+        # Fuel type counts
+        fuel_types = base_cars.values('fuel_type').annotate(count=Count('id')).order_by('-count')
+        filter_data['fuel_type'] = [{'value': ft['fuel_type'], 'label': dict(Car.FUEL_CHOICES).get(ft['fuel_type'], ft['fuel_type']), 'count': ft['count']} for ft in fuel_types if ft['fuel_type']]
+        
+        # Transmission counts
+        transmissions = base_cars.values('transmission').annotate(count=Count('id')).order_by('-count')
+        filter_data['transmission'] = [{'value': t['transmission'], 'label': dict(Car.TRANSMISSION_CHOICES).get(t['transmission'], t['transmission']), 'count': t['count']} for t in transmissions if t['transmission']]
+        
+        # Condition counts
+        conditions = base_cars.values('condition').annotate(count=Count('id')).order_by('-count')
+        filter_data['condition'] = [{'value': c['condition'], 'label': dict(Car.CONDITION_CHOICES).get(c['condition'], c['condition']), 'count': c['count']} for c in conditions if c['condition']]
+        
+        # Engine size counts
+        engine_sizes = base_cars.values('engine_size').annotate(count=Count('id')).order_by('-count')
+        filter_data['engine_size'] = [{'value': es['engine_size'], 'label': es['engine_size'], 'count': es['count']} for es in engine_sizes if es['engine_size']]
+        
+        # Doors counts
+        doors_list = base_cars.values('doors').annotate(count=Count('id')).order_by('doors')
+        filter_data['doors'] = [{'value': str(d['doors']), 'label': f'{d["doors"]} Doors', 'count': d['count']} for d in doors_list if d['doors']]
+        
+        # Body type counts
+        body_types = base_cars.values('body_type').annotate(count=Count('id')).order_by('-count')
+        filter_data['body_type'] = [{'value': bt['body_type'], 'label': dict(Car.BODY_TYPE_CHOICES).get(bt['body_type'], bt['body_type']), 'count': bt['count']} for bt in body_types if bt['body_type']]
+        
+        # Previous owners counts
+        owners = base_cars.values('previous_owners').annotate(count=Count('id')).order_by('previous_owners')
+        filter_data['previous_owners'] = [{'value': str(o['previous_owners']), 'label': dict(Car.OWNERS_CHOICES).get(o['previous_owners'], str(o['previous_owners'])), 'count': o['count']} for o in owners if o['previous_owners'] is not None]
+        
+        # Seats counts
+        seats_list = base_cars.values('seats').annotate(count=Count('id')).order_by('seats')
+        filter_data['seats'] = [{'value': str(s['seats']), 'label': f'{s["seats"]}+ Seats', 'count': s['count']} for s in seats_list if s['seats']]
+        
+        # Exterior color counts
+        exterior_colors = base_cars.values('exterior_color').annotate(count=Count('id')).order_by('-count')
+        filter_data['exterior_color'] = [{'value': ec['exterior_color'], 'label': ec['exterior_color'], 'count': ec['count']} for ec in exterior_colors if ec['exterior_color']]
+        
+        # Interior color counts
+        interior_colors = base_cars.values('interior_color').annotate(count=Count('id')).order_by('-count')
+        filter_data['interior_color'] = [{'value': ic['interior_color'], 'label': ic['interior_color'], 'count': ic['count']} for ic in interior_colors if ic['interior_color']]
+        
+        # Seat material counts
+        seat_materials = base_cars.values('seat_material').annotate(count=Count('id')).order_by('-count')
+        filter_data['seat_material'] = [{'value': sm['seat_material'], 'label': sm['seat_material'], 'count': sm['count']} for sm in seat_materials if sm['seat_material']]
+        
+        # Interior trim counts
+        interior_trims = base_cars.values('interior_trim').annotate(count=Count('id')).order_by('-count')
+        filter_data['interior_trim'] = [{'value': it['interior_trim'], 'label': it['interior_trim'], 'count': it['count']} for it in interior_trims if it['interior_trim']]
+        
+        # Number of keys counts
+        keys = base_cars.values('number_of_keys').annotate(count=Count('id')).order_by('number_of_keys')
+        filter_data['number_of_keys'] = [{'value': str(k['number_of_keys']), 'label': f'{k["number_of_keys"]} Key{"s" if k["number_of_keys"] > 1 else ""}', 'count': k['count']} for k in keys]
+        
+        # Fuel economy source counts
+        fuel_economy_sources = base_cars.values('fuel_economy_source').annotate(count=Count('id')).order_by('-count')
+        filter_data['fuel_economy_source'] = [{'value': fes['fuel_economy_source'], 'label': dict(Car.FUEL_ECONOMY_SOURCE_CHOICES).get(fes['fuel_economy_source'], fes['fuel_economy_source']), 'count': fes['count']} for fes in fuel_economy_sources if fes['fuel_economy_source']]
+        
+        # Fuel economy combined counts
+        fuel_economies = base_cars.values('fuel_economy_combined').annotate(count=Count('id')).order_by('-count')
+        filter_data['fuel_economy_combined'] = [{'value': fe['fuel_economy_combined'], 'label': f'{fe["fuel_economy_combined"]} km/L', 'count': fe['count']} for fe in fuel_economies if fe['fuel_economy_combined']]
+        
+        # Value source counts
+        value_sources = base_cars.values('value_source').annotate(count=Count('id')).order_by('-count')
+        filter_data['value_source'] = [{'value': vs['value_source'], 'label': dict(Car.VALUE_SOURCE_CHOICES).get(vs['value_source'], vs['value_source']), 'count': vs['count']} for vs in value_sources if vs['value_source']]
+        
+        return JsonResponse(filter_data)
+    
+    except Exception as e:
+        logger.error(f"Error in get_filter_counts: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required(login_url='login')

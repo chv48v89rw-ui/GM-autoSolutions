@@ -3507,44 +3507,18 @@ class ConversationMessageForm(forms.Form):
 class CarSearchForm(forms.Form):
     @staticmethod
     def get_make_choices():
-        try:
-            hierarchy = get_combined_car_hierarchy()
-            all_makes = sorted(hierarchy.keys())
-            return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
-        except Exception:
-            all_makes = sorted(set(CAR_HIERARCHY.keys()))
-            return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
+        """Database-driven make choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Makes --')]
 
     @staticmethod
     def get_model_choices(make=None):
-        if not make:
-            return [('', '-- All Models --')]
-
-        models = set()
-        try:
-            hierarchy = get_combined_car_hierarchy()
-            models.update(hierarchy.get(make, {}).keys())
-        except Exception:
-            models.update(CAR_HIERARCHY.get(make, {}).keys())
-
-        return [('', '-- All Models --')] + [(model, model) for model in sorted(models) if model]
+        """Database-driven model choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Models --')]
 
     @staticmethod
     def get_variant_choices(make=None, model=None):
-        if not make:
-            return [('', '-- All Variants --')]
-        if not model:
-            return [('', '-- All Variants --')]
-
-        variants = []
-        try:
-            hierarchy = get_combined_car_hierarchy()
-            variants = hierarchy.get(make, {}).get(model, [])
-        except Exception:
-            variants = CAR_HIERARCHY.get(make, {}).get(model, [])
-        variants = [v for v in sorted(set(v for v in variants if v))]
-        
-        return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
+        """Database-driven variant choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Variants --')]
 
     make = forms.ChoiceField(
         required=False,
@@ -3771,14 +3745,17 @@ class CarSearchForm(forms.Form):
  
     @staticmethod
     def get_fuel_type_choices():
+        """Database-driven fuel type choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
 
     @staticmethod
     def get_transmission_choices():
+        """Database-driven transmission choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
 
     @staticmethod
     def get_condition_choices():
+        """Database-driven condition choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
 
     fuel_type = forms.ChoiceField(
@@ -3819,14 +3796,17 @@ class CarSearchForm(forms.Form):
  
     @staticmethod
     def get_body_type_choices():
+        """Database-driven body type choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
 
     @staticmethod
     def get_doors_choices():
+        """Database-driven doors choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
 
     @staticmethod
     def get_seats_choices():
+        """Database-driven seats choices - will be populated dynamically via JavaScript"""
         return [('', '-- All Seats --')] + [
             ('2', '2 Seats'),
             ('4', '4 Seats'),
@@ -3837,6 +3817,7 @@ class CarSearchForm(forms.Form):
 
     @staticmethod
     def get_exterior_color_choices():
+        """Database-driven exterior color choices - will be populated dynamically via JavaScript"""
         EXTERIOR_COLOR_CHOICES = sorted([
             ('Arctic White', 'Arctic White'),
             ('Black', 'Black'),
@@ -3905,116 +3886,43 @@ class CarSearchForm(forms.Form):
 
     @staticmethod
     def get_interior_color_choices():
-        INTERIOR_COLOR_CHOICES = sorted([
-            ('Anthracite', 'Anthracite'),
-            ('Beige', 'Beige'),
-            ('Black', 'Black'),
-            ('Black / Beige', 'Black / Beige'),
-            ('Black / Blue', 'Black / Blue'),
-            ('Black / Brown', 'Black / Brown'),
-            ('Black / Grey', 'Black / Grey'),
-            ('Black / Red', 'Black / Red'),
-            ('Black / White', 'Black / White'),
-            ('Blue', 'Blue'),
-            ('Brown', 'Brown'),
-            ('Brown / Beige', 'Brown / Beige'),
-            ('Burgundy', 'Burgundy'),
-            ('Camel', 'Camel'),
-            ('Charcoal', 'Charcoal'),
-            ('Chocolate Brown', 'Chocolate Brown'),
-            ('Cream', 'Cream'),
-            ('Dark Brown', 'Dark Brown'),
-            ('Dark Grey', 'Dark Grey'),
-            ('Espresso Brown', 'Espresso Brown'),
-            ('Green', 'Green'),
-            ('Grey', 'Grey'),
-            ('Ivory', 'Ivory'),
-            ('Jet Black', 'Jet Black'),
-            ('Light Grey', 'Light Grey'),
-            ('Mocha', 'Mocha'),
-            ('Navy Blue', 'Navy Blue'),
-            ('Orange', 'Orange'),
-            ('Other', 'Other'),
-            ('Oyster', 'Oyster'),
-            ('Red', 'Red'),
-            ('Red / Black', 'Red / Black'),
-            ('Saddle Tan', 'Saddle Tan'),
-            ('Sand Beige', 'Sand Beige'),
-            ('Tan', 'Tan'),
-            ('Tan / Black', 'Tan / Black'),
-            ('Taupe', 'Taupe'),
-            ('White', 'White'),
-            ('White / Black', 'White / Black'),
-        ])
-        INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES
+        """Database-driven interior color choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Interior Colors --')]
 
     @staticmethod
     def get_seat_material_choices():
-        SEAT_MATERIAL_CHOICES = sorted([
-            ('Alcantara', 'Alcantara'),
-            ('Cloth', 'Cloth'),
-            ('Fabric', 'Fabric'),
-            ('Leather', 'Leather'),
-            ('Leatherette', 'Leatherette'),
-            ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
-            ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
-            ('Nappa Leather', 'Nappa Leather'),
-            ('Other', 'Other'),
-            ('Premium Leather', 'Premium Leather'),
-            ('Suede', 'Suede'),
-            ('Synthetic Leather', 'Synthetic Leather'),
-            ('Velour', 'Velour'),
-            ('Vinyl', 'Vinyl'),
-        ])
-        SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES
+        """Database-driven seat material choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Seat Materials --')]
 
     @staticmethod
     def get_interior_trim_choices():
-        INTERIOR_TRIM_CHOICES = sorted([
-            ('Aluminum', 'Aluminum'),
-            ('Brushed Aluminum', 'Brushed Aluminum'),
-            ('Carbon Fiber', 'Carbon Fiber'),
-            ('Carbon Fiber Look', 'Carbon Fiber Look'),
-            ('Chrome', 'Chrome'),
-            ('Gloss Wood', 'Gloss Wood'),
-            ('Leather Wrapped', 'Leather Wrapped'),
-            ('Matte Wood', 'Matte Wood'),
-            ('Mixed Materials', 'Mixed Materials'),
-            ('Open-Pore Wood', 'Open-Pore Wood'),
-            ('Other', 'Other'),
-            ('Piano Black', 'Piano Black'),
-            ('Satin Chrome', 'Satin Chrome'),
-            ('Wood Trim', 'Wood Trim'),
-        ])
-        INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
-        return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
+        """Database-driven interior trim choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Interior Trims --')]
 
     @staticmethod
     def get_number_of_keys_choices():
-        return [('', '-- All Keys --')] + [
-            ('1', '1 Key'),
-            ('2', '2 Keys'),
-            ('3', '3 Keys'),
-            ('4', '4+ Keys'),
-        ]
+        """Database-driven number of keys choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Keys --')]
 
     @staticmethod
     def get_previous_owners_choices():
-        return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
+        """Database-driven previous owners choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Owners --')]
 
     @staticmethod
     def get_fuel_economy_source_choices():
-        return [('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
+        """Database-driven fuel economy source choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Fuel Economy Sources --')]
 
     @staticmethod
     def get_fuel_economy_combined_choices():
-        return [('', '-- All Fuel Economy --')] + [(value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value]
+        """Database-driven fuel economy combined choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Fuel Economy --')]
 
     @staticmethod
     def get_value_source_choices():
-        return [('', '-- All Value Sources --')] + list(Car.VALUE_SOURCE_CHOICES)
+        """Database-driven value source choices - will be populated dynamically via JavaScript"""
+        return [('', '-- All Value Sources --')]
 
     body_type = forms.ChoiceField(
         required=False,

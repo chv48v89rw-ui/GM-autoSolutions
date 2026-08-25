@@ -956,6 +956,8 @@
     <!-- Bootstrap JS -->
     <script src="/static/js/bootstrap.bundle.min.js"></script>
     <script id="car_hierarchy_data" type="application/json">{{ car_hierarchy_json|default:'{}'|safe }}</script>
+    <!-- Dynamic Filters JS -->
+    <script src="{% static 'js/dynamic-filters.js' %}"></script>
     <script>
         const CAR_HIERARCHY = JSON.parse(document.getElementById('car_hierarchy_data').textContent || '{}');
 
