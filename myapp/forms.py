@@ -3507,22 +3507,32 @@ class ConversationMessageForm(forms.Form):
 class CarSearchForm(forms.Form):
     @staticmethod
     def get_make_choices():
-        """Database-driven make choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Makes --')]
+        """Static make choices from CAR_HIERARCHY"""
+        all_makes = sorted(CAR_HIERARCHY.keys())
+        return [('', '-- All Makes --')] + [(make, make) for make in all_makes]
 
     @staticmethod
     def get_model_choices(make=None):
-        """Database-driven model choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Models --')]
+        """Static model choices from CAR_HIERARCHY"""
+        if not make:
+            return [('', '-- All Models --')]
+        
+        models = sorted(CAR_HIERARCHY.get(make, {}).keys())
+        return [('', '-- All Models --')] + [(model, model) for model in models if model]
 
     @staticmethod
     def get_variant_choices(make=None, model=None):
-        """Database-driven variant choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Variants --')]
+        """Static variant choices from CAR_HIERARCHY"""
+        if not make or not model:
+            return [('', '-- All Variants --')]
+        
+        variants = CAR_HIERARCHY.get(make, {}).get(model, [])
+        variants = [v for v in sorted(set(v for v in variants if v))]
+        return [('', '-- All Variants --')] + [(variant, variant) for variant in variants]
 
     make = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_make_choices.__func__(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3530,7 +3540,7 @@ class CarSearchForm(forms.Form):
 
     model = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_model_choices.__func__(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3538,7 +3548,7 @@ class CarSearchForm(forms.Form):
 
     variant = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_variant_choices.__func__(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3554,7 +3564,7 @@ class CarSearchForm(forms.Form):
         self.fields['model'].choices = self.get_model_choices(selected_make)
         self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
         
-        # Initialize dynamic choices for other filters
+        # Initialize static choices for other filters
         self.fields['fuel_type'].choices = self.get_fuel_type_choices()
         self.fields['transmission'].choices = self.get_transmission_choices()
         self.fields['condition'].choices = self.get_condition_choices()
@@ -3745,34 +3755,34 @@ class CarSearchForm(forms.Form):
  
     @staticmethod
     def get_fuel_type_choices():
-        """Database-driven fuel type choices - will be populated dynamically via JavaScript"""
+        """Static fuel type choices"""
         return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
 
     @staticmethod
     def get_transmission_choices():
-        """Database-driven transmission choices - will be populated dynamically via JavaScript"""
+        """Static transmission choices"""
         return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
 
     @staticmethod
     def get_condition_choices():
-        """Database-driven condition choices - will be populated dynamically via JavaScript"""
+        """Static condition choices"""
         return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
 
     fuel_type = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_fuel_type_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
     transmission = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_transmission_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
     condition = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_condition_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
@@ -3790,23 +3800,23 @@ class CarSearchForm(forms.Form):
  
     doors = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_doors_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
     @staticmethod
     def get_body_type_choices():
-        """Database-driven body type choices - will be populated dynamically via JavaScript"""
+        """Static body type choices"""
         return [('', '-- All Body Types --')] + list(Car.BODY_TYPE_CHOICES)
 
     @staticmethod
     def get_doors_choices():
-        """Database-driven doors choices - will be populated dynamically via JavaScript"""
+        """Static doors choices"""
         return [('', '-- All Doors --')] + list(Car.DOORS_CHOICES)
 
     @staticmethod
     def get_seats_choices():
-        """Database-driven seats choices - will be populated dynamically via JavaScript"""
+        """Static seats choices"""
         return [('', '-- All Seats --')] + [
             ('2', '2 Seats'),
             ('4', '4 Seats'),
@@ -3817,7 +3827,7 @@ class CarSearchForm(forms.Form):
 
     @staticmethod
     def get_exterior_color_choices():
-        """Database-driven exterior color choices - will be populated dynamically via JavaScript"""
+        """Static exterior color choices"""
         EXTERIOR_COLOR_CHOICES = sorted([
             ('Arctic White', 'Arctic White'),
             ('Black', 'Black'),
@@ -3886,254 +3896,215 @@ class CarSearchForm(forms.Form):
 
     @staticmethod
     def get_interior_color_choices():
-        """Database-driven interior color choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Interior Colors --')]
+        """Static interior color choices"""
+        INTERIOR_COLOR_CHOICES = sorted([
+            ('Anthracite', 'Anthracite'),
+            ('Beige', 'Beige'),
+            ('Black', 'Black'),
+            ('Black / Beige', 'Black / Beige'),
+            ('Black / Blue', 'Black / Blue'),
+            ('Black / Brown', 'Black / Brown'),
+            ('Black / Grey', 'Black / Grey'),
+            ('Black / Red', 'Black / Red'),
+            ('Black / White', 'Black / White'),
+            ('Blue', 'Blue'),
+            ('Brown', 'Brown'),
+            ('Brown / Beige', 'Brown / Beige'),
+            ('Burgundy', 'Burgundy'),
+            ('Camel', 'Camel'),
+            ('Charcoal', 'Charcoal'),
+            ('Chocolate Brown', 'Chocolate Brown'),
+            ('Cream', 'Cream'),
+            ('Dark Brown', 'Dark Brown'),
+            ('Dark Grey', 'Dark Grey'),
+            ('Espresso Brown', 'Espresso Brown'),
+            ('Green', 'Green'),
+            ('Grey', 'Grey'),
+            ('Ivory', 'Ivory'),
+            ('Jet Black', 'Jet Black'),
+            ('Light Grey', 'Light Grey'),
+            ('Mocha', 'Mocha'),
+            ('Navy Blue', 'Navy Blue'),
+            ('Orange', 'Orange'),
+            ('Other', 'Other'),
+            ('Oyster', 'Oyster'),
+            ('Red', 'Red'),
+            ('Red / Black', 'Red / Black'),
+            ('Saddle Tan', 'Saddle Tan'),
+            ('Sand Beige', 'Sand Beige'),
+            ('Tan', 'Tan'),
+            ('Tan / Black', 'Tan / Black'),
+            ('Taupe', 'Taupe'),
+            ('White', 'White'),
+            ('White / Black', 'White / Black'),
+        ])
+        INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Interior Colors --')] + INTERIOR_COLOR_CHOICES
 
     @staticmethod
     def get_seat_material_choices():
-        """Database-driven seat material choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Seat Materials --')]
+        """Static seat material choices"""
+        SEAT_MATERIAL_CHOICES = sorted([
+            ('Alcantara', 'Alcantara'),
+            ('Cloth', 'Cloth'),
+            ('Fabric', 'Fabric'),
+            ('Leather', 'Leather'),
+            ('Leatherette', 'Leatherette'),
+            ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
+            ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
+            ('Nappa Leather', 'Nappa Leather'),
+            ('Other', 'Other'),
+            ('Premium Leather', 'Premium Leather'),
+            ('Suede', 'Suede'),
+            ('Synthetic Leather', 'Synthetic Leather'),
+            ('Velour', 'Velour'),
+            ('Vinyl', 'Vinyl'),
+        ])
+        SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Seat Materials --')] + SEAT_MATERIAL_CHOICES
 
     @staticmethod
     def get_interior_trim_choices():
-        """Database-driven interior trim choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Interior Trims --')]
+        """Static interior trim choices"""
+        INTERIOR_TRIM_CHOICES = sorted([
+            ('Aluminum', 'Aluminum'),
+            ('Brushed Aluminum', 'Brushed Aluminum'),
+            ('Carbon Fiber', 'Carbon Fiber'),
+            ('Carbon Fiber Look', 'Carbon Fiber Look'),
+            ('Chrome', 'Chrome'),
+            ('Gloss Wood', 'Gloss Wood'),
+            ('Leather Wrapped', 'Leather Wrapped'),
+            ('Matte Wood', 'Matte Wood'),
+            ('Mixed Materials', 'Mixed Materials'),
+            ('Open-Pore Wood', 'Open-Pore Wood'),
+            ('Other', 'Other'),
+            ('Piano Black', 'Piano Black'),
+            ('Satin Chrome', 'Satin Chrome'),
+            ('Wood Trim', 'Wood Trim'),
+        ])
+        INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
+        return [('', '-- All Interior Trims --')] + INTERIOR_TRIM_CHOICES
 
     @staticmethod
     def get_number_of_keys_choices():
-        """Database-driven number of keys choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Keys --')]
+        """Static number of keys choices"""
+        return [('', '-- All Keys --'), ('1', '1 Key'), ('2', '2 Keys'), ('3', '3 Keys'), ('4+)', '4+ Keys')]
 
     @staticmethod
     def get_previous_owners_choices():
-        """Database-driven previous owners choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Owners --')]
+        """Static previous owners choices"""
+        return [('', '-- All Owners --')] + list(Car.OWNERS_CHOICES)
 
     @staticmethod
     def get_fuel_economy_source_choices():
-        """Database-driven fuel economy source choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Fuel Economy Sources --')]
+        """Static fuel economy source choices"""
+        return [('', '-- All Fuel Economy Sources --')] + list(Car.FUEL_ECONOMY_SOURCE_CHOICES)
 
     @staticmethod
     def get_fuel_economy_combined_choices():
-        """Database-driven fuel economy combined choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Fuel Economy --')]
+        """Static fuel economy combined choices"""
+        return [('', '-- All Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
     @staticmethod
     def get_value_source_choices():
-        """Database-driven value source choices - will be populated dynamically via JavaScript"""
-        return [('', '-- All Value Sources --')]
+        """Static value source choices"""
+        return [('', '-- All Value Sources --')] + list(Car.VALUE_SOURCE_CHOICES)
 
     body_type = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_body_type_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
     previous_owners = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_previous_owners_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
     seats = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_seats_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    EXTERIOR_COLOR_CHOICES = sorted([
-        ('Arctic White', 'Arctic White'),
-        ('Black', 'Black'),
-        ('Blue', 'Blue'),
-        ('Bright Red', 'Bright Red'),
-        ('Bronze', 'Bronze'),
-        ('Brown', 'Brown'),
-        ('Burgundy', 'Burgundy'),
-        ('Candy Red', 'Candy Red'),
-        ('Champagne Gold', 'Champagne Gold'),
-        ('Charcoal Grey', 'Charcoal Grey'),
-        ('Cherry Red', 'Cherry Red'),
-        ('Chocolate Brown', 'Chocolate Brown'),
-        ('Copper', 'Copper'),
-        ('Copper Orange', 'Copper Orange'),
-        ('Cream', 'Cream'),
-        ('Dark Brown', 'Dark Brown'),
-        ('Dark Grey', 'Dark Grey'),
-        ('Electric Blue', 'Electric Blue'),
-        ('Emerald Green', 'Emerald Green'),
-        ('Forest Green', 'Forest Green'),
-        ('Gold', 'Gold'),
-        ('Grey', 'Grey'),
-        ('Gunmetal Grey', 'Gunmetal Grey'),
-        ('Ivory', 'Ivory'),
-        ('Jet Black', 'Jet Black'),
-        ('Light Blue', 'Light Blue'),
-        ('Light Grey', 'Light Grey'),
-        ('Lime Green', 'Lime Green'),
-        ('Matte Black', 'Matte Black'),
-        ('Matte Blue', 'Matte Blue'),
-        ('Matte Green', 'Matte Green'),
-        ('Matte Grey', 'Matte Grey'),
-        ('Matte Silver', 'Matte Silver'),
-        ('Metallic Silver', 'Metallic Silver'),
-        ('Midnight Blue', 'Midnight Blue'),
-        ('Mocha', 'Mocha'),
-        ('Multi-Color', 'Multi-Color'),
-        ('Mustard Yellow', 'Mustard Yellow'),
-        ('Nardo Grey', 'Nardo Grey'),
-        ('Navy Blue', 'Navy Blue'),
-        ('Olive Green', 'Olive Green'),
-        ('Orange', 'Orange'),
-        ('Other', 'Other'),
-        ('Pearl White', 'Pearl White'),
-        ('Pink', 'Pink'),
-        ('Purple', 'Purple'),
-        ('Red', 'Red'),
-        ('Royal Blue', 'Royal Blue'),
-        ('Ruby Red', 'Ruby Red'),
-        ('Slate Grey', 'Slate Grey'),
-        ('Sky Blue', 'Sky Blue'),
-        ('Steel Blue', 'Steel Blue'),
-        ('Sunflower Yellow', 'Sunflower Yellow'),
-        ('Teal', 'Teal'),
-        ('Titanium Silver', 'Titanium Silver'),
-        ('Turquoise', 'Turquoise'),
-        ('Two-Tone', 'Two-Tone'),
-        ('Violet', 'Violet'),
-        ('White', 'White'),
-        ('Wine Red', 'Wine Red'),
-        ('Yellow', 'Yellow'),
-    ])
-    EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-
     exterior_color = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_exterior_color_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    
-    INTERIOR_COLOR_CHOICES = sorted([
-        ('Anthracite', 'Anthracite'),
-        ('Beige', 'Beige'),
-        ('Black', 'Black'),
-        ('Black / Beige', 'Black / Beige'),
-        ('Black / Blue', 'Black / Blue'),
-        ('Black / Brown', 'Black / Brown'),
-        ('Black / Grey', 'Black / Grey'),
-        ('Black / Red', 'Black / Red'),
-        ('Black / White', 'Black / White'),
-        ('Blue', 'Blue'),
-        ('Brown', 'Brown'),
-        ('Brown / Beige', 'Brown / Beige'),
-        ('Burgundy', 'Burgundy'),
-        ('Camel', 'Camel'),
-        ('Charcoal', 'Charcoal'),
-        ('Chocolate Brown', 'Chocolate Brown'),
-        ('Cream', 'Cream'),
-        ('Dark Brown', 'Dark Brown'),
-        ('Dark Grey', 'Dark Grey'),
-        ('Espresso Brown', 'Espresso Brown'),
-        ('Green', 'Green'),
-        ('Grey', 'Grey'),
-        ('Ivory', 'Ivory'),
-        ('Jet Black', 'Jet Black'),
-        ('Light Grey', 'Light Grey'),
-        ('Mocha', 'Mocha'),
-        ('Navy Blue', 'Navy Blue'),
-        ('Orange', 'Orange'),
-        ('Other', 'Other'),
-        ('Oyster', 'Oyster'),
-        ('Red', 'Red'),
-        ('Red / Black', 'Red / Black'),
-        ('Saddle Tan', 'Saddle Tan'),
-        ('Sand Beige', 'Sand Beige'),
-        ('Tan', 'Tan'),
-        ('Tan / Black', 'Tan / Black'),
-        ('Taupe', 'Taupe'),
-        ('White', 'White'),
-        ('White / Black', 'White / Black'),
-    ])
-    INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
-
+ 
     interior_color = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_interior_color_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    
-    SEAT_MATERIAL_CHOICES = sorted([
-        ('Alcantara', 'Alcantara'),
-        ('Cloth', 'Cloth'),
-        ('Fabric', 'Fabric'),
-        ('Leather', 'Leather'),
-        ('Leatherette', 'Leatherette'),
-        ('Mixed Leather / Alcantara', 'Mixed Leather / Alcantara'),
-        ('Mixed Leather / Cloth', 'Mixed Leather / Cloth'),
-        ('Nappa Leather', 'Nappa Leather'),
-        ('Other', 'Other'),
-        ('Premium Leather', 'Premium Leather'),
-        ('Suede', 'Suede'),
-        ('Synthetic Leather', 'Synthetic Leather'),
-        ('Velour', 'Velour'),
-        ('Vinyl', 'Vinyl'),
-    ])
-    SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
-
+ 
     seat_material = forms.ChoiceField(
         required=False,
-        choices=[],
+        choices=get_seat_material_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    interior_trim = forms.ChoiceField(
+        required=False,
+        choices=get_interior_trim_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    number_of_keys = forms.ChoiceField(
+        required=False,
+        choices=get_number_of_keys_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    fuel_economy_source = forms.ChoiceField(
+        required=False,
+        choices=get_fuel_economy_source_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    fuel_economy_combined = forms.ChoiceField(
+        required=False,
+        choices=get_fuel_economy_combined_choices.__func__(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+ 
+    value_source = forms.ChoiceField(
+        required=False,
+        choices=get_value_source_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    INTERIOR_TRIM_CHOICES = sorted([
-        ('Aluminum', 'Aluminum'),
-        ('Brushed Aluminum', 'Brushed Aluminum'),
-        ('Carbon Fiber', 'Carbon Fiber'),
-        ('Carbon Fiber Look', 'Carbon Fiber Look'),
-        ('Chrome', 'Chrome'),
-        ('Gloss Wood', 'Gloss Wood'),
-        ('Leather Wrapped', 'Leather Wrapped'),
-        ('Matte Wood', 'Matte Wood'),
-        ('Mixed Materials', 'Mixed Materials'),
-        ('Open-Pore Wood', 'Open-Pore Wood'),
-        ('Other', 'Other'),
-        ('Piano Black', 'Piano Black'),
-        ('Satin Chrome', 'Satin Chrome'),
-        ('Wood Trim', 'Wood Trim'),
-    ])
-    INTERIOR_TRIM_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_TRIM_CHOICES if choice[0] != 'Other']
-
-    interior_trim = forms.ChoiceField(
+    features = forms.CharField(
         required=False,
-        choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Features (comma-separated): ABS, Power Steering, AC, etc.',
+            'rows': 3
+        })
     )
-
-    number_of_keys = forms.ChoiceField(
+    
+    color = forms.CharField(
         required=False,
-        choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Color'
+        })
     )
+    
+    FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + list(Car.FUEL_ECONOMY_CHOICES)
 
-    fuel_economy_source = forms.ChoiceField(
-        required=False,
-        choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
+    fuel_economy_from = forms.ChoiceField(required=False, choices=FUEL_ECONOMY_FROM_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
 
-    fuel_economy_combined = forms.ChoiceField(
-        required=False,
-        choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
+    FUEL_ECONOMY_TO_CHOICES = [('', '--- Fuel Economy to ---')] + list(Car.FUEL_ECONOMY_CHOICES)
 
-    value_source = forms.ChoiceField(
-        required=False,
-        choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
+    fuel_economy_to = forms.ChoiceField(required=False, choices=FUEL_ECONOMY_TO_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
+    
     color = forms.CharField(required=False, widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'Color (e.g., Red, Black, White)'

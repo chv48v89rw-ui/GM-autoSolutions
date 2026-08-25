@@ -211,80 +211,17 @@ def apply_car_filters(cars, form):
     if form.cleaned_data.get('variant'):
         cars = cars.filter(variant__iexact=form.cleaned_data['variant'])
     if form.cleaned_data.get('year_from'):
-        year_from = form.cleaned_data['year_from']
-        # Handle AutoTrader-style range format
-        if '_' in year_from:
-            parts = year_from.split('_')
-            cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
-        else:
-            cars = cars.filter(year__gte=int(year_from))
-            
+        cars = cars.filter(year__gte=int(form.cleaned_data['year_from']))
     if form.cleaned_data.get('year_to'):
-        year_to = form.cleaned_data['year_to']
-        # Handle AutoTrader-style range format
-        if '_' in year_to:
-            parts = year_to.split('_')
-            cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
-        else:
-            cars = cars.filter(year__lte=int(year_to))
+        cars = cars.filter(year__lte=int(form.cleaned_data['year_to']))
     if form.cleaned_data.get('price_from'):
-        price_from = form.cleaned_data['price_from']
-        # Handle AutoTrader-style range format
-        if price_from.startswith('under_'):
-            threshold = float(price_from.split('_')[1])
-            cars = cars.filter(price__lt=threshold)
-        elif price_from.startswith('over_'):
-            threshold = float(price_from.split('_')[1])
-            cars = cars.filter(price__gte=threshold)
-        elif '_' in price_from:
-            parts = price_from.split('_')
-            cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
-        else:
-            cars = cars.filter(price__gte=float(price_from))
-            
+        cars = cars.filter(price__gte=float(form.cleaned_data['price_from']))
     if form.cleaned_data.get('price_to'):
-        price_to = form.cleaned_data['price_to']
-        # Handle AutoTrader-style range format
-        if price_to.startswith('under_'):
-            threshold = float(price_to.split('_')[1])
-            cars = cars.filter(price__lt=threshold)
-        elif price_to.startswith('over_'):
-            threshold = float(price_to.split('_')[1])
-            cars = cars.filter(price__gte=threshold)
-        elif '_' in price_to:
-            parts = price_to.split('_')
-            cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
-        else:
-            cars = cars.filter(price__lte=float(price_to))
+        cars = cars.filter(price__lte=float(form.cleaned_data['price_to']))
     if form.cleaned_data.get('mileage_from'):
-        mileage_from = form.cleaned_data['mileage_from']
-        # Handle AutoTrader-style range format
-        if mileage_from.startswith('under_'):
-            threshold = float(mileage_from.split('_')[1])
-            cars = cars.filter(mileage__lt=threshold)
-        elif mileage_from.startswith('over_'):
-            threshold = float(mileage_from.split('_')[1])
-            cars = cars.filter(mileage__gte=threshold)
-        elif '_' in mileage_from:
-            parts = mileage_from.split('_')
-            cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
-        else:
-            cars = cars.filter(mileage__gte=float(mileage_from))
-            
+        cars = cars.filter(mileage__gte=float(form.cleaned_data['mileage_from']))
     if form.cleaned_data.get('mileage_to'):
-        mileage_to = form.cleaned_data['mileage_to']
-        # Handle AutoTrader-style range format
-        if mileage_to.startswith('under_'):
-            threshold = float(mileage_to.split('_')[1])
-            cars = cars.filter(mileage__lt=threshold)
-        elif mileage_to.startswith('over_'):
-            threshold = float(mileage_to.split('_')[1])
-            cars = cars.filter(mileage__gte=threshold)
-        elif '_' in mileage_to:
-            parts = mileage_to.split('_')
-            cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
-        else:
-            cars = cars.filter(mileage__lte=float(mileage_to))
+        cars = cars.filter(mileage__lte=float(form.cleaned_data['mileage_to']))
     if form.cleaned_data.get('fuel_type'):
         cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
     if form.cleaned_data.get('transmission'):
@@ -296,34 +233,10 @@ def apply_car_filters(cars, form):
         cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
         
         if form.cleaned_data.get('engine_size_from'):
-            engine_size_from = form.cleaned_data['engine_size_from']
-            # Handle AutoTrader-style range format
-            if engine_size_from.startswith('under_'):
-                threshold = float(engine_size_from.split('_')[1])
-                cars = cars.filter(engine_size_value__lt=threshold)
-            elif engine_size_from.startswith('over_'):
-                threshold = float(engine_size_from.split('_')[1])
-                cars = cars.filter(engine_size_value__gte=threshold)
-            elif '_' in engine_size_from:
-                parts = engine_size_from.split('_')
-                cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
-            else:
-                cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+            cars = cars.filter(engine_size_value__gte=float(form.cleaned_data['engine_size_from']))
                 
         if form.cleaned_data.get('engine_size_to'):
-            engine_size_to = form.cleaned_data['engine_size_to']
-            # Handle AutoTrader-style range format
-            if engine_size_to.startswith('under_'):
-                threshold = float(engine_size_to.split('_')[1])
-                cars = cars.filter(engine_size_value__lt=threshold)
-            elif engine_size_to.startswith('over_'):
-                threshold = float(engine_size_to.split('_')[1])
-                cars = cars.filter(engine_size_value__gte=threshold)
-            elif '_' in engine_size_to:
-                parts = engine_size_to.split('_')
-                cars = cars.filter(engine_size_value__gte=float(parts[0]), engine_size_value__lt=float(parts[1]))
-            else:
-                cars = cars.filter(engine_size_value__lte=float(engine_size_to))
+            cars = cars.filter(engine_size_value__lte=float(form.cleaned_data['engine_size_to']))
 
     if form.cleaned_data.get('doors'):
         cars = cars.filter(doors=form.cleaned_data['doors'])
@@ -364,34 +277,10 @@ def apply_car_filters(cars, form):
         cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
         
         if form.cleaned_data.get('fuel_economy_from'):
-            fuel_economy_from = form.cleaned_data['fuel_economy_from']
-            # Handle AutoTrader-style range format
-            if fuel_economy_from and fuel_economy_from.startswith('under_'):
-                threshold = float(fuel_economy_from.split('_')[1])
-                cars = cars.filter(fuel_economy_value__lt=threshold)
-            elif fuel_economy_from and fuel_economy_from.startswith('over_'):
-                threshold = float(fuel_economy_from.split('_')[1])
-                cars = cars.filter(fuel_economy_value__gte=threshold)
-            elif fuel_economy_from and '_' in fuel_economy_from:
-                parts = fuel_economy_from.split('_')
-                cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
-            elif fuel_economy_from:
-                cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+            cars = cars.filter(fuel_economy_value__gte=float(form.cleaned_data['fuel_economy_from']))
                 
         if form.cleaned_data.get('fuel_economy_to'):
-            fuel_economy_to = form.cleaned_data['fuel_economy_to']
-            # Handle AutoTrader-style range format
-            if fuel_economy_to and fuel_economy_to.startswith('under_'):
-                threshold = float(fuel_economy_to.split('_')[1])
-                cars = cars.filter(fuel_economy_value__lt=threshold)
-            elif fuel_economy_to and fuel_economy_to.startswith('over_'):
-                threshold = float(fuel_economy_to.split('_')[1])
-                cars = cars.filter(fuel_economy_value__gte=threshold)
-            elif fuel_economy_to and '_' in fuel_economy_to:
-                parts = fuel_economy_to.split('_')
-                cars = cars.filter(fuel_economy_value__gte=float(parts[0]), fuel_economy_value__lt=float(parts[1]))
-            elif fuel_economy_to:
-                cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
+            cars = cars.filter(fuel_economy_value__lte=float(form.cleaned_data['fuel_economy_to']))
 
     if form.cleaned_data.get('fuel_economy_combined'):
         cars = cars.filter(fuel_economy_combined=form.cleaned_data['fuel_economy_combined'])
@@ -1374,76 +1263,17 @@ def get_filter_counts(request):
             cars = cars.filter(variant__iexact=variant)
             
         if year_from:
-            # Handle AutoTrader-style range format
-            if '_' in year_from:
-                parts = year_from.split('_')
-                cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
-            else:
-                cars = cars.filter(year__gte=int(year_from))
-                
+            cars = cars.filter(year__gte=int(year_from))
         if year_to:
-            # Handle AutoTrader-style range format
-            if '_' in year_to:
-                parts = year_to.split('_')
-                cars = cars.filter(year__gte=int(parts[0]), year__lt=int(parts[1]))
-            else:
-                cars = cars.filter(year__lte=int(year_to))
-                
+            cars = cars.filter(year__lte=int(year_to))
         if price_from:
-            # Handle AutoTrader-style range format
-            if price_from.startswith('under_'):
-                threshold = float(price_from.split('_')[1])
-                cars = cars.filter(price__lt=threshold)
-            elif price_from.startswith('over_'):
-                threshold = float(price_from.split('_')[1])
-                cars = cars.filter(price__gte=threshold)
-            elif '_' in price_from:
-                parts = price_from.split('_')
-                cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
-            else:
-                cars = cars.filter(price__gte=float(price_from))
-                
+            cars = cars.filter(price__gte=float(price_from))
         if price_to:
-            # Handle AutoTrader-style range format
-            if price_to.startswith('under_'):
-                threshold = float(price_to.split('_')[1])
-                cars = cars.filter(price__lt=threshold)
-            elif price_to.startswith('over_'):
-                threshold = float(price_to.split('_')[1])
-                cars = cars.filter(price__gte=threshold)
-            elif '_' in price_to:
-                parts = price_to.split('_')
-                cars = cars.filter(price__gte=float(parts[0]), price__lt=float(parts[1]))
-            else:
-                cars = cars.filter(price__lte=float(price_to))
-                
+            cars = cars.filter(price__lte=float(price_to))
         if mileage_from:
-            # Handle AutoTrader-style range format
-            if mileage_from.startswith('under_'):
-                threshold = float(mileage_from.split('_')[1])
-                cars = cars.filter(mileage__lt=threshold)
-            elif mileage_from.startswith('over_'):
-                threshold = float(mileage_from.split('_')[1])
-                cars = cars.filter(mileage__gte=threshold)
-            elif '_' in mileage_from:
-                parts = mileage_from.split('_')
-                cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
-            else:
-                cars = cars.filter(mileage__gte=float(mileage_from))
-                
+            cars = cars.filter(mileage__gte=float(mileage_from))
         if mileage_to:
-            # Handle AutoTrader-style range format
-            if mileage_to.startswith('under_'):
-                threshold = float(mileage_to.split('_')[1])
-                cars = cars.filter(mileage__lt=threshold)
-            elif mileage_to.startswith('over_'):
-                threshold = float(mileage_to.split('_')[1])
-                cars = cars.filter(mileage__gte=threshold)
-            elif '_' in mileage_to:
-                parts = mileage_to.split('_')
-                cars = cars.filter(mileage__gte=float(parts[0]), mileage__lt=float(parts[1]))
-            else:
-                cars = cars.filter(mileage__lte=float(mileage_to))
+            cars = cars.filter(mileage__lte=float(mileage_to))
         if fuel_type:
             cars = cars.filter(fuel_type=fuel_type)
         if transmission:
