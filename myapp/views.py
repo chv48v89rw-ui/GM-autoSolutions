@@ -2016,16 +2016,25 @@ def subscription_request(request):
 
 
 def get_models_for_make(request):
-    """API endpoint to get models for a selected make"""
+    """API endpoint to get models for a selected make, and variants for a selected model"""
     from .models import Car
     
     make = request.GET.get('make', '')
+    model = request.GET.get('model', '')
+    
     if make:
-        models = Car.objects.filter(make=make).values_list('model', flat=True).distinct().order_by('model')
-        model_list = [{'value': model, 'label': model} for model in models]
-        return JsonResponse({'models': model_list})
+        if model:
+            # Get variants for the specific make and model
+            variants = Car.objects.filter(make=make, model=model).values_list('variant', flat=True).distinct().order_by('variant')
+            variant_list = list(variants)
+            return JsonResponse({'variants': variant_list})
+        else:
+            # Get models for the make
+            models = Car.objects.filter(make=make).values_list('model', flat=True).distinct().order_by('model')
+            model_list = list(models)
+            return JsonResponse({'models': model_list})
     else:
-        return JsonResponse({'models': []})
+        return JsonResponse({'models': [], 'variants': []})
 
 
 def get_dealerships_json(request):

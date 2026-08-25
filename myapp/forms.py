@@ -283,7 +283,7 @@ CAR_HIERARCHY = {
     ],
 
     'C-Class': [
-        'C200' 'C220d'
+        'C200', 'C220d',
         'C300', 'C300e', 'C350', 'C350e',
         'C400', 'C36 AMG', 'C43 AMG',
         'C55 AMG', 'C63 AMG', 'C63 S AMG'
@@ -3999,21 +3999,38 @@ class CarSearchForm(forms.Form):
         'class': 'form-control',
     }))
  
-    @staticmethod
-    def get_fuel_type_choices():
-        """Static fuel type choices"""
-        return [('', '-- All Fuel Types --')] + list(Car.FUEL_CHOICES)
+    ENGINE_SIZE_FROM_CHOICES = [('', '--- Engine Size from ---')] + list(Car.ENGINE_SIZE_CHOICES)
 
-    @staticmethod
-    def get_transmission_choices():
-        """Static transmission choices"""
-        return [('', '-- All Transmissions --')] + list(Car.TRANSMISSION_CHOICES)
+    engine_size_from = forms.ChoiceField(required=False, choices=ENGINE_SIZE_FROM_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
 
-    @staticmethod
-    def get_condition_choices():
-        """Static condition choices"""
-        return [('', '-- All Conditions --')] + list(Car.CONDITION_CHOICES)
+    ENGINE_SIZE_TO_CHOICES = [('', '--- Engine Size to ---')] + list(Car.ENGINE_SIZE_CHOICES)
 
+    engine_size_to = forms.ChoiceField(required=False, choices=ENGINE_SIZE_TO_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control',
+    }))
+    
+    FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + [
+        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
+    ]
+
+    FUEL_ECONOMY_TO_CHOICES = [('', '--- Fuel Economy to ---')] + [
+        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
+    ]
+
+    fuel_economy_from = forms.ChoiceField(
+        required=False,
+        choices=FUEL_ECONOMY_FROM_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    fuel_economy_to = forms.ChoiceField(
+        required=False,
+        choices=FUEL_ECONOMY_TO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
     fuel_type = forms.ChoiceField(
         required=False,
         choices=get_fuel_type_choices.__func__(),
@@ -4031,18 +4048,6 @@ class CarSearchForm(forms.Form):
         choices=get_condition_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
- 
-    ENGINE_SIZE_FROM_CHOICES = [('', '--- Engine Size from ---')] + list(Car.ENGINE_SIZE_CHOICES)
-
-    engine_size_from = forms.ChoiceField(required=False, choices=ENGINE_SIZE_FROM_CHOICES, widget=forms.Select(attrs={
-        'class': 'form-control',
-    }))
-
-    ENGINE_SIZE_TO_CHOICES = [('', '--- Engine Size to ---')] + list(Car.ENGINE_SIZE_CHOICES)
-
-    engine_size_to = forms.ChoiceField(required=False, choices=ENGINE_SIZE_TO_CHOICES, widget=forms.Select(attrs={
-        'class': 'form-control',
-    }))
  
     doors = forms.ChoiceField(
         required=False,
@@ -4116,59 +4121,13 @@ class CarSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    FUEL_ECONOMY_FROM_CHOICES = [('', '--- Fuel Economy from ---')] + [
-        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
-    ]
-
-    FUEL_ECONOMY_TO_CHOICES = [('', '--- Fuel Economy to ---')] + [
-        (value, label) for value, label in Car.FUEL_ECONOMY_CHOICES if value
-    ]
-
-    fuel_economy_from = forms.ChoiceField(
-        required=False,
-        choices=FUEL_ECONOMY_FROM_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    fuel_economy_to = forms.ChoiceField(
-        required=False,
-        choices=FUEL_ECONOMY_TO_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
-    @staticmethod
-    def get_features_choices():
-        """Static features choices for common car features"""
-        FEATURES_CHOICES = sorted([
-            ('ABS', 'ABS (Anti-lock Braking System)'),
-            ('Air Conditioning', 'Air Conditioning'),
-            ('Alloy Wheels', 'Alloy Wheels'),
-            ('Android Auto', 'Android Auto'),
-            ('Apple CarPlay', 'Apple CarPlay'),
-            ('Bluetooth', 'Bluetooth'),
-            ('Cruise Control', 'Cruise Control'),
-            ('Electric Windows', 'Electric Windows'),
-            ('GPS Navigation', 'GPS Navigation'),
-            ('Heated Seats', 'Heated Seats'),
-            ('Keyless Entry', 'Keyless Entry'),
-            ('Leather Seats', 'Leather Seats'),
-            ('Parking Sensors', 'Parking Sensors'),
-            ('Power Steering', 'Power Steering'),
-            ('Rear View Camera', 'Rear View Camera'),
-            ('Sunroof', 'Sunroof'),
-            ('USB Port', 'USB Port'),
-        ])
-        return [('', '-- All Features --')] + FEATURES_CHOICES
-
     features = forms.ChoiceField(
         required=False,
         choices=get_features_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
-   
 
-    
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
