@@ -2955,14 +2955,12 @@ class DealershipRegistrationForm(forms.ModelForm):
 
 
 class CarForm(forms.ModelForm):
-    make = forms.ChoiceField(
+    make = forms.CharField(
         required=True,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    model = forms.ChoiceField(
+    model = forms.CharField(
         required=True,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     @staticmethod
@@ -2983,27 +2981,23 @@ class CarForm(forms.ModelForm):
             ('8', '8+ Seats'),
         ]
 
-    variant = forms.ChoiceField(
+    variant = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    body_type = forms.ChoiceField(
+    body_type = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    doors = forms.ChoiceField(
+    doors = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    seats = forms.ChoiceField(
+    seats = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     @staticmethod
@@ -3074,9 +3068,8 @@ class CarForm(forms.ModelForm):
         EXTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in EXTERIOR_COLOR_CHOICES if choice[0] != 'Other']
         return [('', '-- Select Exterior Color --')] + EXTERIOR_COLOR_CHOICES
 
-    exterior_color = forms.ChoiceField(
+    exterior_color = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     @staticmethod
@@ -3125,9 +3118,8 @@ class CarForm(forms.ModelForm):
         INTERIOR_COLOR_CHOICES = [('Other', 'Other')] + [choice for choice in INTERIOR_COLOR_CHOICES if choice[0] != 'Other']
         return [('', '-- Select Interior Color --')] + INTERIOR_COLOR_CHOICES
 
-    interior_color = forms.ChoiceField(
+    interior_color = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     @staticmethod
@@ -3151,9 +3143,8 @@ class CarForm(forms.ModelForm):
         SEAT_MATERIAL_CHOICES = [('Other', 'Other')] + [choice for choice in SEAT_MATERIAL_CHOICES if choice[0] != 'Other']
         return [('', '-- Select Seat Material --')] + SEAT_MATERIAL_CHOICES
 
-    seat_material = forms.ChoiceField(
+    seat_material = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     @staticmethod
@@ -3189,27 +3180,23 @@ class CarForm(forms.ModelForm):
     def get_condition_choices():
         return [('', '-- Select Condition --')] + list(Car.CONDITION_CHOICES)
 
-    fuel_type = forms.ChoiceField(
+    fuel_type = forms.CharField(
         required=True,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    transmission = forms.ChoiceField(
+    transmission = forms.CharField(
         required=True,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    condition = forms.ChoiceField(
+    condition = forms.CharField(
         required=True,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
-    interior_trim = forms.ChoiceField(
+    interior_trim = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
@@ -3221,15 +3208,13 @@ class CarForm(forms.ModelForm):
     def get_fuel_economy_choices():
         return [('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
-    fuel_economy_source = forms.ChoiceField(
+    fuel_economy_source = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    fuel_economy_combined = forms.ChoiceField(
+    fuel_economy_combined = forms.CharField(
         required=False,
-        choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -3258,25 +3243,25 @@ class CarForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Mileage (km)'
             }),
-            'fuel_type': forms.Select(attrs={'class': 'form-select'}, choices=[]),
-            'transmission': forms.Select(attrs={'class': 'form-select'}, choices=[]),
-            'condition': forms.Select(attrs={'class': 'form-select'}, choices=[]),
+            'fuel_type': forms.Select(attrs={'class': 'form-select'}),
+            'transmission': forms.Select(attrs={'class': 'form-select'}),
+            'condition': forms.Select(attrs={'class': 'form-select'}),
             'color': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Color'
             }),
-            'exterior_color': forms.Select(attrs={'class': 'form-select'}, choices=[]),
-            'interior_color': forms.Select(attrs={'class': 'form-select'}, choices=[]),
-            'seat_material': forms.Select(attrs={'class': 'form-select'}, choices=[]),
-            'interior_trim': forms.Select(attrs={'class': 'form-select'}, choices=[]),
+            'exterior_color': forms.Select(attrs={'class': 'form-select'}),
+            'interior_color': forms.Select(attrs={'class': 'form-select'}),
+            'seat_material': forms.Select(attrs={'class': 'form-select'}),
+            'interior_trim': forms.Select(attrs={'class': 'form-select'}),
             'seats': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Number of seats'
             }),
-            'engine_size': forms.Select(attrs={'class': 'form-select'}),
-            'doors': forms.Select(attrs={'class': 'form-select'}),
-            'body_type': forms.Select(attrs={'class': 'form-select'}),
-            'previous_owners': forms.Select(attrs={'class': 'form-select'}),
+            'engine_size': forms.CharField(widget=forms.Select(attrs={'class': 'form-select'})),
+            'doors': forms.CharField(widget=forms.Select(attrs={'class': 'form-select'})),
+            'body_type': forms.CharField(widget=forms.Select(attrs={'class': 'form-select'})),
+            'previous_owners': forms.CharField(widget=forms.Select(attrs={'class': 'form-select'})),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Detailed description',
@@ -3296,9 +3281,17 @@ class CarForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         instance = kwargs.get('instance')
-        make_value = self.data.get('make') or self.initial.get('make') or (instance.make if instance else '')
-        model_value = self.data.get('model') or self.initial.get('model') or (instance.model if instance else '')
-        variant_value = self.data.get('variant') or self.initial.get('variant') or (instance.variant if instance else '')
+        
+        # Get values from different sources in priority order
+        make_value = (self.data.get('make') if hasattr(self, 'data') and self.data else None) or \
+                    self.initial.get('make') or \
+                    (instance.make if instance else '')
+        model_value = (self.data.get('model') if hasattr(self, 'data') and self.data else None) or \
+                     self.initial.get('model') or \
+                     (instance.model if instance else '')
+        variant_value = (self.data.get('variant') if hasattr(self, 'data') and self.data else None) or \
+                       self.initial.get('variant') or \
+                       (instance.variant if instance else '')
 
         self.fields['make'].choices = self.get_make_choices()
         self.fields['model'].choices = self.get_model_choices(make_value)
@@ -3775,25 +3768,22 @@ class CarSearchForm(forms.Form):
         ])
         return [('', '-- All Features --')] + FEATURES_CHOICES
 
-    make = forms.ChoiceField(
+    make = forms.CharField(
         required=False,
-        choices=get_make_choices.__func__(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
     )
 
-    model = forms.ChoiceField(
+    model = forms.CharField(
         required=False,
-        choices=[('', '-- All Models --')],
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
     )
 
-    variant = forms.ChoiceField(
+    variant = forms.CharField(
         required=False,
-        choices=[('', '-- All Variants --')],
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3801,7 +3791,16 @@ class CarSearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Get initial values for make/model/variant dropdowns
+        selected_make = self.data.get('make') or self.initial.get('make')
+        selected_model = self.data.get('model') or self.initial.get('model')
+        selected_variant = self.data.get('variant') or self.initial.get('variant')
+        
+        # Set choices for dynamic dropdowns
         self.fields['make'].choices = self.get_make_choices()
+        self.fields['model'].choices = self.get_model_choices(selected_make)
+        self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
         
         # Initialize static choices for other filters
         self.fields['fuel_type'].choices = self.get_fuel_type_choices()
@@ -4025,99 +4024,83 @@ class CarSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     
-    fuel_type = forms.ChoiceField(
+    fuel_type = forms.CharField(
         required=False,
-        choices=get_fuel_type_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    transmission = forms.ChoiceField(
+    transmission = forms.CharField(
         required=False,
-        choices=get_transmission_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    condition = forms.ChoiceField(
+    condition = forms.CharField(
         required=False,
-        choices=get_condition_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    doors = forms.ChoiceField(
+    doors = forms.CharField(
         required=False,
-        choices=get_doors_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    body_type = forms.ChoiceField(
+    body_type = forms.CharField(
         required=False,
-        choices=get_body_type_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    previous_owners = forms.ChoiceField(
+    previous_owners = forms.CharField(
         required=False,
-        choices=get_previous_owners_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    seats = forms.ChoiceField(
+    seats = forms.CharField(
         required=False,
-        choices=get_seats_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    exterior_color = forms.ChoiceField(
+    exterior_color = forms.CharField(
         required=False,
-        choices=get_exterior_color_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    interior_color = forms.ChoiceField(
+    interior_color = forms.CharField(
         required=False,
-        choices=get_interior_color_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    seat_material = forms.ChoiceField(
+    seat_material = forms.CharField(
         required=False,
-        choices=get_seat_material_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    interior_trim = forms.ChoiceField(
+    interior_trim = forms.CharField(
         required=False,
-        choices=get_interior_trim_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    number_of_keys = forms.ChoiceField(
+    number_of_keys = forms.CharField(
         required=False,
-        choices=get_number_of_keys_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    fuel_economy_source = forms.ChoiceField(
+    fuel_economy_source = forms.CharField(
         required=False,
-        choices=get_fuel_economy_source_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    fuel_economy_combined = forms.ChoiceField(
+    fuel_economy_combined = forms.CharField(
         required=False,
-        choices=get_fuel_economy_combined_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
  
-    value_source = forms.ChoiceField(
+    value_source = forms.CharField(
         required=False,
-        choices=get_value_source_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    features = forms.ChoiceField(
+    features = forms.CharField(
         required=False,
-        choices=get_features_choices.__func__(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
