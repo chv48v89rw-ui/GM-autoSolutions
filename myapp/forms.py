@@ -3785,7 +3785,7 @@ class CarSearchForm(forms.Form):
 
     model = forms.ChoiceField(
         required=False,
-        choices=get_model_choices.__func__(),
+        choices=[('', '-- All Models --')],
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3793,7 +3793,7 @@ class CarSearchForm(forms.Form):
 
     variant = forms.ChoiceField(
         required=False,
-        choices=get_variant_choices.__func__(),
+        choices=[('', '-- All Variants --')],
         widget=forms.Select(attrs={
             'class': 'form-control'
         })
@@ -3802,12 +3802,6 @@ class CarSearchForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['make'].choices = self.get_make_choices()
-
-        selected_make = self.data.get('make') or self.initial.get('make')
-        selected_model = self.data.get('model') or self.initial.get('model')
-
-        self.fields['model'].choices = self.get_model_choices(selected_make)
-        self.fields['variant'].choices = self.get_variant_choices(selected_make, selected_model)
         
         # Initialize static choices for other filters
         self.fields['fuel_type'].choices = self.get_fuel_type_choices()
