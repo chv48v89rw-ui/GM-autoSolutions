@@ -3416,6 +3416,43 @@ class CarForm(forms.ModelForm):
                 if selected_value not in current_choices:
                     self.fields[field_name].choices.append((selected_value, selected_value))
 
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Custom validation messages for required fields (only for CarForm, not CarSearchForm)
+        required_fields = {
+            'title': 'Car title is required',
+            'make': 'Car make is required',
+            'model': 'Car model is required',
+            'variant': 'Car variant is required',
+            'year': 'Car year is required',
+            'price': 'Car price is required',
+            'mileage': 'Car mileage is required',
+            'fuel_type': 'Fuel type is required',
+            'transmission': 'Transmission type is required',
+            'condition': 'Car condition is required',
+            'exterior_color': 'Exterior color is required',
+            'interior_color': 'Interior color is required',
+            'seat_material': 'Seat material is required',
+            'interior_trim': 'Interior trim is required',
+            'seats': 'Number of seats is required',
+            'engine_size': 'Engine size is required',
+            'doors': 'Number of doors is required',
+            'body_type': 'Body type is required',
+            'description': 'Car description is required',
+            'fuel_economy_source': 'Fuel economy source is required',
+            'fuel_economy_combined': 'Fuel economy information is required',
+        }
+        
+        for field_name, error_message in required_fields.items():
+            # Only validate fields that exist in this form
+            if field_name in self.fields:
+                field_value = cleaned_data.get(field_name)
+                if field_value is None or (isinstance(field_value, str) and field_value.strip() == ''):
+                    self.add_error(field_name, error_message)
+        
+        return cleaned_data
+
     @staticmethod
     def get_make_choices():
         try:
@@ -3903,41 +3940,6 @@ class CarSearchForm(forms.Form):
         self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices()
         self.fields['value_source'].choices = self.get_value_source_choices()
         self.fields['features'].choices = self.get_features_choices()
-
-    def clean(self):
-        cleaned_data = super().clean()
-        
-        # Custom validation messages for required fields
-        required_fields = {
-            'title': 'Car title is required',
-            'make': 'Car make is required',
-            'model': 'Car model is required',
-            'variant': 'Car variant is required',
-            'year': 'Car year is required',
-            'price': 'Car price is required',
-            'mileage': 'Car mileage is required',
-            'fuel_type': 'Fuel type is required',
-            'transmission': 'Transmission type is required',
-            'condition': 'Car condition is required',
-            'exterior_color': 'Exterior color is required',
-            'interior_color': 'Interior color is required',
-            'seat_material': 'Seat material is required',
-            'interior_trim': 'Interior trim is required',
-            'seats': 'Number of seats is required',
-            'engine_size': 'Engine size is required',
-            'doors': 'Number of doors is required',
-            'body_type': 'Body type is required',
-            'description': 'Car description is required',
-            'fuel_economy_source': 'Fuel economy source is required',
-            'fuel_economy_combined': 'Fuel economy information is required',
-        }
-        
-        for field_name, error_message in required_fields.items():
-            field_value = cleaned_data.get(field_name)
-            if field_value is None or (isinstance(field_value, str) and field_value.strip() == ''):
-                self.add_error(field_name, error_message)
-        
-        return cleaned_data
  
     current_year = timezone.now().year
  
