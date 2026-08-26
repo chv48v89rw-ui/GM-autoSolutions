@@ -2984,25 +2984,25 @@ class CarForm(forms.ModelForm):
         ]
 
     variant = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     body_type = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     doors = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     seats = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3075,7 +3075,7 @@ class CarForm(forms.ModelForm):
         return [('', '-- Select Exterior Color --')] + EXTERIOR_COLOR_CHOICES
 
     exterior_color = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3126,7 +3126,7 @@ class CarForm(forms.ModelForm):
         return [('', '-- Select Interior Color --')] + INTERIOR_COLOR_CHOICES
 
     interior_color = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3152,7 +3152,7 @@ class CarForm(forms.ModelForm):
         return [('', '-- Select Seat Material --')] + SEAT_MATERIAL_CHOICES
 
     seat_material = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3208,7 +3208,7 @@ class CarForm(forms.ModelForm):
     )
 
     interior_trim = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3222,13 +3222,13 @@ class CarForm(forms.ModelForm):
         return [('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
     fuel_economy_source = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     fuel_economy_combined = forms.ChoiceField(
-        required=False,
+        required=True,
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -3247,23 +3247,27 @@ class CarForm(forms.ModelForm):
             }),
             'year': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Year'
+                'placeholder': 'Year',
+                'required': 'required'
             }),
             'price': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Price in KES'
+                'placeholder': 'Price in KES',
+                'required': 'required'
             }),
             'is_price_negotiable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Mileage (km)'
+                'placeholder': 'Mileage (km)',
+                'required': 'required'
             }),
             'fuel_type': forms.Select(attrs={'class': 'form-select'}),
             'transmission': forms.Select(attrs={'class': 'form-select'}),
             'condition': forms.Select(attrs={'class': 'form-select'}),
             'color': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Color'
+                'placeholder': 'Color',
+                'required': 'required'
             }),
             'exterior_color': forms.Select(attrs={'class': 'form-select'}),
             'interior_color': forms.Select(attrs={'class': 'form-select'}),
@@ -3280,9 +3284,10 @@ class CarForm(forms.ModelForm):
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Detailed description',
-                'rows': 4
+                'rows': 4,
+                'required': 'required'
             }),
-            'main_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'main_image': forms.FileInput(attrs={'class': 'form-control', 'required': 'required'}),
             'image2': forms.FileInput(attrs={'class': 'form-control'}),
             'image3': forms.FileInput(attrs={'class': 'form-control'}),
             'image4': forms.FileInput(attrs={'class': 'form-control'}),
@@ -3390,10 +3395,26 @@ class CarForm(forms.ModelForm):
         except Exception:
             self.fields['fuel_economy_combined'].choices = [('', '-- Select Fuel Economy --')] + list(Car.FUEL_ECONOMY_CHOICES)
 
-        if make_value and model_value and variant_value:
-            variant_values = [choice[0] for choice in self.fields['variant'].choices]
-            if variant_value not in variant_values:
-                self.fields['variant'].choices.append((variant_value, variant_value))
+        # Add selected values to all choice fields if they're not already there (for validation)
+        selected_values = {
+            'exterior_color': self.data.get('exterior_color') or self.initial.get('exterior_color') or (instance.exterior_color if instance else ''),
+            'interior_color': self.data.get('interior_color') or self.initial.get('interior_color') or (instance.interior_color if instance else ''),
+            'seat_material': self.data.get('seat_material') or self.initial.get('seat_material') or (instance.seat_material if instance else ''),
+            'interior_trim': self.data.get('interior_trim') or self.initial.get('interior_trim') or (instance.interior_trim if instance else ''),
+            'body_type': self.data.get('body_type') or self.initial.get('body_type') or (instance.body_type if instance else ''),
+            'doors': self.data.get('doors') or self.initial.get('doors') or (instance.doors if instance else ''),
+            'fuel_type': self.data.get('fuel_type') or self.initial.get('fuel_type') or (instance.fuel_type if instance else ''),
+            'transmission': self.data.get('transmission') or self.initial.get('transmission') or (instance.transmission if instance else ''),
+            'condition': self.data.get('condition') or self.initial.get('condition') or (instance.condition if instance else ''),
+            'fuel_economy_source': self.data.get('fuel_economy_source') or self.initial.get('fuel_economy_source') or (instance.fuel_economy_source if instance else ''),
+            'fuel_economy_combined': self.data.get('fuel_economy_combined') or self.initial.get('fuel_economy_combined') or (instance.fuel_economy_combined if instance else ''),
+        }
+        
+        for field_name, selected_value in selected_values.items():
+            if selected_value and field_name in self.fields:
+                current_choices = [choice[0] for choice in self.fields[field_name].choices]
+                if selected_value not in current_choices:
+                    self.fields[field_name].choices.append((selected_value, selected_value))
 
     @staticmethod
     def get_make_choices():
@@ -3844,6 +3865,27 @@ class CarSearchForm(forms.Form):
         self.fields['model'].choices = model_choices
         self.fields['variant'].choices = variant_choices
         
+        # Add selected values to all other choice fields if they're not already there (for validation)
+        selected_values = {
+            'exterior_color': self.data.get('exterior_color') or self.initial.get('exterior_color'),
+            'interior_color': self.data.get('interior_color') or self.initial.get('interior_color'),
+            'seat_material': self.data.get('seat_material') or self.initial.get('seat_material'),
+            'interior_trim': self.data.get('interior_trim') or self.initial.get('interior_trim'),
+            'body_type': self.data.get('body_type') or self.initial.get('body_type'),
+            'doors': self.data.get('doors') or self.initial.get('doors'),
+            'fuel_type': self.data.get('fuel_type') or self.initial.get('fuel_type'),
+            'transmission': self.data.get('transmission') or self.initial.get('transmission'),
+            'condition': self.data.get('condition') or self.initial.get('condition'),
+            'fuel_economy_source': self.data.get('fuel_economy_source') or self.initial.get('fuel_economy_source'),
+            'fuel_economy_combined': self.data.get('fuel_economy_combined') or self.initial.get('fuel_economy_combined'),
+        }
+        
+        for field_name, selected_value in selected_values.items():
+            if selected_value and field_name in self.fields:
+                current_choices = [choice[0] for choice in self.fields[field_name].choices]
+                if selected_value not in current_choices:
+                    self.fields[field_name].choices.append((selected_value, selected_value))
+        
         # Initialize static choices for other filters
         self.fields['fuel_type'].choices = self.get_fuel_type_choices()
         self.fields['transmission'].choices = self.get_transmission_choices()
@@ -3861,6 +3903,41 @@ class CarSearchForm(forms.Form):
         self.fields['fuel_economy_combined'].choices = self.get_fuel_economy_combined_choices()
         self.fields['value_source'].choices = self.get_value_source_choices()
         self.fields['features'].choices = self.get_features_choices()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Custom validation messages for required fields
+        required_fields = {
+            'title': 'Car title is required',
+            'make': 'Car make is required',
+            'model': 'Car model is required',
+            'variant': 'Car variant is required',
+            'year': 'Car year is required',
+            'price': 'Car price is required',
+            'mileage': 'Car mileage is required',
+            'fuel_type': 'Fuel type is required',
+            'transmission': 'Transmission type is required',
+            'condition': 'Car condition is required',
+            'exterior_color': 'Exterior color is required',
+            'interior_color': 'Interior color is required',
+            'seat_material': 'Seat material is required',
+            'interior_trim': 'Interior trim is required',
+            'seats': 'Number of seats is required',
+            'engine_size': 'Engine size is required',
+            'doors': 'Number of doors is required',
+            'body_type': 'Body type is required',
+            'description': 'Car description is required',
+            'fuel_economy_source': 'Fuel economy source is required',
+            'fuel_economy_combined': 'Fuel economy information is required',
+        }
+        
+        for field_name, error_message in required_fields.items():
+            field_value = cleaned_data.get(field_name)
+            if field_value is None or (isinstance(field_value, str) and field_value.strip() == ''):
+                self.add_error(field_name, error_message)
+        
+        return cleaned_data
  
     current_year = timezone.now().year
  

@@ -4,6 +4,9 @@
 
 {% block content %}
 <div class="container py-5">
+    <!-- Flash Messages -->
+    <div id="flash-message-container"></div>
+    
     <div class="row justify-content-center">
         <div class="col-lg-10 col-md-12">
             <div class="card">
@@ -12,23 +15,24 @@
                     <p class="text-muted mb-0 mt-2">Fill in the details to list your car</p>
                 </div>
                 <div class="card-body p-5">
-                    <form method="post" enctype="multipart/form-data" novalidate>
+                    {% if form.errors %}
+                        <div class="alert alert-danger mb-4">
+                            <h5>Please correct the following errors:</h5>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate id="addCarForm">
                         {% csrf_token %}
-
-                        {% if form.errors %}
-                            <div class="alert alert-danger mb-4">
-                                <ul class="mb-0">
-                                    {% for field in form %}
-                                        {% for error in field.errors %}
-                                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                                        {% endfor %}
-                                    {% endfor %}
-                                    {% for error in form.non_field_errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
 
                         <h5 class="mb-4 text-accent">Basic Information</h5>
 
@@ -167,18 +171,9 @@
                             </div>
                         </div>
 
-                        <!-- Error Messages -->
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {% for error in form.non_field_errors %}
-                                    {{ error }}<br>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-
                         <div class="row g-2 mt-5">
                             <div class="col-md-6">
-                                <button type="submit" class="btn btn-primary w-100 btn-lg">Add Car Listing</button>
+                                <button type="submit" class="btn btn-primary w-100 btn-lg" id="addButton">Add Car Listing</button>
                             </div>
                             <div class="col-md-6">
                                 <a href="/dashboard/dealership/" class="btn btn-outline-secondary w-100 btn-lg">Cancel</a>
@@ -190,4 +185,54 @@
         </div>
     </div>
 </div>
+
+<script>
+function showMessage(message, type = 'success') {
+    const container = document.getElementById('flash-message-container');
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.innerHTML = '';
+    container.appendChild(alert);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('addCarForm');
+    const addButton = document.getElementById('addButton');
+    
+    if (form && addButton) {
+        form.addEventListener('submit', function(e) {
+            // Disable button to prevent double submission
+            addButton.disabled = true;
+            addButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+            
+            // Form will submit normally
+        });
+    }
+    
+    // Add visual indicators for required fields
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        const label = field.closest('.mb-3')?.querySelector('label');
+        if (label) {
+            if (!label.innerHTML.includes('*')) {
+                label.innerHTML += ' <span class="text-danger">*</span>';
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

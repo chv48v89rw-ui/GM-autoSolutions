@@ -1043,9 +1043,11 @@ def add_car(request):
 
         form = CarForm(post_data, request.FILES)
         images = request.FILES.getlist('images')
+        
         if form.is_valid():
             if len(images) > 15:
                 form.add_error(None, 'You can upload up to 15 images only.')
+                messages.error(request, 'You can upload up to 15 images only.')
             else:
                 car = form.save(commit=False)
                 car.dealership = dealership
@@ -1071,6 +1073,12 @@ def add_car(request):
 
                 messages.success(request, 'Car added successfully!')
                 return redirect('dealership_dashboard')
+        else:
+            # Form validation failed - show errors
+            messages.error(request, 'Please fill in all required car specifications.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = CarForm()
     
@@ -1091,30 +1099,41 @@ def edit_car(request, car_id):
     if request.method == 'POST':
         form = CarForm(request.POST, request.FILES, instance=car)
         images = request.FILES.getlist('images')
+        
         if form.is_valid():
             if len(images) > 15:
                 form.add_error('images', 'You can upload up to 15 images only.')
+                messages.error(request, 'You can upload up to 15 images only.')
             else:
-                updated_car = form.save(commit=False)
-                updated_car.is_approved = True
-                
-                # Generate inventory code if not provided
-                if not updated_car.inventory_code:
-                    last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
-                    if last_car and last_car.inventory_code:
-                        try:
-                            last_number = int(last_car.inventory_code.replace('GM', ''))
-                            updated_car.inventory_code = f'GM{last_number + 1:04d}'
-                        except ValueError:
+                try:
+                    updated_car = form.save(commit=False)
+                    updated_car.is_approved = True
+                    
+                    # Generate inventory code if not provided
+                    if not updated_car.inventory_code:
+                        last_car = Car.objects.exclude(inventory_code__isnull=True).exclude(inventory_code='').order_by('-inventory_code').first()
+                        if last_car and last_car.inventory_code:
+                            try:
+                                last_number = int(last_car.inventory_code.replace('GM', ''))
+                                updated_car.inventory_code = f'GM{last_number + 1:04d}'
+                            except ValueError:
+                                updated_car.inventory_code = 'GM0001'
+                        else:
                             updated_car.inventory_code = 'GM0001'
-                    else:
-                        updated_car.inventory_code = 'GM0001'
-                
-                updated_car.save()
-                for image in images:
-                    CarImage.objects.create(car=updated_car, image=image)
-                messages.success(request, 'Car updated successfully!')
-                return redirect('dealership_dashboard')
+                    
+                    updated_car.save()
+                    for image in images:
+                        CarImage.objects.create(car=updated_car, image=image)
+                    messages.success(request, 'Car updated successfully!')
+                    return redirect('dealership_dashboard')
+                except Exception as e:
+                    messages.error(request, f'Error updating car: {str(e)}')
+        else:
+            # Form validation failed - show errors
+            messages.error(request, 'Please correct the errors below.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = CarForm(instance=car)
     
