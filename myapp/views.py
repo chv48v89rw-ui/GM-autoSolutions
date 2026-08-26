@@ -201,153 +201,94 @@ def infer_task_token_budget(message):
 
 def apply_car_filters(cars, form):
     """Apply shared car search filters to a queryset."""
-    # Handle form validation gracefully for dynamic fields
-    if form.is_valid():
-        # Use cleaned_data for validated fields
-        make = form.cleaned_data.get('make')
-        model = form.cleaned_data.get('model')
-        variant = form.cleaned_data.get('variant')
-        year_from = form.cleaned_data.get('year_from')
-        year_to = form.cleaned_data.get('year_to')
-        price_from = form.cleaned_data.get('price_from')
-        price_to = form.cleaned_data.get('price_to')
-        mileage_from = form.cleaned_data.get('mileage_from')
-        mileage_to = form.cleaned_data.get('mileage_to')
-        fuel_type = form.cleaned_data.get('fuel_type')
-        transmission = form.cleaned_data.get('transmission')
-        condition = form.cleaned_data.get('condition')
-        engine_size_from = form.cleaned_data.get('engine_size_from')
-        engine_size_to = form.cleaned_data.get('engine_size_to')
-        doors = form.cleaned_data.get('doors')
-        body_type = form.cleaned_data.get('body_type')
-        previous_owners = form.cleaned_data.get('previous_owners')
-        seats = form.cleaned_data.get('seats')
-        exterior_color = form.cleaned_data.get('exterior_color')
-        interior_color = form.cleaned_data.get('interior_color')
-        seat_material = form.cleaned_data.get('seat_material')
-        interior_trim = form.cleaned_data.get('interior_trim')
-        features = form.cleaned_data.get('features')
-        number_of_keys = form.cleaned_data.get('number_of_keys')
-        fuel_economy_source = form.cleaned_data.get('fuel_economy_source')
-        fuel_economy_from = form.cleaned_data.get('fuel_economy_from')
-        fuel_economy_to = form.cleaned_data.get('fuel_economy_to')
-        fuel_economy_combined = form.cleaned_data.get('fuel_economy_combined')
-        value_source = form.cleaned_data.get('value_source')
-    else:
-        # Fallback to raw data if validation fails (for dynamic fields)
-        make = form.data.get('make')
-        model = form.data.get('model')
-        variant = form.data.get('variant')
-        year_from = form.data.get('year_from')
-        year_to = form.data.get('year_to')
-        price_from = form.data.get('price_from')
-        price_to = form.data.get('price_to')
-        mileage_from = form.data.get('mileage_from')
-        mileage_to = form.data.get('mileage_to')
-        fuel_type = form.data.get('fuel_type')
-        transmission = form.data.get('transmission')
-        condition = form.data.get('condition')
-        engine_size_from = form.data.get('engine_size_from')
-        engine_size_to = form.data.get('engine_size_to')
-        doors = form.data.get('doors')
-        body_type = form.data.get('body_type')
-        previous_owners = form.data.get('previous_owners')
-        seats = form.data.get('seats')
-        exterior_color = form.data.get('exterior_color')
-        interior_color = form.data.get('interior_color')
-        seat_material = form.data.get('seat_material')
-        interior_trim = form.data.get('interior_trim')
-        features = form.data.get('features')
-        number_of_keys = form.data.get('number_of_keys')
-        fuel_economy_source = form.data.get('fuel_economy_source')
-        fuel_economy_from = form.data.get('fuel_economy_from')
-        fuel_economy_to = form.data.get('fuel_economy_to')
-        fuel_economy_combined = form.data.get('fuel_economy_combined')
-        value_source = form.data.get('value_source')
+    if not form.is_valid():
+        return cars
 
-    if make:
-        cars = cars.filter(make__iexact=make)
-    if model:
-        cars = cars.filter(model__iexact=model)
-    if variant:
-        cars = cars.filter(variant__iexact=variant)
-    if year_from:
-        cars = cars.filter(year__gte=int(year_from))
-    if year_to:
-        cars = cars.filter(year__lte=int(year_to))
-    if price_from:
-        cars = cars.filter(price__gte=float(price_from))
-    if price_to:
-        cars = cars.filter(price__lte=float(price_to))
-    if mileage_from:
-        cars = cars.filter(mileage__gte=float(mileage_from))
-    if mileage_to:
-        cars = cars.filter(mileage__lte=float(mileage_to))
-    if fuel_type:
-        cars = cars.filter(fuel_type=fuel_type)
-    if transmission:
-        cars = cars.filter(transmission=transmission)
-    if condition:
-        cars = cars.filter(condition=condition)
+    if form.cleaned_data.get('make'):
+        cars = cars.filter(make__iexact=form.cleaned_data['make'])
+    if form.cleaned_data.get('model'):
+        cars = cars.filter(model__iexact=form.cleaned_data['model'])
+    if form.cleaned_data.get('variant'):
+        cars = cars.filter(variant__iexact=form.cleaned_data['variant'])
+    if form.cleaned_data.get('year_from'):
+        cars = cars.filter(year__gte=int(form.cleaned_data['year_from']))
+    if form.cleaned_data.get('year_to'):
+        cars = cars.filter(year__lte=int(form.cleaned_data['year_to']))
+    if form.cleaned_data.get('price_from'):
+        cars = cars.filter(price__gte=float(form.cleaned_data['price_from']))
+    if form.cleaned_data.get('price_to'):
+        cars = cars.filter(price__lte=float(form.cleaned_data['price_to']))
+    if form.cleaned_data.get('mileage_from'):
+        cars = cars.filter(mileage__gte=float(form.cleaned_data['mileage_from']))
+    if form.cleaned_data.get('mileage_to'):
+        cars = cars.filter(mileage__lte=float(form.cleaned_data['mileage_to']))
+    if form.cleaned_data.get('fuel_type'):
+        cars = cars.filter(fuel_type=form.cleaned_data['fuel_type'])
+    if form.cleaned_data.get('transmission'):
+        cars = cars.filter(transmission=form.cleaned_data['transmission'])
+    if form.cleaned_data.get('condition'):
+        cars = cars.filter(condition=form.cleaned_data['condition'])
 
-    if engine_size_from or engine_size_to:
+    if form.cleaned_data.get('engine_size_from') or form.cleaned_data.get('engine_size_to'):
         cars = cars.annotate(engine_size_value=Cast('engine_size', output_field=FloatField()))
         
-        if engine_size_from:
-            cars = cars.filter(engine_size_value__gte=float(engine_size_from))
+        if form.cleaned_data.get('engine_size_from'):
+            cars = cars.filter(engine_size_value__gte=float(form.cleaned_data['engine_size_from']))
                 
-        if engine_size_to:
-            cars = cars.filter(engine_size_value__lte=float(engine_size_to))
+        if form.cleaned_data.get('engine_size_to'):
+            cars = cars.filter(engine_size_value__lte=float(form.cleaned_data['engine_size_to']))
 
-    if doors:
-        cars = cars.filter(doors=doors)
-    if body_type:
-        cars = cars.filter(body_type=body_type)
-    if previous_owners:
-        cars = cars.filter(previous_owners=previous_owners)
-    if seats:
-        cars = cars.filter(seats__gte=seats)
+    if form.cleaned_data.get('doors'):
+        cars = cars.filter(doors=form.cleaned_data['doors'])
+    if form.cleaned_data.get('body_type'):
+        cars = cars.filter(body_type=form.cleaned_data['body_type'])
+    if form.cleaned_data.get('previous_owners'):
+        cars = cars.filter(previous_owners=form.cleaned_data['previous_owners'])
+    if form.cleaned_data.get('seats'):
+        cars = cars.filter(seats__gte=form.cleaned_data['seats'])
 
-    if exterior_color:
-        cars = cars.filter(exterior_color=exterior_color)
-    if interior_color:
-        cars = cars.filter(interior_color=interior_color)
-    if seat_material:
-        cars = cars.filter(seat_material=seat_material)
-    if interior_trim:
-        cars = cars.filter(interior_trim=interior_trim)
+    if form.cleaned_data.get('exterior_color'):
+        cars = cars.filter(exterior_color=form.cleaned_data['exterior_color'])
+    if form.cleaned_data.get('interior_color'):
+        cars = cars.filter(interior_color=form.cleaned_data['interior_color'])
+    if form.cleaned_data.get('seat_material'):
+        cars = cars.filter(seat_material=form.cleaned_data['seat_material'])
+    if form.cleaned_data.get('interior_trim'):
+        cars = cars.filter(interior_trim=form.cleaned_data['interior_trim'])
 
-    if exterior_color:
-        cars = cars.filter(exterior_color__iexact=exterior_color)
+    if form.cleaned_data.get('exterior_color'):
+        cars = cars.filter(exterior_color__iexact=form.cleaned_data['exterior_color'])
 
-    if interior_color:
-        cars = cars.filter(interior_color__iexact=interior_color)
+    if form.cleaned_data.get('interior_color'):
+        cars = cars.filter(interior_color__iexact=form.cleaned_data['interior_color'])
 
-    if features:
-        cars = cars.filter(features__icontains=features)
+    if form.cleaned_data.get('features'):
+        cars = cars.filter(features__icontains=form.cleaned_data['features'])
 
-    if number_of_keys:
-        cars = cars.filter(number_of_keys=number_of_keys)
+    if form.cleaned_data.get('number_of_keys'):
+        cars = cars.filter(number_of_keys=form.cleaned_data['number_of_keys'])
 
-    if fuel_economy_source:
-        cars = cars.filter(fuel_economy_source=fuel_economy_source)
+    if form.cleaned_data.get('fuel_economy_source'):
+        cars = cars.filter(fuel_economy_source=form.cleaned_data['fuel_economy_source'])
 
-    if fuel_economy_from or fuel_economy_to:
+    if form.cleaned_data.get('fuel_economy_from') or form.cleaned_data.get('fuel_economy_to'):
         cars = cars.annotate(fuel_economy_value=Cast('fuel_economy_combined', output_field=FloatField()))
         
-        if fuel_economy_from:
-            cars = cars.filter(fuel_economy_value__gte=float(fuel_economy_from))
+        if form.cleaned_data.get('fuel_economy_from'):
+            cars = cars.filter(fuel_economy_value__gte=float(form.cleaned_data['fuel_economy_from']))
                 
-        if fuel_economy_to:
-            cars = cars.filter(fuel_economy_value__lte=float(fuel_economy_to))
+        if form.cleaned_data.get('fuel_economy_to'):
+            cars = cars.filter(fuel_economy_value__lte=float(form.cleaned_data['fuel_economy_to']))
 
-    if fuel_economy_combined:
-        cars = cars.filter(fuel_economy_combined=fuel_economy_combined)
+    if form.cleaned_data.get('fuel_economy_combined'):
+        cars = cars.filter(fuel_economy_combined=form.cleaned_data['fuel_economy_combined'])
 
-    if value_source:
-        cars = cars.filter(value_source=value_source)
+    if form.cleaned_data.get('value_source'):
+        cars = cars.filter(value_source=form.cleaned_data['value_source'])
 
     return cars
+
+
 
 
 def home(request):
